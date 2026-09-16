@@ -7,33 +7,27 @@ const issuer = process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER;
 const secret = process.env.AUTH_SECRET;
 
 if (!clientId) {
-  throw new Error(
-    "Missing AUTH_MICROSOFT_ENTRA_ID_ID environment variable."
-  );
+  throw new Error("Missing AUTH_MICROSOFT_ENTRA_ID_ID");
 }
 
 if (!clientSecret) {
-  throw new Error(
-    "Missing AUTH_MICROSOFT_ENTRA_ID_SECRET environment variable."
-  );
+  throw new Error("Missing AUTH_MICROSOFT_ENTRA_ID_SECRET");
 }
 
 if (!issuer) {
-  throw new Error(
-    "Missing AUTH_MICROSOFT_ENTRA_ID_ISSUER environment variable."
-  );
+  throw new Error("Missing AUTH_MICROSOFT_ENTRA_ID_ISSUER");
 }
 
 if (!secret) {
-  throw new Error(
-    "Missing AUTH_SECRET environment variable."
-  );
+  throw new Error("Missing AUTH_SECRET");
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret,
 
   trustHost: true,
+
+  debug: true,
 
   providers: [
     MicrosoftEntraID({
@@ -47,29 +41,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
 
-  pages: {
-    error: "/auth/error",
-  },
-
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider !== "microsoft-entra-id") {
-        return false;
-      }
-
-      if (!profile) {
-        return false;
-      }
-
-      return true;
+    async signIn({ account }) {
+      return account?.provider === "microsoft-entra-id";
     },
 
     async jwt({ token, profile }) {
       if (profile) {
+        const microsoftProfile = profile as {
+          oid?: string;
+          sub?: string;
+        };
+
         token.microsoftId =
-          typeof profile.sub === "string"
-            ? profile.sub
-            : undefined;
+          microsoftProfile.oid ??
+          microsoftProfile.sub ??
+          token.sub;
       }
 
       return token;
