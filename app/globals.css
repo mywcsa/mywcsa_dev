@@ -1,0 +1,597 @@
+@import "tailwindcss";
+
+
+/* =====================================================
+   MyWCSA GovApps
+   Central Applications Gateway
+
+   LOGIN SCREEN
+   Font: Century Gothic
+
+   NOTE:
+   The internal MyWCSA GovApps launcher will use
+   Poppins later. This stylesheet currently focuses
+   on the public GovApps login gateway.
+   ===================================================== */
+
+
+/* =====================================================
+   GLOBAL RESET
+   ===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-height: 100%;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+
+  overflow-x: hidden;
+
+  background: #001489;
+}
+
+
+/* =====================================================
+   MAIN GOVAPPS LOGIN SCREEN
+   ===================================================== */
+
+.govapps-login {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 35px;
+
+  background-image: url("/govapps-background.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  font-family:
+    "Century Gothic",
+    CenturyGothic,
+    AppleGothic,
+    Arial,
+    sans-serif;
+}
+
+
+/* =====================================================
+   CENTRAL WHITE LOGIN PANEL
+   ===================================================== */
+
+.login-box {
+  width: 100%;
+  max-width: 440px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #eeeeee;
+
+  box-shadow:
+    0 2px 7px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =====================================================
+   MyWCSA GOVAPPS LOGO AREA
+   ===================================================== */
+
+.login-logo {
+  width: 100%;
+  min-height: 130px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 25px 35px;
+
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   LOGO IMAGE
+   ===================================================== */
+
+.login-logo img {
+  display: block;
+
+  width: auto;
+  height: auto;
+
+  max-width: 270px;
+  max-height: 90px;
+
+  object-fit: contain;
+}
+
+
+/* =====================================================
+   LOGIN SECTION
+
+   Used by:
+   - Staff
+   - Business Partner
+   - External User
+   ===================================================== */
+
+.login-section {
+  width: 100%;
+
+  border-top: 1px solid #d6d6d6;
+
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   SELECTED SECTION WHEN VIDEO IS OPEN
+   ===================================================== */
+
+.login-section-video-open {
+  width: 100%;
+}
+
+
+/* =====================================================
+   ROLE TITLE ROW
+   ===================================================== */
+
+.login-title-row {
+  position: relative;
+
+  width: 100%;
+  min-height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 55px;
+
+  background: #fafafa;
+
+  border-bottom: 1px solid #d6d6d6;
+}
+
+
+/* =====================================================
+   ROLE TITLE
+
+   Examples:
+   Staff
+   Business Partner
+   External User
+   ===================================================== */
+
+.login-title {
+  color: #171717;
+
+  font-family:
+    "Century Gothic",
+    CenturyGothic,
+    AppleGothic,
+    Arial,
+    sans-serif;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  line-height: 1.4;
+
+  text-align: center;
+}
+
+
+/* =====================================================
+   INFORMATION ICON
+   ===================================================== */
+
+.info-icon {
+  position: absolute;
+
+  right: 26px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 20px;
+  height: 20px;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #001489;
+
+  color: #ffffff;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 13px;
+  font-weight: 700;
+  font-style: normal;
+
+  line-height: 20px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+/* =====================================================
+   INFORMATION ICON HOVER
+   ===================================================== */
+
+.info-icon:hover {
+  background: #0026b8;
+}
+
+
+/* =====================================================
+   INFORMATION ICON WHEN TUTORIAL IS OPEN
+   ===================================================== */
+
+.info-icon-active {
+  background: #001489;
+}
+
+
+/* =====================================================
+   INFORMATION ICON KEYBOARD FOCUS
+   ===================================================== */
+
+.info-icon:focus-visible {
+  outline: 3px solid rgba(0, 20, 137, 0.25);
+  outline-offset: 3px;
+}
+
+
+/* =====================================================
+   NORMAL LOGIN BUTTON AREA
+   ===================================================== */
+
+.login-button-area {
+  width: 100%;
+  min-height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 18px 40px;
+
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   LOGIN BUTTON
+   ===================================================== */
+
+.login-button {
+  width: 285px;
+  max-width: 100%;
+
+  min-height: 39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 20px;
+
+  background: #0788f9;
+
+  border: none;
+  border-radius: 4px;
+
+  color: #ffffff;
+
+  font-family:
+    "Century Gothic",
+    CenturyGothic,
+    AppleGothic,
+    Arial,
+    sans-serif;
+
+  font-size: 16px;
+  font-weight: 400;
+
+  line-height: 1.4;
+
+  text-align: center;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+/* =====================================================
+   LOGIN BUTTON HOVER
+   ===================================================== */
+
+.login-button:hover {
+  background: #006fd6;
+}
+
+
+/* =====================================================
+   LOGIN BUTTON KEYBOARD FOCUS
+   ===================================================== */
+
+.login-button:focus-visible {
+  outline: 3px solid rgba(7, 136, 249, 0.30);
+  outline-offset: 3px;
+}
+
+
+/* =====================================================
+   ROLE INFORMATION VIDEO AREA
+
+   This appears after the user clicks the "i" icon.
+
+   The other two role sections are removed from the
+   screen by React while this area is visible.
+   ===================================================== */
+
+.login-video-area {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    20px
+    45px
+    35px
+    45px;
+
+  background: #ffffff;
+}
+
+
+/* =====================================================
+   TUTORIAL VIDEO
+   ===================================================== */
+
+.login-video {
+  display: block;
+
+  width: 100%;
+  max-width: 400px;
+
+  height: auto;
+
+  margin: 0;
+
+  background: #000000;
+
+  border: none;
+
+  outline: none;
+}
+
+
+/* =====================================================
+   VIDEO CONTROLS
+
+   Browser controls are used intentionally.
+
+   This gives the user access to:
+   - Play
+   - Pause
+   - Timeline
+   - Volume
+   - Full screen
+
+   The exact appearance is controlled by the browser.
+   ===================================================== */
+
+
+/* =====================================================
+   TABLET RESPONSIVENESS
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+  .govapps-login {
+    padding: 25px;
+  }
+
+  .login-box {
+    max-width: 430px;
+  }
+
+  .login-video-area {
+    padding:
+      20px
+      35px
+      30px
+      35px;
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE RESPONSIVENESS
+   ===================================================== */
+
+@media (max-width: 480px) {
+
+  .govapps-login {
+    min-height: 100vh;
+
+    align-items: flex-start;
+
+    padding:
+      20px
+      15px;
+  }
+
+
+  /* ------------------------------
+     Logo
+     ------------------------------ */
+
+  .login-logo {
+    min-height: 110px;
+
+    padding: 20px;
+  }
+
+  .login-logo img {
+    max-width: 220px;
+    max-height: 75px;
+  }
+
+
+  /* ------------------------------
+     Role title
+     ------------------------------ */
+
+  .login-title-row {
+    min-height: 48px;
+
+    padding:
+      10px
+      50px;
+  }
+
+  .login-title {
+    font-size: 15px;
+  }
+
+
+  /* ------------------------------
+     Information icon
+     ------------------------------ */
+
+  .info-icon {
+    right: 20px;
+  }
+
+
+  /* ------------------------------
+     Login button area
+     ------------------------------ */
+
+  .login-button-area {
+    min-height: 76px;
+
+    padding:
+      17px
+      30px;
+  }
+
+
+  /* ------------------------------
+     Login button
+     ------------------------------ */
+
+  .login-button {
+    width: 100%;
+
+    min-height: 39px;
+
+    font-size: 15px;
+  }
+
+
+  /* ------------------------------
+     Tutorial video
+     ------------------------------ */
+
+  .login-video-area {
+    padding:
+      18px
+      20px
+      25px
+      20px;
+  }
+
+  .login-video {
+    width: 100%;
+    max-width: 100%;
+  }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE SCREENS
+   ===================================================== */
+
+@media (max-width: 350px) {
+
+  .govapps-login {
+    padding:
+      12px
+      10px;
+  }
+
+  .login-title-row {
+    padding-left: 45px;
+    padding-right: 45px;
+  }
+
+  .info-icon {
+    right: 16px;
+  }
+
+  .login-button-area {
+    padding:
+      15px
+      20px;
+  }
+
+  .login-video-area {
+    padding:
+      15px
+      15px
+      20px
+      15px;
+  }
+
+}
