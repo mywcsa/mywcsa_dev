@@ -1,27 +1,57 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+
+/* ============================================================
+   MyWCSA AMS
+   REGISTER PARTICIPANT
+
+   Staff Interface
+   Western Cape Sports Association
+
+   IMPORTANT
+   ------------------------------------------------------------
+   This page currently provides the complete front-end workflow.
+
+   Production still requires:
+   - participant search API
+   - duplicate detection API
+   - registry database
+   - affiliation registry lookups
+   - transactional participant-number generation
+   - audit logging
+   - server-side validation
+   - authorisation checks
+   ============================================================ */
+
+const WCG_BLUE = "#001489";
+const DARK_BLUE = "#00105f";
+const TEXT_BLUE = "#00175a";
+const BORDER = "#9fa9b4";
+const LIGHT_BORDER = "#d4d9df";
+const MUTED = "#65717d";
+const PALE_BLUE = "#edf2f8";
+const TABLE_HEADER = "#eef1f5";
 
 type RegistrationData = {
-  // Step 1
   firstName: string;
   middleNames: string;
   surname: string;
-  preferredName: string;
   dateOfBirth: string;
+  gender: string;
   idType: string;
   idNumber: string;
+  participantType: string;
 
-  // Step 2
-  gender: string;
-  nationality: string;
-  countryOfBirth: string;
-  recordStatus: string;
+  mobile: string;
+  email: string;
 
-  // Step 3
-  mobileNumber: string;
-  emailAddress: string;
   addressLine1: string;
   addressLine2: string;
   suburb: string;
@@ -29,7 +59,6 @@ type RegistrationData = {
   province: string;
   postalCode: string;
 
-  guardianRequired: string;
   guardianFirstName: string;
   guardianSurname: string;
   guardianRelationship: string;
@@ -40,41 +69,40 @@ type RegistrationData = {
   emergencyRelationship: string;
   emergencyMobile: string;
 
-  // Step 4
-  participantType: string;
   sportingCode: string;
   participantRole: string;
   ageGroup: string;
   division: string;
-  participationLevel: string;
 
-  // Step 5
-  schoolName: string;
-  clubName: string;
-  teamName: string;
-  associationName: string;
-  affiliationStartDate: string;
+  school: string;
+  club: string;
+  team: string;
+  association: string;
 
-  // Declaration
-  declarationAccepted: boolean;
+  notes: string;
 };
 
-const initialData: RegistrationData = {
+type DuplicateSearchData = {
+  firstName: string;
+  surname: string;
+  dateOfBirth: string;
+  idNumber: string;
+  participantNumber: string;
+};
+
+const initialRegistrationData: RegistrationData = {
   firstName: "",
   middleNames: "",
   surname: "",
-  preferredName: "",
   dateOfBirth: "",
-  idType: "Not Provided",
-  idNumber: "",
-
   gender: "",
-  nationality: "South African",
-  countryOfBirth: "South Africa",
-  recordStatus: "Active",
+  idType: "South African ID",
+  idNumber: "",
+  participantType: "Learner / Athlete",
 
-  mobileNumber: "",
-  emailAddress: "",
+  mobile: "",
+  email: "",
+
   addressLine1: "",
   addressLine2: "",
   suburb: "",
@@ -82,7 +110,6 @@ const initialData: RegistrationData = {
   province: "Western Cape",
   postalCode: "",
 
-  guardianRequired: "Yes",
   guardianFirstName: "",
   guardianSurname: "",
   guardianRelationship: "",
@@ -93,233 +120,277 @@ const initialData: RegistrationData = {
   emergencyRelationship: "",
   emergencyMobile: "",
 
-  participantType: "",
   sportingCode: "",
-  participantRole: "",
+  participantRole: "Athlete / Participant",
   ageGroup: "",
   division: "",
-  participationLevel: "",
 
-  schoolName: "",
-  clubName: "",
-  teamName: "",
-  associationName: "",
-  affiliationStartDate: "",
+  school: "",
+  club: "",
+  team: "",
+  association: "",
 
-  declarationAccepted: false,
+  notes: "",
 };
+
+const initialDuplicateSearch: DuplicateSearchData = {
+  firstName: "",
+  surname: "",
+  dateOfBirth: "",
+  idNumber: "",
+  participantNumber: "",
+};
+
+const workflowSteps = [
+  {
+    number: 1,
+    short: "01",
+    title: "Duplicate Check",
+  },
+  {
+    number: 2,
+    short: "02",
+    title: "Personal Details",
+  },
+  {
+    number: 3,
+    short: "03",
+    title: "Contact & Guardian",
+  },
+  {
+    number: 4,
+    short: "04",
+    title: "Participation",
+  },
+  {
+    number: 5,
+    short: "05",
+    title: "Affiliations",
+  },
+  {
+    number: 6,
+    short: "06",
+    title: "Review & Register",
+  },
+];
 
 export default function RegisterParticipantPage() {
   const [step, setStep] = useState(1);
 
   const [data, setData] =
-    useState<RegistrationData>(initialData);
+    useState<RegistrationData>(
+      initialRegistrationData
+    );
 
-  const [duplicateChecked, setDuplicateChecked] =
-    useState(false);
+  const [
+    duplicateSearch,
+    setDuplicateSearch,
+  ] = useState<DuplicateSearchData>(
+    initialDuplicateSearch
+  );
 
-  const [searching, setSearching] =
-    useState(false);
+  const [
+    duplicateSearchCompleted,
+    setDuplicateSearchCompleted,
+  ] = useState(false);
 
-  const [submitted, setSubmitted] =
-    useState(false);
+  const [
+    duplicateSearchRunning,
+    setDuplicateSearchRunning,
+  ] = useState(false);
 
-  const [participantNumber, setParticipantNumber] =
-    useState("");
+  const [
+    declarationAccepted,
+    setDeclarationAccepted,
+  ] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [
+    registrationComplete,
+    setRegistrationComplete,
+  ] = useState(false);
 
-  const participantAge = useMemo(() => {
-    if (!data.dateOfBirth) {
-      return null;
-    }
+  const [
+    validationMessage,
+    setValidationMessage,
+  ] = useState("");
 
-    const birthDate =
-      new Date(`${data.dateOfBirth}T00:00:00`);
+  const currentDate = useMemo(
+    () => formatDate(),
+    []
+  );
 
-    const today = new Date();
-
-    let age =
-      today.getFullYear() -
-      birthDate.getFullYear();
-
-    const monthDifference =
-      today.getMonth() -
-      birthDate.getMonth();
-
-    if (
-      monthDifference < 0 ||
-      (monthDifference === 0 &&
-        today.getDate() <
-          birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  }, [data.dateOfBirth]);
+  const participantAge = useMemo(
+    () => calculateAge(data.dateOfBirth),
+    [data.dateOfBirth]
+  );
 
   const isMinor =
     participantAge !== null &&
     participantAge < 18;
 
-  function updateField<K extends keyof RegistrationData>(
-    field: K,
-    value: RegistrationData[K]
+  const developmentParticipantNumber =
+    useMemo(
+      () =>
+        buildDevelopmentParticipantNumber(
+          data.dateOfBirth,
+          data.firstName,
+          data.surname
+        ),
+      [
+        data.dateOfBirth,
+        data.firstName,
+        data.surname,
+      ]
+    );
+
+  function updateData(
+    field: keyof RegistrationData,
+    value: string
   ) {
     setData((current) => ({
       ...current,
       [field]: value,
     }));
 
-    setError("");
-
-    if (
-      field === "firstName" ||
-      field === "surname" ||
-      field === "dateOfBirth" ||
-      field === "idNumber"
-    ) {
-      setDuplicateChecked(false);
-    }
+    setValidationMessage("");
   }
 
-  function runDuplicateCheck() {
-    setError("");
+  function updateDuplicateSearch(
+    field: keyof DuplicateSearchData,
+    value: string
+  ) {
+    setDuplicateSearch((current) => ({
+      ...current,
+      [field]: value,
+    }));
 
-    if (
-      !data.firstName.trim() ||
-      !data.surname.trim() ||
-      !data.dateOfBirth
-    ) {
-      setError(
-        "Enter the participant's first name, surname and date of birth before searching the registry."
+    setDuplicateSearchCompleted(false);
+    setValidationMessage("");
+  }
+
+  function runDuplicateSearch() {
+    const hasSearchValue =
+      duplicateSearch.firstName.trim() ||
+      duplicateSearch.surname.trim() ||
+      duplicateSearch.dateOfBirth ||
+      duplicateSearch.idNumber.trim() ||
+      duplicateSearch.participantNumber.trim();
+
+    if (!hasSearchValue) {
+      setValidationMessage(
+        "Enter at least one participant search value before searching the registry."
       );
-
       return;
     }
 
-    setSearching(true);
-
-    /*
-      DEVELOPMENT MODE
-
-      This currently simulates completion of the duplicate
-      search interface.
-
-      When the AMS database is connected, this function must
-      call the secure server-side duplicate search.
-
-      It must NOT automatically assume that no duplicate exists.
-    */
+    setValidationMessage("");
+    setDuplicateSearchRunning(true);
+    setDuplicateSearchCompleted(false);
 
     window.setTimeout(() => {
-      setSearching(false);
-      setDuplicateChecked(true);
+      setDuplicateSearchRunning(false);
+      setDuplicateSearchCompleted(true);
     }, 500);
+  }
+
+  function clearDuplicateSearch() {
+    setDuplicateSearch(
+      initialDuplicateSearch
+    );
+
+    setDuplicateSearchCompleted(false);
+    setValidationMessage("");
   }
 
   function validateStep(
     targetStep: number
   ) {
-    setError("");
-
     if (targetStep === 1) {
-      if (!duplicateChecked) {
-        setError(
-          "Complete the Participant Registry duplicate check before continuing."
+      if (!duplicateSearchCompleted) {
+        return (
+          "Complete the duplicate registry " +
+          "search before continuing."
         );
-
-        return false;
       }
     }
 
     if (targetStep === 2) {
-      if (
-        !data.firstName.trim() ||
-        !data.surname.trim() ||
-        !data.dateOfBirth ||
-        !data.gender ||
-        !data.nationality.trim()
-      ) {
-        setError(
-          "Complete all required Personal Details before continuing."
-        );
+      if (!data.firstName.trim()) {
+        return "First Name(s) is required.";
+      }
 
-        return false;
+      if (!data.surname.trim()) {
+        return "Surname is required.";
+      }
+
+      if (!data.dateOfBirth) {
+        return "Date of Birth is required.";
+      }
+
+      if (!data.gender) {
+        return "Gender is required.";
+      }
+
+      if (!data.participantType) {
+        return "Participant Type is required.";
       }
     }
 
     if (targetStep === 3) {
-      if (
-        !data.mobileNumber.trim() &&
-        !data.emailAddress.trim() &&
-        !isMinor
-      ) {
-        setError(
-          "Provide at least a mobile number or email address for the participant."
-        );
+      if (isMinor) {
+        if (
+          !data.guardianFirstName.trim() ||
+          !data.guardianSurname.trim()
+        ) {
+          return (
+            "Parent / Guardian name is " +
+            "required for a participant under 18."
+          );
+        }
 
-        return false;
-      }
+        if (
+          !data.guardianRelationship
+        ) {
+          return (
+            "Parent / Guardian relationship " +
+            "is required for a participant under 18."
+          );
+        }
 
-      if (
-        isMinor &&
-        (!data.guardianFirstName.trim() ||
-          !data.guardianSurname.trim() ||
-          !data.guardianRelationship ||
-          !data.guardianMobile.trim())
-      ) {
-        setError(
-          "A parent or guardian name, relationship and mobile number are required for a participant under 18."
-        );
-
-        return false;
-      }
-
-      if (
-        !data.emergencyName.trim() ||
-        !data.emergencyMobile.trim()
-      ) {
-        setError(
-          "Complete the emergency contact information before continuing."
-        );
-
-        return false;
+        if (
+          !data.guardianMobile.trim()
+        ) {
+          return (
+            "Parent / Guardian mobile number " +
+            "is required for a participant under 18."
+          );
+        }
       }
     }
 
     if (targetStep === 4) {
-      if (
-        !data.participantType ||
-        !data.participantRole
-      ) {
-        setError(
-          "Select the participant type and participant role before continuing."
-        );
+      if (!data.sportingCode) {
+        return "Sporting Code is required.";
+      }
 
-        return false;
+      if (!data.participantRole) {
+        return "Participant Role is required.";
       }
     }
 
-    if (targetStep === 5) {
-      if (!data.affiliationStartDate) {
-        setError(
-          "Enter the affiliation start date before continuing."
-        );
-
-        return false;
-      }
-    }
-
-    return true;
+    return "";
   }
 
   function nextStep() {
-    if (!validateStep(step)) {
+    const message =
+      validateStep(step);
+
+    if (message) {
+      setValidationMessage(message);
       return;
     }
+
+    setValidationMessage("");
 
     setStep((current) =>
       Math.min(current + 1, 6)
@@ -332,7 +403,7 @@ export default function RegisterParticipantPage() {
   }
 
   function previousStep() {
-    setError("");
+    setValidationMessage("");
 
     setStep((current) =>
       Math.max(current - 1, 1)
@@ -345,55 +416,56 @@ export default function RegisterParticipantPage() {
   }
 
   function goToStep(
-    requestedStep: number
+    targetStep: number
   ) {
-    if (requestedStep >= step) {
+    if (targetStep < step) {
+      setValidationMessage("");
+      setStep(targetStep);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
       return;
     }
 
-    setError("");
-    setStep(requestedStep);
+    if (targetStep === step) {
+      return;
+    }
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    if (targetStep === step + 1) {
+      nextStep();
+    }
   }
 
   function registerParticipant() {
-    setError("");
-
-    if (!data.declarationAccepted) {
-      setError(
-        "Confirm the registration declaration before registering the participant."
+    if (!declarationAccepted) {
+      setValidationMessage(
+        "Confirm the declaration before registering the participant."
       );
-
       return;
     }
 
+    setValidationMessage("");
+
     /*
-      IMPORTANT:
+      DEVELOPMENT MODE ONLY.
 
-      This is TEMPORARY UI behaviour.
+      Production registration must POST the
+      validated record to the AMS API.
 
-      The real permanent participant number must eventually
-      be generated on the SERVER inside a database transaction.
-
-      The browser must NOT generate the production sequence.
+      The server/database must:
+      1. re-check duplicates;
+      2. validate affiliation conflicts;
+      3. allocate the permanent participant
+         number transactionally;
+      4. save the participant;
+      5. create audit history;
+      6. return the official record.
     */
 
-    const previewNumber =
-      buildDevelopmentParticipantNumber(
-        data.dateOfBirth,
-        data.firstName,
-        data.surname
-      );
-
-    setParticipantNumber(
-      previewNumber
-    );
-
-    setSubmitted(true);
+    setRegistrationComplete(true);
 
     window.scrollTo({
       top: 0,
@@ -401,45 +473,74 @@ export default function RegisterParticipantPage() {
     });
   }
 
-  if (submitted) {
+  if (registrationComplete) {
     return (
       <RegistrationSuccess
-        participantNumber={
-          participantNumber
+        participantName={
+          `${data.firstName} ${data.surname}`.trim()
         }
-        data={data}
+        developmentParticipantNumber={
+          developmentParticipantNumber
+        }
       />
     );
   }
 
   return (
-    <main>
+    <div style={styles.page}>
       {/* =====================================================
-          BREADCRUMB
+          BREADCRUMB / DATE
           ===================================================== */}
 
-      <div style={styles.breadcrumb}>
-        <Link
-          href="/apps/ams"
-          style={styles.breadcrumbLink}
-        >
-          MyWCSA AMS
-        </Link>
+      <div style={styles.topUtilityRow}>
+        <div style={styles.breadcrumb}>
+          <Link
+            href="/my-apps"
+            style={styles.breadcrumbLink}
+          >
+            MyGovApps
+          </Link>
 
-        <span>/</span>
+          <span
+            style={styles.breadcrumbSeparator}
+          >
+            /
+          </span>
 
-        <Link
-          href="/apps/ams/participants"
-          style={styles.breadcrumbLink}
-        >
-          Participants
-        </Link>
+          <Link
+            href="/apps/ams"
+            style={styles.breadcrumbLink}
+          >
+            MyWCSA AMS
+          </Link>
 
-        <span>/</span>
+          <span
+            style={styles.breadcrumbSeparator}
+          >
+            /
+          </span>
 
-        <span>
-          Register Participant
-        </span>
+          <Link
+            href="/apps/ams/participants"
+            style={styles.breadcrumbLink}
+          >
+            Participants
+          </Link>
+
+          <span
+            style={styles.breadcrumbSeparator}
+          >
+            /
+          </span>
+
+          <strong>
+            Register Participant
+          </strong>
+        </div>
+
+        <div style={styles.currentDate}>
+          {currentDate}
+        </div>
       </div>
 
       {/* =====================================================
@@ -448,16 +549,16 @@ export default function RegisterParticipantPage() {
 
       <section style={styles.pageHeading}>
         <div>
-          <div style={styles.eyebrow}>
-            PARTICIPANT REGISTRATION
+          <div style={styles.pageReference}>
+            AMS / PARTICIPANTS / REGISTRATION
           </div>
 
           <h1 style={styles.pageTitle}>
-            Register Participant
+            REGISTER PARTICIPANT
           </h1>
 
           <p style={styles.pageSubtitle}>
-            Create a new permanent participant
+            Create a permanent participant
             record in the MyWCSA Participant
             Registry.
           </p>
@@ -472,173 +573,179 @@ export default function RegisterParticipantPage() {
       </section>
 
       {/* =====================================================
-          STATUS BAR
-          ===================================================== */}
-
-      <section style={styles.statusBar}>
-        <StatusItem
-          label="REGISTRATION"
-          value="NEW PARTICIPANT"
-        />
-
-        <StatusItem
-          label="STATUS"
-          value="NOT SUBMITTED"
-        />
-
-        <StatusItem
-          label="CURRENT STEP"
-          value={`${step} OF 6`}
-        />
-
-        <StatusItem
-          label="PARTICIPANT NO."
-          value="PENDING"
-        />
-      </section>
-
-      {/* =====================================================
           WORKFLOW
           ===================================================== */}
 
-      <section style={styles.workflow}>
-        <WorkflowStep
-          number={1}
-          title="Duplicate Check"
-          currentStep={step}
-          onClick={goToStep}
-        />
+      <div style={styles.workflow}>
+        {workflowSteps.map(
+          (workflowStep) => {
+            const isCurrent =
+              workflowStep.number === step;
 
-        <WorkflowStep
-          number={2}
-          title="Personal Details"
-          currentStep={step}
-          onClick={goToStep}
-        />
+            const isComplete =
+              workflowStep.number < step;
 
-        <WorkflowStep
-          number={3}
-          title="Contact & Guardian"
-          currentStep={step}
-          onClick={goToStep}
-        />
+            return (
+              <button
+                key={workflowStep.number}
+                type="button"
+                onClick={() =>
+                  goToStep(
+                    workflowStep.number
+                  )
+                }
+                style={{
+                  ...styles.workflowStep,
 
-        <WorkflowStep
-          number={4}
-          title="Participation"
-          currentStep={step}
-          onClick={goToStep}
-        />
+                  ...(isCurrent
+                    ? styles.workflowCurrent
+                    : {}),
 
-        <WorkflowStep
-          number={5}
-          title="Affiliations"
-          currentStep={step}
-          onClick={goToStep}
-        />
+                  ...(isComplete
+                    ? styles.workflowComplete
+                    : {}),
+                }}
+              >
+                <span
+                  style={{
+                    ...styles.workflowNumber,
 
-        <WorkflowStep
-          number={6}
-          title="Review"
-          currentStep={step}
-          onClick={goToStep}
-        />
-      </section>
+                    ...(isCurrent
+                      ? styles.workflowNumberCurrent
+                      : {}),
+
+                    ...(isComplete
+                      ? styles.workflowNumberComplete
+                      : {}),
+                  }}
+                >
+                  {isComplete
+                    ? "✓"
+                    : workflowStep.short}
+                </span>
+
+                <span>
+                  <span
+                    style={
+                      styles.workflowSmallLabel
+                    }
+                  >
+                    STEP{" "}
+                    {workflowStep.short}
+                  </span>
+
+                  <span
+                    style={
+                      styles.workflowTitle
+                    }
+                  >
+                    {workflowStep.title}
+                  </span>
+                </span>
+              </button>
+            );
+          }
+        )}
+      </div>
 
       {/* =====================================================
-          ERROR
+          VALIDATION MESSAGE
           ===================================================== */}
 
-      {error && (
+      {validationMessage ? (
         <div style={styles.errorBox}>
-          <strong>
-            ACTION REQUIRED
-          </strong>
+          <div style={styles.errorMarker}>
+            !
+          </div>
 
-          <span>
-            {error}
-          </span>
+          <div>
+            <div style={styles.errorTitle}>
+              ACTION REQUIRED
+            </div>
+
+            <div style={styles.errorText}>
+              {validationMessage}
+            </div>
+          </div>
         </div>
-      )}
+      ) : null}
 
       {/* =====================================================
-          CURRENT STEP
+          STEP CONTENT
           ===================================================== */}
 
-      {step === 1 && (
+      {step === 1 ? (
         <DuplicateCheckStep
-          data={data}
-          updateField={updateField}
-          duplicateChecked={
-            duplicateChecked
+          search={duplicateSearch}
+          updateSearch={
+            updateDuplicateSearch
           }
-          searching={searching}
-          runDuplicateCheck={
-            runDuplicateCheck
+          searchCompleted={
+            duplicateSearchCompleted
           }
+          searchRunning={
+            duplicateSearchRunning
+          }
+          onSearch={runDuplicateSearch}
+          onClear={clearDuplicateSearch}
         />
-      )}
+      ) : null}
 
-      {step === 2 && (
+      {step === 2 ? (
         <PersonalDetailsStep
           data={data}
-          updateField={updateField}
-          participantAge={
-            participantAge
-          }
+          updateData={updateData}
+          participantAge={participantAge}
         />
-      )}
+      ) : null}
 
-      {step === 3 && (
+      {step === 3 ? (
         <ContactGuardianStep
           data={data}
-          updateField={updateField}
+          updateData={updateData}
+          participantAge={participantAge}
           isMinor={isMinor}
-          participantAge={
-            participantAge
-          }
         />
-      )}
+      ) : null}
 
-      {step === 4 && (
+      {step === 4 ? (
         <ParticipationStep
           data={data}
-          updateField={updateField}
+          updateData={updateData}
         />
-      )}
+      ) : null}
 
-      {step === 5 && (
+      {step === 5 ? (
         <AffiliationsStep
           data={data}
-          updateField={updateField}
+          updateData={updateData}
         />
-      )}
+      ) : null}
 
-      {step === 6 && (
+      {step === 6 ? (
         <ReviewStep
           data={data}
-          participantAge={
-            participantAge
+          participantAge={participantAge}
+          developmentParticipantNumber={
+            developmentParticipantNumber
           }
-          updateField={updateField}
-          goToStep={goToStep}
+          declarationAccepted={
+            declarationAccepted
+          }
+          setDeclarationAccepted={
+            setDeclarationAccepted
+          }
+          setStep={setStep}
         />
-      )}
+      ) : null}
 
       {/* =====================================================
-          NAVIGATION
+          BOTTOM NAVIGATION
           ===================================================== */}
 
-      <section style={styles.bottomNavigation}>
+      <div style={styles.bottomNavigation}>
         <div>
-          {step === 1 ? (
-            <Link
-              href="/apps/ams/participants"
-              style={styles.secondaryButton}
-            >
-              ← BACK TO PARTICIPANTS
-            </Link>
-          ) : (
+          {step > 1 ? (
             <button
               type="button"
               onClick={previousStep}
@@ -646,6 +753,13 @@ export default function RegisterParticipantPage() {
             >
               ← PREVIOUS
             </button>
+          ) : (
+            <Link
+              href="/apps/ams/participants"
+              style={styles.secondaryLink}
+            >
+              CANCEL
+            </Link>
           )}
         </div>
 
@@ -660,7 +774,7 @@ export default function RegisterParticipantPage() {
               onClick={nextStep}
               style={styles.primaryButton}
             >
-              SAVE & CONTINUE →
+              CONTINUE →
             </button>
           ) : (
             <button
@@ -668,1195 +782,1743 @@ export default function RegisterParticipantPage() {
               onClick={
                 registerParticipant
               }
-              style={
-                styles.registerFinalButton
-              }
+              style={styles.registerFinalButton}
             >
               REGISTER PARTICIPANT
             </button>
           )}
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }
 
 /* ============================================================
-   STEP 01
+   STEP 1
    DUPLICATE CHECK
    ============================================================ */
 
 function DuplicateCheckStep({
-  data,
-  updateField,
-  duplicateChecked,
-  searching,
-  runDuplicateCheck,
+  search,
+  updateSearch,
+  searchCompleted,
+  searchRunning,
+  onSearch,
+  onClear,
 }: {
-  data: RegistrationData;
-  updateField: UpdateField;
-  duplicateChecked: boolean;
-  searching: boolean;
-  runDuplicateCheck: () => void;
+  search: DuplicateSearchData;
+
+  updateSearch: (
+    field: keyof DuplicateSearchData,
+    value: string
+  ) => void;
+
+  searchCompleted: boolean;
+  searchRunning: boolean;
+
+  onSearch: () => void;
+  onClear: () => void;
 }) {
   return (
     <>
-      <StepIntroduction
+      <StepHeading
         number="01"
-        title="Duplicate Check"
-        description="Search the Participant Registry before creating a new record."
+        title="DUPLICATE CHECK"
+        description="Search the provincial participant registry before creating a new record."
       />
 
-      <InfoNotice
+      <Notice
         title="SEARCH BEFORE REGISTRATION"
-        text="Every participant must have only one permanent WCSA Participant Number. If the participant already exists, use the existing record instead of creating another registration."
+        text="A participant must only have one permanent MyWCSA participant record. If an existing record is found, use the existing record and the appropriate affiliation or transfer process instead of creating a duplicate."
       />
 
-      <Panel
+      <FormSection
         number="01.1"
         title="PARTICIPANT IDENTITY SEARCH"
+        reference="REGISTRY ENQUIRY"
       >
-        <p style={styles.instructions}>
-          Enter the participant's basic
-          identity information. First name,
-          surname and date of birth are
-          required.
-        </p>
+        <FormRow>
+          <RowNumber value="01" />
 
-        <div style={styles.formGrid2}>
-          <TextInput
-            label="First Name(s)"
-            required
-            value={data.firstName}
-            placeholder="Enter first name(s)"
-            onChange={(value) =>
-              updateField(
-                "firstName",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            Participant Number
+          </FormLabel>
 
-          <TextInput
-            label="Surname"
-            required
-            value={data.surname}
-            placeholder="Enter surname"
-            onChange={(value) =>
-              updateField(
-                "surname",
-                value
-              )
-            }
-          />
+          <FormControl>
+            <input
+              value={
+                search.participantNumber
+              }
+              onChange={(event) =>
+                updateSearch(
+                  "participantNumber",
+                  event.target.value
+                )
+              }
+              placeholder="Enter participant number"
+              style={styles.input}
+            />
+          </FormControl>
 
-          <TextInput
-            label="Date of Birth"
-            required
-            type="date"
-            value={data.dateOfBirth}
-            onChange={(value) =>
-              updateField(
-                "dateOfBirth",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            ID / Passport Number
+          </FormLabel>
 
-          <TextInput
-            label="ID / Passport Number"
-            value={data.idNumber}
-            placeholder="Optional during search"
-            onChange={(value) =>
-              updateField(
-                "idNumber",
-                value
-              )
-            }
-          />
-        </div>
+          <FormControl last>
+            <input
+              value={search.idNumber}
+              onChange={(event) =>
+                updateSearch(
+                  "idNumber",
+                  event.target.value
+                )
+              }
+              placeholder="Enter ID or passport number"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
 
-        <div style={styles.actionRow}>
-          <button
-            type="button"
-            onClick={
-              runDuplicateCheck
-            }
-            disabled={searching}
-            style={styles.primaryButton}
-          >
-            {searching
-              ? "SEARCHING..."
-              : "SEARCH PARTICIPANT REGISTRY"}
-          </button>
-        </div>
-      </Panel>
+        <FormRow>
+          <RowNumber value="02" />
 
-      <Panel
-        number="01.2"
-        title="POSSIBLE MATCHES"
-      >
-        {!duplicateChecked ? (
-          <EmptyState
-            title="Duplicate check required"
-            text="Search the Participant Registry before continuing with the registration."
-          />
-        ) : (
-          <div style={styles.successSearch}>
+          <FormLabel>
+            First Name(s)
+          </FormLabel>
+
+          <FormControl>
+            <input
+              value={search.firstName}
+              onChange={(event) =>
+                updateSearch(
+                  "firstName",
+                  event.target.value
+                )
+              }
+              placeholder="Enter first name"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Surname
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={search.surname}
+              onChange={(event) =>
+                updateSearch(
+                  "surname",
+                  event.target.value
+                )
+              }
+              placeholder="Enter surname"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="03" />
+
+          <FormLabel>
+            Date of Birth
+          </FormLabel>
+
+          <FormControl>
+            <input
+              type="date"
+              value={search.dateOfBirth}
+              onChange={(event) =>
+                updateSearch(
+                  "dateOfBirth",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Search Status
+          </FormLabel>
+
+          <FormControl last>
             <div
               style={
-                styles.successSearchIcon
+                styles.readOnlyControl
               }
             >
-              ✓
+              {searchCompleted
+                ? "SEARCH COMPLETED"
+                : "NOT YET SEARCHED"}
+            </div>
+          </FormControl>
+        </FormRow>
+
+        <div style={styles.formActions}>
+          <div
+            style={
+              styles.formActionInformation
+            }
+          >
+            Enter one or more known
+            participant details.
+          </div>
+
+          <div
+            style={
+              styles.formActionButtons
+            }
+          >
+            <button
+              type="button"
+              onClick={onClear}
+              style={
+                styles.secondaryButton
+              }
+            >
+              CLEAR
+            </button>
+
+            <button
+              type="button"
+              onClick={onSearch}
+              disabled={searchRunning}
+              style={{
+                ...styles.primaryButton,
+
+                ...(searchRunning
+                  ? styles.disabledButton
+                  : {}),
+              }}
+            >
+              {searchRunning
+                ? "SEARCHING..."
+                : "SEARCH REGISTRY"}
+            </button>
+          </div>
+        </div>
+      </FormSection>
+
+      <SectionTitle
+        number="01.2"
+        title="POSSIBLE MATCHES"
+        reference="SEARCH RESULTS"
+      />
+
+      <div style={styles.tableFrame}>
+        <div style={styles.tableScroll}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <TableHeading width="48px">
+                  #
+                </TableHeading>
+
+                <TableHeading width="150px">
+                  PARTICIPANT NO.
+                </TableHeading>
+
+                <TableHeading width="200px">
+                  PARTICIPANT
+                </TableHeading>
+
+                <TableHeading width="110px">
+                  DATE OF BIRTH
+                </TableHeading>
+
+                <TableHeading>
+                  CURRENT AFFILIATION
+                </TableHeading>
+
+                <TableHeading width="95px">
+                  STATUS
+                </TableHeading>
+
+                <TableHeading width="80px">
+                  ACTION
+                </TableHeading>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td
+                  colSpan={7}
+                  style={styles.emptyTableCell}
+                >
+                  {!searchCompleted ? (
+                    <EmptyTableState
+                      code="AWAITING SEARCH"
+                      title="REGISTRY SEARCH REQUIRED"
+                      text="Complete the identity search above to check for an existing participant record."
+                    />
+                  ) : (
+                    <EmptyTableState
+                      code="DEVELOPMENT MODE"
+                      title="NO MATCHES RETURNED"
+                      text="No possible matches are shown in this development build. Production will display live registry matches returned by the participant search API."
+                    />
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {searchCompleted ? (
+        <div
+          style={
+            styles.searchCompletionNotice
+          }
+        >
+          <div
+            style={
+              styles.searchCompletionMarker
+            }
+          >
+            ✓
+          </div>
+
+          <div>
+            <div
+              style={
+                styles.searchCompletionTitle
+              }
+            >
+              DUPLICATE CHECK COMPLETED
             </div>
 
-            <div>
-              <div
-                style={
-                  styles.successSearchTitle
-                }
-              >
-                REGISTRY SEARCH COMPLETED
-              </div>
-
-              <p
-                style={
-                  styles.successSearchText
-                }
-              >
-                The duplicate-check
-                interface has completed.
-                The live participant
-                database is not connected
-                yet, so this development
-                version cannot confirm
-                whether an actual matching
-                record exists.
-              </p>
-
-              <div
-                style={
-                  styles.developmentBox
-                }
-              >
-                <strong>
-                  DEVELOPMENT MODE:
-                </strong>{" "}
-                Live matching will be
-                connected to the AMS
-                database before production
-                registration is enabled.
-              </div>
+            <div
+              style={
+                styles.searchCompletionText
+              }
+            >
+              This development version
+              allows the workflow to continue.
+              The production system must
+              re-check the live registry on
+              the server before registration
+              is committed.
             </div>
           </div>
-        )}
-      </Panel>
-
-      <div style={styles.twoCards}>
-        <RuleCard
-          number="01.3"
-          title="IF A MATCH IS FOUND"
-          text="Open the existing participant record. Do not issue another participant number. Transfers and affiliation changes must be processed against the existing participant."
-        />
-
-        <RuleCard
-          number="01.4"
-          title="IF NO MATCH IS FOUND"
-          text="Continue with the new registration. The permanent participant number will only be issued after the complete registration has been successfully submitted."
-        />
-      </div>
+        </div>
+      ) : null}
     </>
   );
 }
 
 /* ============================================================
-   STEP 02
+   STEP 2
    PERSONAL DETAILS
    ============================================================ */
 
 function PersonalDetailsStep({
   data,
-  updateField,
+  updateData,
   participantAge,
 }: {
   data: RegistrationData;
-  updateField: UpdateField;
+
+  updateData: (
+    field: keyof RegistrationData,
+    value: string
+  ) => void;
+
   participantAge: number | null;
 }) {
   return (
     <>
-      <StepIntroduction
+      <StepHeading
         number="02"
-        title="Personal Details"
-        description="Capture the participant's official personal and identification information."
+        title="PERSONAL DETAILS"
+        description="Capture the participant's official personal and identity information."
       />
 
-      <Panel
+      <FormSection
         number="02.1"
-        title="PERSONAL INFORMATION"
+        title="PARTICIPANT IDENTITY"
+        reference="CORE RECORD"
       >
-        <div style={styles.formGrid3}>
-          <TextInput
-            label="First Name(s)"
-            required
-            value={data.firstName}
-            onChange={(value) =>
-              updateField(
-                "firstName",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="01" />
 
-          <TextInput
-            label="Middle Name(s)"
-            value={data.middleNames}
-            onChange={(value) =>
-              updateField(
-                "middleNames",
-                value
-              )
-            }
-          />
+          <FormLabel required>
+            First Name(s)
+          </FormLabel>
 
-          <TextInput
-            label="Surname"
-            required
-            value={data.surname}
-            onChange={(value) =>
-              updateField(
-                "surname",
-                value
-              )
-            }
-          />
+          <FormControl>
+            <input
+              value={data.firstName}
+              onChange={(event) =>
+                updateData(
+                  "firstName",
+                  event.target.value
+                )
+              }
+              placeholder="Enter first name(s)"
+              style={styles.input}
+            />
+          </FormControl>
 
-          <TextInput
-            label="Preferred Name"
-            value={data.preferredName}
-            onChange={(value) =>
-              updateField(
-                "preferredName",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            Middle Name(s)
+          </FormLabel>
 
-          <TextInput
-            label="Date of Birth"
-            required
-            type="date"
-            value={data.dateOfBirth}
-            onChange={(value) =>
-              updateField(
-                "dateOfBirth",
-                value
-              )
-            }
-          />
+          <FormControl last>
+            <input
+              value={data.middleNames}
+              onChange={(event) =>
+                updateData(
+                  "middleNames",
+                  event.target.value
+                )
+              }
+              placeholder="Enter middle name(s)"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
 
-          <ReadOnlyField
-            label="Calculated Age"
-            value={
-              participantAge === null
-                ? "—"
-                : `${participantAge} years`
-            }
-          />
+        <FormRow>
+          <RowNumber value="02" />
 
-          <SelectInput
-            label="Gender"
-            required
-            value={data.gender}
-            options={[
-              "",
-              "Male",
-              "Female",
-              "Other",
-              "Prefer not to say",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "gender",
-                value
-              )
-            }
-          />
+          <FormLabel required>
+            Surname
+          </FormLabel>
 
-          <TextInput
-            label="Nationality"
-            required
-            value={data.nationality}
-            onChange={(value) =>
-              updateField(
-                "nationality",
-                value
-              )
-            }
-          />
+          <FormControl>
+            <input
+              value={data.surname}
+              onChange={(event) =>
+                updateData(
+                  "surname",
+                  event.target.value
+                )
+              }
+              placeholder="Enter surname"
+              style={styles.input}
+            />
+          </FormControl>
 
-          <TextInput
-            label="Country of Birth"
-            value={data.countryOfBirth}
-            onChange={(value) =>
-              updateField(
-                "countryOfBirth",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+          <FormLabel required>
+            Date of Birth
+          </FormLabel>
 
-      <Panel
-        number="02.2"
-        title="IDENTIFICATION"
-      >
-        <div style={styles.formGrid3}>
-          <SelectInput
-            label="Identification Type"
-            value={data.idType}
-            options={[
-              "Not Provided",
-              "South African ID",
-              "Passport",
-              "Other Identification",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "idType",
-                value
-              )
-            }
-          />
+          <FormControl last>
+            <input
+              type="date"
+              value={data.dateOfBirth}
+              onChange={(event) =>
+                updateData(
+                  "dateOfBirth",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
 
-          <TextInput
-            label="Identification Number"
-            value={data.idNumber}
-            placeholder="Enter ID / passport number"
-            onChange={(value) =>
-              updateField(
-                "idNumber",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="03" />
 
-          <ReadOnlyField
-            label="Record Status"
-            value={data.recordStatus}
-          />
-        </div>
-      </Panel>
+          <FormLabel>
+            Calculated Age
+          </FormLabel>
 
-      <InfoNotice
-        title="SYSTEM CONTROLLED INFORMATION"
-        text="The permanent WCSA Participant Number, registration date, creator and audit information will be generated by MyWCSA when the final registration is successfully submitted."
+          <FormControl>
+            <div
+              style={
+                styles.readOnlyControl
+              }
+            >
+              {participantAge === null
+                ? "PENDING DATE OF BIRTH"
+                : `${participantAge} YEARS`}
+            </div>
+          </FormControl>
+
+          <FormLabel required>
+            Gender
+          </FormLabel>
+
+          <FormControl last>
+            <select
+              value={data.gender}
+              onChange={(event) =>
+                updateData(
+                  "gender",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option value="">
+                Select gender
+              </option>
+
+              <option value="Male">
+                Male
+              </option>
+
+              <option value="Female">
+                Female
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+              <option value="Prefer not to say">
+                Prefer not to say
+              </option>
+            </select>
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="04" />
+
+          <FormLabel>
+            Identity Document Type
+          </FormLabel>
+
+          <FormControl>
+            <select
+              value={data.idType}
+              onChange={(event) =>
+                updateData(
+                  "idType",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option>
+                South African ID
+              </option>
+
+              <option>
+                Passport
+              </option>
+
+              <option>
+                Birth Certificate
+              </option>
+
+              <option>
+                Other
+              </option>
+            </select>
+          </FormControl>
+
+          <FormLabel>
+            ID / Passport Number
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={data.idNumber}
+              onChange={(event) =>
+                updateData(
+                  "idNumber",
+                  event.target.value
+                )
+              }
+              placeholder="Enter document number"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="05" />
+
+          <FormLabel required>
+            Participant Type
+          </FormLabel>
+
+          <FormControl>
+            <select
+              value={
+                data.participantType
+              }
+              onChange={(event) =>
+                updateData(
+                  "participantType",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option>
+                Learner / Athlete
+              </option>
+
+              <option>
+                Coach
+              </option>
+
+              <option>
+                Official
+              </option>
+
+              <option>
+                Sports Staff
+              </option>
+
+              <option>
+                Volunteer
+              </option>
+
+              <option>
+                Other
+              </option>
+            </select>
+          </FormControl>
+
+          <FormLabel>
+            Record Status
+          </FormLabel>
+
+          <FormControl last>
+            <div
+              style={
+                styles.readOnlyControl
+              }
+            >
+              NEW REGISTRATION
+            </div>
+          </FormControl>
+        </FormRow>
+      </FormSection>
+
+      <Notice
+        title="PERMANENT PARTICIPANT RECORD"
+        text="The participant's identity details form the core permanent registry record. Corrections to official identity information should later be controlled through an authorised amendment and audit process."
       />
     </>
   );
 }
 
 /* ============================================================
-   STEP 03
+   STEP 3
    CONTACT & GUARDIAN
    ============================================================ */
 
 function ContactGuardianStep({
   data,
-  updateField,
-  isMinor,
+  updateData,
   participantAge,
+  isMinor,
 }: {
   data: RegistrationData;
-  updateField: UpdateField;
-  isMinor: boolean;
+
+  updateData: (
+    field: keyof RegistrationData,
+    value: string
+  ) => void;
+
   participantAge: number | null;
+  isMinor: boolean;
 }) {
   return (
     <>
-      <StepIntroduction
+      <StepHeading
         number="03"
-        title="Contact & Guardian"
-        description="Capture contact, address, parent or guardian and emergency information."
+        title="CONTACT & GUARDIAN"
+        description="Capture participant contact details, physical address, guardian information and emergency contact details."
       />
 
-      {participantAge !== null && (
-        <InfoNotice
-          title={
-            isMinor
-              ? "MINOR PARTICIPANT"
-              : "ADULT PARTICIPANT"
-          }
-          text={
-            isMinor
-              ? `The participant is ${participantAge} years old. Parent or guardian information is required.`
-              : `The participant is ${participantAge} years old. Parent or guardian information is not required by age.`
-          }
+      {isMinor ? (
+        <Notice
+          title="MINOR PARTICIPANT"
+          text={`The participant is currently calculated as ${participantAge} years old. Parent or guardian information is therefore required before registration can continue.`}
         />
-      )}
+      ) : null}
 
-      <Panel
+      <FormSection
         number="03.1"
         title="PARTICIPANT CONTACT DETAILS"
+        reference="CONTACT"
       >
-        <div style={styles.formGrid2}>
-          <TextInput
-            label="Mobile Number"
-            value={data.mobileNumber}
-            placeholder="e.g. 082 000 0000"
-            onChange={(value) =>
-              updateField(
-                "mobileNumber",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="01" />
 
-          <TextInput
-            label="Email Address"
-            type="email"
-            value={data.emailAddress}
-            placeholder="name@example.com"
-            onChange={(value) =>
-              updateField(
-                "emailAddress",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+          <FormLabel>
+            Mobile Number
+          </FormLabel>
 
-      <Panel
+          <FormControl>
+            <input
+              type="tel"
+              value={data.mobile}
+              onChange={(event) =>
+                updateData(
+                  "mobile",
+                  event.target.value
+                )
+              }
+              placeholder="Enter mobile number"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Email Address
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              type="email"
+              value={data.email}
+              onChange={(event) =>
+                updateData(
+                  "email",
+                  event.target.value
+                )
+              }
+              placeholder="Enter email address"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+      </FormSection>
+
+      <FormSection
         number="03.2"
         title="PHYSICAL ADDRESS"
+        reference="ADDRESS"
       >
-        <div style={styles.formGrid2}>
-          <TextInput
-            label="Address Line 1"
-            value={data.addressLine1}
-            onChange={(value) =>
-              updateField(
-                "addressLine1",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="01" />
 
-          <TextInput
-            label="Address Line 2"
-            value={data.addressLine2}
-            onChange={(value) =>
-              updateField(
-                "addressLine2",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            Address Line 1
+          </FormLabel>
 
-          <TextInput
-            label="Suburb"
-            value={data.suburb}
-            onChange={(value) =>
-              updateField(
-                "suburb",
-                value
-              )
-            }
-          />
+          <FormControl>
+            <input
+              value={data.addressLine1}
+              onChange={(event) =>
+                updateData(
+                  "addressLine1",
+                  event.target.value
+                )
+              }
+              placeholder="Street / house address"
+              style={styles.input}
+            />
+          </FormControl>
 
-          <TextInput
-            label="Town / City"
-            value={data.townCity}
-            onChange={(value) =>
-              updateField(
-                "townCity",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            Address Line 2
+          </FormLabel>
 
-          <SelectInput
-            label="Province"
-            value={data.province}
-            options={[
-              "Western Cape",
-              "Eastern Cape",
-              "Northern Cape",
-              "Free State",
-              "Gauteng",
-              "KwaZulu-Natal",
-              "Limpopo",
-              "Mpumalanga",
-              "North West",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "province",
-                value
-              )
-            }
-          />
+          <FormControl last>
+            <input
+              value={data.addressLine2}
+              onChange={(event) =>
+                updateData(
+                  "addressLine2",
+                  event.target.value
+                )
+              }
+              placeholder="Complex / additional address"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
 
-          <TextInput
-            label="Postal Code"
-            value={data.postalCode}
-            onChange={(value) =>
-              updateField(
-                "postalCode",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+        <FormRow>
+          <RowNumber value="02" />
 
-      <Panel
+          <FormLabel>
+            Suburb
+          </FormLabel>
+
+          <FormControl>
+            <input
+              value={data.suburb}
+              onChange={(event) =>
+                updateData(
+                  "suburb",
+                  event.target.value
+                )
+              }
+              placeholder="Enter suburb"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Town / City
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={data.townCity}
+              onChange={(event) =>
+                updateData(
+                  "townCity",
+                  event.target.value
+                )
+              }
+              placeholder="Enter town or city"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="03" />
+
+          <FormLabel>
+            Province
+          </FormLabel>
+
+          <FormControl>
+            <select
+              value={data.province}
+              onChange={(event) =>
+                updateData(
+                  "province",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option>
+                Western Cape
+              </option>
+
+              <option>
+                Eastern Cape
+              </option>
+
+              <option>
+                Northern Cape
+              </option>
+
+              <option>
+                Gauteng
+              </option>
+
+              <option>
+                KwaZulu-Natal
+              </option>
+
+              <option>
+                Free State
+              </option>
+
+              <option>
+                Limpopo
+              </option>
+
+              <option>
+                Mpumalanga
+              </option>
+
+              <option>
+                North West
+              </option>
+            </select>
+          </FormControl>
+
+          <FormLabel>
+            Postal Code
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={data.postalCode}
+              onChange={(event) =>
+                updateData(
+                  "postalCode",
+                  event.target.value
+                )
+              }
+              placeholder="Enter postal code"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+      </FormSection>
+
+      <FormSection
         number="03.3"
-        title="PARENT / GUARDIAN"
+        title="PARENT / GUARDIAN DETAILS"
+        reference={
+          isMinor
+            ? "REQUIRED"
+            : "WHERE APPLICABLE"
+        }
       >
-        <div style={styles.formGrid3}>
-          <TextInput
-            label="Guardian First Name"
-            required={isMinor}
-            value={
-              data.guardianFirstName
-            }
-            onChange={(value) =>
-              updateField(
-                "guardianFirstName",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="01" />
 
-          <TextInput
-            label="Guardian Surname"
-            required={isMinor}
-            value={
-              data.guardianSurname
-            }
-            onChange={(value) =>
-              updateField(
-                "guardianSurname",
-                value
-              )
-            }
-          />
+          <FormLabel required={isMinor}>
+            Guardian First Name
+          </FormLabel>
 
-          <SelectInput
-            label="Relationship"
-            required={isMinor}
-            value={
-              data.guardianRelationship
-            }
-            options={[
-              "",
-              "Mother",
-              "Father",
-              "Parent",
-              "Legal Guardian",
-              "Grandparent",
-              "Sibling",
-              "Other",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "guardianRelationship",
-                value
-              )
-            }
-          />
+          <FormControl>
+            <input
+              value={
+                data.guardianFirstName
+              }
+              onChange={(event) =>
+                updateData(
+                  "guardianFirstName",
+                  event.target.value
+                )
+              }
+              placeholder="Enter first name"
+              style={styles.input}
+            />
+          </FormControl>
 
-          <TextInput
-            label="Guardian Mobile"
-            required={isMinor}
-            value={data.guardianMobile}
-            onChange={(value) =>
-              updateField(
-                "guardianMobile",
-                value
-              )
-            }
-          />
+          <FormLabel required={isMinor}>
+            Guardian Surname
+          </FormLabel>
 
-          <TextInput
-            label="Guardian Email"
-            type="email"
-            value={data.guardianEmail}
-            onChange={(value) =>
-              updateField(
-                "guardianEmail",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+          <FormControl last>
+            <input
+              value={
+                data.guardianSurname
+              }
+              onChange={(event) =>
+                updateData(
+                  "guardianSurname",
+                  event.target.value
+                )
+              }
+              placeholder="Enter surname"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
 
-      <Panel
+        <FormRow>
+          <RowNumber value="02" />
+
+          <FormLabel required={isMinor}>
+            Relationship
+          </FormLabel>
+
+          <FormControl>
+            <select
+              value={
+                data.guardianRelationship
+              }
+              onChange={(event) =>
+                updateData(
+                  "guardianRelationship",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option value="">
+                Select relationship
+              </option>
+
+              <option>
+                Mother
+              </option>
+
+              <option>
+                Father
+              </option>
+
+              <option>
+                Legal Guardian
+              </option>
+
+              <option>
+                Grandparent
+              </option>
+
+              <option>
+                Other
+              </option>
+            </select>
+          </FormControl>
+
+          <FormLabel required={isMinor}>
+            Mobile Number
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              type="tel"
+              value={
+                data.guardianMobile
+              }
+              onChange={(event) =>
+                updateData(
+                  "guardianMobile",
+                  event.target.value
+                )
+              }
+              placeholder="Enter mobile number"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="03" />
+
+          <FormLabel>
+            Guardian Email
+          </FormLabel>
+
+          <FormControl>
+            <input
+              type="email"
+              value={
+                data.guardianEmail
+              }
+              onChange={(event) =>
+                updateData(
+                  "guardianEmail",
+                  event.target.value
+                )
+              }
+              placeholder="Enter email address"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Guardian Status
+          </FormLabel>
+
+          <FormControl last>
+            <div
+              style={
+                styles.readOnlyControl
+              }
+            >
+              {isMinor
+                ? "REQUIRED FOR MINOR"
+                : "OPTIONAL"}
+            </div>
+          </FormControl>
+        </FormRow>
+      </FormSection>
+
+      <FormSection
         number="03.4"
         title="EMERGENCY CONTACT"
+        reference="SAFETY CONTACT"
       >
-        <div style={styles.formGrid3}>
-          <TextInput
-            label="Contact Name"
-            required
-            value={data.emergencyName}
-            onChange={(value) =>
-              updateField(
-                "emergencyName",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="01" />
 
-          <TextInput
-            label="Relationship"
-            value={
-              data.emergencyRelationship
-            }
-            onChange={(value) =>
-              updateField(
-                "emergencyRelationship",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            Contact Name
+          </FormLabel>
 
-          <TextInput
-            label="Mobile Number"
-            required
-            value={
-              data.emergencyMobile
-            }
-            onChange={(value) =>
-              updateField(
-                "emergencyMobile",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+          <FormControl>
+            <input
+              value={data.emergencyName}
+              onChange={(event) =>
+                updateData(
+                  "emergencyName",
+                  event.target.value
+                )
+              }
+              placeholder="Enter emergency contact"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Relationship
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={
+                data.emergencyRelationship
+              }
+              onChange={(event) =>
+                updateData(
+                  "emergencyRelationship",
+                  event.target.value
+                )
+              }
+              placeholder="Enter relationship"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="02" />
+
+          <FormLabel>
+            Mobile Number
+          </FormLabel>
+
+          <FormControl>
+            <input
+              type="tel"
+              value={
+                data.emergencyMobile
+              }
+              onChange={(event) =>
+                updateData(
+                  "emergencyMobile",
+                  event.target.value
+                )
+              }
+              placeholder="Enter emergency number"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Contact Record
+          </FormLabel>
+
+          <FormControl last>
+            <div
+              style={
+                styles.readOnlyControl
+              }
+            >
+              EMERGENCY CONTACT
+            </div>
+          </FormControl>
+        </FormRow>
+      </FormSection>
     </>
   );
 }
 
 /* ============================================================
-   STEP 04
+   STEP 4
    PARTICIPATION
    ============================================================ */
 
 function ParticipationStep({
   data,
-  updateField,
+  updateData,
 }: {
   data: RegistrationData;
-  updateField: UpdateField;
+
+  updateData: (
+    field: keyof RegistrationData,
+    value: string
+  ) => void;
 }) {
   return (
     <>
-      <StepIntroduction
+      <StepHeading
         number="04"
-        title="Participation"
-        description="Capture the participant's classification, role and sporting participation."
+        title="PARTICIPATION"
+        description="Capture the participant's sporting code, role and competition classification."
       />
 
-      <Panel
+      <FormSection
         number="04.1"
-        title="PARTICIPANT CLASSIFICATION"
+        title="SPORTING PARTICIPATION"
+        reference="PARTICIPATION RECORD"
       >
-        <div style={styles.formGrid3}>
-          <SelectInput
-            label="Participant Type"
-            required
-            value={
-              data.participantType
-            }
-            options={[
-              "",
-              "Learner / Athlete",
-              "Coach",
-              "Official",
-              "Sports Staff",
-              "Volunteer",
-              "Other",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "participantType",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="01" />
 
-          <SelectInput
-            label="Participant Role"
-            required
-            value={
-              data.participantRole
-            }
-            options={[
-              "",
-              "Athlete",
-              "Learner",
-              "Coach",
-              "Assistant Coach",
-              "Manager",
-              "Official",
-              "Referee",
-              "Administrator",
-              "Volunteer",
-              "Support Staff",
-              "Other",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "participantRole",
-                value
-              )
-            }
-          />
+          <FormLabel required>
+            Sporting Code
+          </FormLabel>
 
-          <SelectInput
-            label="Participation Level"
-            value={
-              data.participationLevel
-            }
-            options={[
-              "",
-              "School",
-              "Club",
-              "Community",
-              "Regional",
-              "Provincial",
-              "National",
-              "Other",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "participationLevel",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+          <FormControl>
+            <select
+              value={data.sportingCode}
+              onChange={(event) =>
+                updateData(
+                  "sportingCode",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option value="">
+                Select sporting code
+              </option>
 
-      <Panel
-        number="04.2"
-        title="SPORTING INFORMATION"
-      >
-        <div style={styles.formGrid3}>
-          <SelectInput
-            label="Primary Sporting Code"
-            value={data.sportingCode}
-            options={[
-              "",
-              "Athletics",
-              "Basketball",
-              "Boxing",
-              "Chess",
-              "Cricket",
-              "Cross Country",
-              "Cycling",
-              "Football",
-              "Gymnastics",
-              "Hockey",
-              "Judo",
-              "Netball",
-              "Rugby",
-              "Softball",
-              "Swimming",
-              "Table Tennis",
-              "Tennis",
-              "Volleyball",
-              "Other",
-            ]}
-            onChange={(value) =>
-              updateField(
-                "sportingCode",
-                value
-              )
-            }
-          />
+              <option>
+                Athletics
+              </option>
 
-          <TextInput
-            label="Age Group"
-            value={data.ageGroup}
-            placeholder="e.g. U13"
-            onChange={(value) =>
-              updateField(
-                "ageGroup",
-                value
-              )
-            }
-          />
+              <option>
+                Basketball
+              </option>
 
-          <TextInput
-            label="Division / Category"
-            value={data.division}
-            placeholder="If applicable"
-            onChange={(value) =>
-              updateField(
-                "division",
-                value
-              )
-            }
-          />
-        </div>
-      </Panel>
+              <option>
+                Chess
+              </option>
 
-      <InfoNotice
+              <option>
+                Cricket
+              </option>
+
+              <option>
+                Cross Country
+              </option>
+
+              <option>
+                Cycling
+              </option>
+
+              <option>
+                Football
+              </option>
+
+              <option>
+                Gymnastics
+              </option>
+
+              <option>
+                Hockey
+              </option>
+
+              <option>
+                Judo
+              </option>
+
+              <option>
+                Netball
+              </option>
+
+              <option>
+                Rugby
+              </option>
+
+              <option>
+                Softball
+              </option>
+
+              <option>
+                Swimming
+              </option>
+
+              <option>
+                Table Tennis
+              </option>
+
+              <option>
+                Tennis
+              </option>
+
+              <option>
+                Volleyball
+              </option>
+
+              <option>
+                Other
+              </option>
+            </select>
+          </FormControl>
+
+          <FormLabel required>
+            Participant Role
+          </FormLabel>
+
+          <FormControl last>
+            <select
+              value={
+                data.participantRole
+              }
+              onChange={(event) =>
+                updateData(
+                  "participantRole",
+                  event.target.value
+                )
+              }
+              style={styles.input}
+            >
+              <option>
+                Athlete / Participant
+              </option>
+
+              <option>
+                Coach
+              </option>
+
+              <option>
+                Official
+              </option>
+
+              <option>
+                Team Manager
+              </option>
+
+              <option>
+                Sports Staff
+              </option>
+
+              <option>
+                Volunteer
+              </option>
+
+              <option>
+                Other
+              </option>
+            </select>
+          </FormControl>
+        </FormRow>
+
+        <FormRow>
+          <RowNumber value="02" />
+
+          <FormLabel>
+            Age Group
+          </FormLabel>
+
+          <FormControl>
+            <input
+              value={data.ageGroup}
+              onChange={(event) =>
+                updateData(
+                  "ageGroup",
+                  event.target.value
+                )
+              }
+              placeholder="e.g. U13"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Division / Category
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={data.division}
+              onChange={(event) =>
+                updateData(
+                  "division",
+                  event.target.value
+                )
+              }
+              placeholder="Enter division or category"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+      </FormSection>
+
+      <Notice
         title="MULTIPLE SPORTING CODES"
-        text="This registration captures the participant's primary sporting code. Additional sporting codes can later be attached to the permanent participant profile without creating another participant record."
+        text="This development form captures the participant's primary sporting code. The production participant profile can later support additional sporting-code participation records without creating another participant."
       />
     </>
   );
 }
 
 /* ============================================================
-   STEP 05
+   STEP 5
    AFFILIATIONS
    ============================================================ */
 
 function AffiliationsStep({
   data,
-  updateField,
+  updateData,
 }: {
   data: RegistrationData;
-  updateField: UpdateField;
+
+  updateData: (
+    field: keyof RegistrationData,
+    value: string
+  ) => void;
 }) {
   return (
     <>
-      <StepIntroduction
+      <StepHeading
         number="05"
-        title="Affiliations"
-        description="Link the participant to the relevant school, club, team or association."
+        title="ORGANISATION & AFFILIATIONS"
+        description="Record the participant's current school, club, team and association affiliations."
       />
 
-      <InfoNotice
+      <Notice
         title="AFFILIATION CONTROL"
-        text="Affiliations belong to the participant's permanent record. Existing active affiliations must later be checked before conflicting affiliations are created."
+        text="A participant should have only one active affiliation in each applicable category. Existing conflicting affiliations must be resolved through the release or transfer process rather than by creating a duplicate participant."
       />
 
-      <Panel
+      <FormSection
         number="05.1"
-        title="ORGANISATION AFFILIATIONS"
+        title="CURRENT AFFILIATIONS"
+        reference="DEVELOPMENT ENTRY"
       >
-        <p style={styles.instructions}>
-          These fields are temporary
-          development inputs. When the
-          organisation registries are
-          connected, staff will search and
-          select registered organisations
-          instead of typing organisation
-          names manually.
-        </p>
+        <FormRow>
+          <RowNumber value="01" />
 
-        <div style={styles.formGrid2}>
-          <TextInput
-            label="School"
-            value={data.schoolName}
-            placeholder="Search registered school"
-            onChange={(value) =>
-              updateField(
-                "schoolName",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            School
+          </FormLabel>
 
-          <TextInput
-            label="Club"
-            value={data.clubName}
-            placeholder="Search registered club"
-            onChange={(value) =>
-              updateField(
-                "clubName",
-                value
-              )
-            }
-          />
+          <FormControl>
+            <input
+              value={data.school}
+              onChange={(event) =>
+                updateData(
+                  "school",
+                  event.target.value
+                )
+              }
+              placeholder="Search / enter school"
+              style={styles.input}
+            />
+          </FormControl>
 
-          <TextInput
-            label="Team"
-            value={data.teamName}
-            placeholder="Search registered team"
-            onChange={(value) =>
-              updateField(
-                "teamName",
-                value
-              )
-            }
-          />
+          <FormLabel>
+            Club
+          </FormLabel>
 
-          <TextInput
-            label="Association"
-            value={
-              data.associationName
-            }
-            placeholder="Search registered association"
-            onChange={(value) =>
-              updateField(
-                "associationName",
-                value
-              )
-            }
-          />
+          <FormControl last>
+            <input
+              value={data.club}
+              onChange={(event) =>
+                updateData(
+                  "club",
+                  event.target.value
+                )
+              }
+              placeholder="Search / enter club"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
 
-          <TextInput
-            label="Affiliation Start Date"
-            required
-            type="date"
-            value={
-              data.affiliationStartDate
-            }
-            onChange={(value) =>
-              updateField(
-                "affiliationStartDate",
-                value
-              )
-            }
-          />
+        <FormRow>
+          <RowNumber value="02" />
+
+          <FormLabel>
+            Team
+          </FormLabel>
+
+          <FormControl>
+            <input
+              value={data.team}
+              onChange={(event) =>
+                updateData(
+                  "team",
+                  event.target.value
+                )
+              }
+              placeholder="Search / enter team"
+              style={styles.input}
+            />
+          </FormControl>
+
+          <FormLabel>
+            Association
+          </FormLabel>
+
+          <FormControl last>
+            <input
+              value={data.association}
+              onChange={(event) =>
+                updateData(
+                  "association",
+                  event.target.value
+                )
+              }
+              placeholder="Search / enter association"
+              style={styles.input}
+            />
+          </FormControl>
+        </FormRow>
+      </FormSection>
+
+      <div style={styles.developmentNotice}>
+        <div
+          style={
+            styles.developmentNoticeCode
+          }
+        >
+          DEVELOPMENT CONTROL
         </div>
-      </Panel>
 
-      <div style={styles.twoCards}>
-        <RuleCard
-          number="05.2"
-          title="ONE ACTIVE AFFILIATION PER CATEGORY"
-          text="The production system will prevent conflicting active school, club, team or association affiliations where the applicable rules require one active affiliation."
-        />
-
-        <RuleCard
-          number="05.3"
-          title="TRANSFER INSTEAD OF DUPLICATION"
-          text="When a participant changes organisation, the existing affiliation history should be retained and the change processed through a release or transfer."
-        />
+        <div
+          style={
+            styles.developmentNoticeText
+          }
+        >
+          These organisation fields are
+          currently temporary text-entry
+          controls. Production must replace
+          them with searches against the
+          official AMS Schools, Clubs &
+          Teams and Associations registries.
+        </div>
       </div>
+
+      <FormSection
+        number="05.2"
+        title="REGISTRATION NOTES"
+        reference="INTERNAL"
+      >
+        <div style={styles.textAreaRow}>
+          <div style={styles.textAreaNumber}>
+            01
+          </div>
+
+          <div style={styles.textAreaLabel}>
+            Internal Notes
+          </div>
+
+          <div style={styles.textAreaControl}>
+            <textarea
+              value={data.notes}
+              onChange={(event) =>
+                updateData(
+                  "notes",
+                  event.target.value
+                )
+              }
+              placeholder="Enter internal registration notes where applicable"
+              style={styles.textarea}
+            />
+          </div>
+        </div>
+      </FormSection>
     </>
   );
 }
 
 /* ============================================================
-   STEP 06
+   STEP 6
    REVIEW
    ============================================================ */
 
 function ReviewStep({
   data,
   participantAge,
-  updateField,
-  goToStep,
+  developmentParticipantNumber,
+  declarationAccepted,
+  setDeclarationAccepted,
+  setStep,
 }: {
   data: RegistrationData;
+
   participantAge: number | null;
-  updateField: UpdateField;
-  goToStep: (step: number) => void;
+
+  developmentParticipantNumber: string;
+
+  declarationAccepted: boolean;
+
+  setDeclarationAccepted: (
+    value: boolean
+  ) => void;
+
+  setStep: (value: number) => void;
 }) {
   return (
     <>
-      <StepIntroduction
+      <StepHeading
         number="06"
-        title="Review Registration"
-        description="Review all participant information before creating the permanent participant record."
-      />
-
-      <InfoNotice
-        title="FINAL REVIEW"
-        text="Check the information carefully. Once the production registration is submitted, the participant becomes part of the permanent WCSA Participant Registry and receives a permanent participant number."
+        title="REVIEW & REGISTER"
+        description="Review the participant record before final registration."
       />
 
       <ReviewSection
         number="06.1"
         title="PERSONAL DETAILS"
-        editStep={2}
-        goToStep={goToStep}
-        rows={[
-          [
-            "Full Name",
-            buildFullName(data),
-          ],
-          [
-            "Preferred Name",
-            valueOrDash(
-              data.preferredName
-            ),
-          ],
-          [
-            "Date of Birth",
-            valueOrDash(
+        onEdit={() => setStep(2)}
+      >
+        <ReviewRow
+          label="First Name(s)"
+          value={data.firstName}
+          label2="Middle Name(s)"
+          value2={data.middleNames}
+        />
+
+        <ReviewRow
+          label="Surname"
+          value={data.surname}
+          label2="Date of Birth"
+          value2={
+            formatValue(
               data.dateOfBirth
-            ),
-          ],
-          [
-            "Age",
+            )
+          }
+        />
+
+        <ReviewRow
+          label="Age"
+          value={
             participantAge === null
               ? "—"
-              : `${participantAge} years`,
-          ],
-          [
-            "Gender",
-            valueOrDash(data.gender),
-          ],
-          [
-            "Nationality",
-            valueOrDash(
-              data.nationality
-            ),
-          ],
-          [
-            "Identification Type",
-            data.idType,
-          ],
-          [
-            "Identification Number",
-            valueOrDash(
-              data.idNumber
-            ),
-          ],
-        ]}
-      />
+              : `${participantAge} years`
+          }
+          label2="Gender"
+          value2={data.gender}
+        />
+
+        <ReviewRow
+          label="Identity Type"
+          value={data.idType}
+          label2="ID / Passport No."
+          value2={data.idNumber}
+        />
+
+        <ReviewRow
+          label="Participant Type"
+          value={data.participantType}
+          label2="Record Status"
+          value2="New Registration"
+        />
+      </ReviewSection>
 
       <ReviewSection
         number="06.2"
         title="CONTACT & GUARDIAN"
-        editStep={3}
-        goToStep={goToStep}
-        rows={[
-          [
-            "Mobile",
-            valueOrDash(
-              data.mobileNumber
-            ),
-          ],
-          [
-            "Email",
-            valueOrDash(
-              data.emailAddress
-            ),
-          ],
-          [
-            "Address",
-            buildAddress(data),
-          ],
-          [
-            "Parent / Guardian",
-            buildGuardian(data),
-          ],
-          [
-            "Guardian Mobile",
-            valueOrDash(
-              data.guardianMobile
-            ),
-          ],
-          [
-            "Emergency Contact",
-            valueOrDash(
-              data.emergencyName
-            ),
-          ],
-          [
-            "Emergency Mobile",
-            valueOrDash(
-              data.emergencyMobile
-            ),
-          ],
-        ]}
-      />
+        onEdit={() => setStep(3)}
+      >
+        <ReviewRow
+          label="Mobile"
+          value={data.mobile}
+          label2="Email"
+          value2={data.email}
+        />
+
+        <ReviewRow
+          label="Address"
+          value={buildAddress(data)}
+          label2="Province"
+          value2={data.province}
+        />
+
+        <ReviewRow
+          label="Guardian"
+          value={
+            `${data.guardianFirstName} ${data.guardianSurname}`.trim()
+          }
+          label2="Relationship"
+          value2={
+            data.guardianRelationship
+          }
+        />
+
+        <ReviewRow
+          label="Guardian Mobile"
+          value={data.guardianMobile}
+          label2="Guardian Email"
+          value2={data.guardianEmail}
+        />
+
+        <ReviewRow
+          label="Emergency Contact"
+          value={data.emergencyName}
+          label2="Emergency Mobile"
+          value2={data.emergencyMobile}
+        />
+      </ReviewSection>
 
       <ReviewSection
         number="06.3"
         title="PARTICIPATION"
-        editStep={4}
-        goToStep={goToStep}
-        rows={[
-          [
-            "Participant Type",
-            valueOrDash(
-              data.participantType
-            ),
-          ],
-          [
-            "Role",
-            valueOrDash(
-              data.participantRole
-            ),
-          ],
-          [
-            "Sporting Code",
-            valueOrDash(
-              data.sportingCode
-            ),
-          ],
-          [
-            "Age Group",
-            valueOrDash(
-              data.ageGroup
-            ),
-          ],
-          [
-            "Division",
-            valueOrDash(
-              data.division
-            ),
-          ],
-          [
-            "Participation Level",
-            valueOrDash(
-              data.participationLevel
-            ),
-          ],
-        ]}
-      />
+        onEdit={() => setStep(4)}
+      >
+        <ReviewRow
+          label="Sporting Code"
+          value={data.sportingCode}
+          label2="Participant Role"
+          value2={data.participantRole}
+        />
+
+        <ReviewRow
+          label="Age Group"
+          value={data.ageGroup}
+          label2="Division / Category"
+          value2={data.division}
+        />
+      </ReviewSection>
 
       <ReviewSection
         number="06.4"
         title="AFFILIATIONS"
-        editStep={5}
-        goToStep={goToStep}
-        rows={[
-          [
-            "School",
-            valueOrDash(
-              data.schoolName
-            ),
-          ],
-          [
-            "Club",
-            valueOrDash(
-              data.clubName
-            ),
-          ],
-          [
-            "Team",
-            valueOrDash(
-              data.teamName
-            ),
-          ],
-          [
-            "Association",
-            valueOrDash(
-              data.associationName
-            ),
-          ],
-          [
-            "Start Date",
-            valueOrDash(
-              data.affiliationStartDate
-            ),
-          ],
-        ]}
+        onEdit={() => setStep(5)}
+      >
+        <ReviewRow
+          label="School"
+          value={data.school}
+          label2="Club"
+          value2={data.club}
+        />
+
+        <ReviewRow
+          label="Team"
+          value={data.team}
+          label2="Association"
+          value2={data.association}
+        />
+
+        <ReviewRow
+          label="Internal Notes"
+          value={data.notes}
+          label2="Affiliation Status"
+          value2="Pending registration"
+        />
+      </ReviewSection>
+
+      <SectionTitle
+        number="06.5"
+        title="PARTICIPANT NUMBER"
+        reference="DEVELOPMENT PREVIEW"
       />
 
-      <Panel
-        number="06.5"
-        title="REGISTRATION DECLARATION"
+      <div
+        style={
+          styles.participantNumberFrame
+        }
       >
+        <div
+          style={
+            styles.participantNumberLabel
+          }
+        >
+          DEVELOPMENT PREVIEW
+        </div>
+
+        <div
+          style={
+            styles.participantNumberValue
+          }
+        >
+          {developmentParticipantNumber}
+        </div>
+
+        <div
+          style={
+            styles.participantNumberExplanation
+          }
+        >
+          This is not an official allocated
+          participant number. Production must
+          allocate the sequence and permanent
+          number on the server only after the
+          registration transaction succeeds.
+        </div>
+      </div>
+
+      <SectionTitle
+        number="06.6"
+        title="DECLARATION"
+        reference="FINAL CONFIRMATION"
+      />
+
+      <div style={styles.declarationBox}>
         <label
           style={
             styles.declarationRow
@@ -1865,125 +2527,131 @@ function ReviewStep({
           <input
             type="checkbox"
             checked={
-              data.declarationAccepted
+              declarationAccepted
             }
             onChange={(event) =>
-              updateField(
-                "declarationAccepted",
+              setDeclarationAccepted(
                 event.target.checked
               )
             }
-            style={
-              styles.checkbox
-            }
+            style={styles.checkbox}
           />
 
           <span>
-            I confirm that I have
-            reviewed the information
-            entered for this participant
-            and that the record is ready
-            to be submitted for
-            registration.
+            I confirm that the information
+            captured in this registration
+            has been reviewed and is correct
+            to the best of my knowledge. I
+            understand that the production
+            system must perform final
+            duplicate, affiliation and
+            server-side validation before
+            creating the permanent record.
           </span>
         </label>
-      </Panel>
+      </div>
 
       <div style={styles.finalWarning}>
         <strong>
-          PARTICIPANT NUMBER:
+          DEVELOPMENT MODE:
         </strong>{" "}
-        The production participant number
-        will be generated by the secure
-        server only after the registration
-        transaction succeeds.
+        Selecting Register Participant
+        currently completes the front-end
+        demonstration only. No participant
+        is written to a production database.
       </div>
     </>
   );
 }
 
 /* ============================================================
-   SUCCESS SCREEN
+   REGISTRATION SUCCESS
    ============================================================ */
 
 function RegistrationSuccess({
-  participantNumber,
-  data,
+  participantName,
+  developmentParticipantNumber,
 }: {
-  participantNumber: string;
-  data: RegistrationData;
+  participantName: string;
+  developmentParticipantNumber: string;
 }) {
   return (
-    <main>
-      <div style={styles.successPage}>
-        <div style={styles.successMark}>
-          ✓
-        </div>
+    <div style={styles.successPage}>
+      <div style={styles.successTopLine}>
+        AMS / PARTICIPANTS / REGISTRATION
+      </div>
 
-        <div style={styles.successEyebrow}>
-          REGISTRATION COMPLETED
-        </div>
+      <div style={styles.successMark}>
+        ✓
+      </div>
 
-        <h1 style={styles.successTitle}>
-          Participant Registered
-        </h1>
+      <div style={styles.successEyebrow}>
+        REGISTRATION WORKFLOW COMPLETED
+      </div>
 
-        <p style={styles.successDescription}>
-          {buildFullName(data)} has
-          completed the development
-          registration workflow.
-        </p>
+      <h1 style={styles.successTitle}>
+        PARTICIPANT RECORD PREPARED
+      </h1>
 
-        <div style={styles.participantNumberBox}>
-          <div
-            style={
-              styles.participantNumberLabel
-            }
-          >
-            DEVELOPMENT PARTICIPANT NUMBER
-          </div>
+      <p style={styles.successDescription}>
+        {participantName || "The participant"}{" "}
+        has completed the front-end
+        registration workflow.
+      </p>
 
-          <div
-            style={
-              styles.participantNumberValue
-            }
-          >
-            {participantNumber}
-          </div>
+      <div
+        style={
+          styles.successNumberFrame
+        }
+      >
+        <div
+          style={
+            styles.successNumberLabel
+          }
+        >
+          DEVELOPMENT PARTICIPANT NUMBER
         </div>
 
         <div
           style={
-            styles.developmentWarning
+            styles.successNumberValue
           }
         >
-          <strong>
-            DEVELOPMENT MODE:
-          </strong>{" "}
-          This number is a UI preview only.
-          It has not been reserved in a
-          database and must not be treated
-          as an official WCSA Participant
-          Number.
-        </div>
-
-        <div style={styles.successActions}>
-          <Link
-            href="/apps/ams/participants"
-            style={styles.primaryLink}
-          >
-            PARTICIPANT REGISTRY
-          </Link>
-
-          <Link
-            href="/apps/ams/participants/register"
-            style={styles.secondaryButton}
-          >
-            REGISTER ANOTHER
-          </Link>
+          {developmentParticipantNumber}
         </div>
       </div>
-    </main>
+
+      <div
+        style={
+          styles.developmentWarning
+        }
+      >
+        <strong>
+          NOT AN OFFICIAL REGISTRY NUMBER.
+        </strong>
+        <br />
+        The production AMS must allocate the
+        final sequence and permanent
+        participant number through the
+        backend/database transaction.
+      </div>
+
+      <div style={styles.successActions}>
+        <Link
+          href="/apps/ams/participants"
+          style={styles.secondaryLink}
+        >
+          PARTICIPANT REGISTRY
+        </Link>
+
+        <Link
+          href="/apps/ams/participants/register"
+          style={styles.primaryLink}
+        >
+          REGISTER ANOTHER
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -1991,75 +2659,7 @@ function RegistrationSuccess({
    SHARED COMPONENTS
    ============================================================ */
 
-type UpdateField = <
-  K extends keyof RegistrationData
->(
-  field: K,
-  value: RegistrationData[K]
-) => void;
-
-function WorkflowStep({
-  number,
-  title,
-  currentStep,
-  onClick,
-}: {
-  number: number;
-  title: string;
-  currentStep: number;
-  onClick: (step: number) => void;
-}) {
-  const current =
-    number === currentStep;
-
-  const complete =
-    number < currentStep;
-
-  return (
-    <button
-      type="button"
-      onClick={() =>
-        complete && onClick(number)
-      }
-      style={{
-        ...styles.workflowStep,
-        ...(current
-          ? styles.workflowCurrent
-          : {}),
-        ...(complete
-          ? styles.workflowComplete
-          : {}),
-        cursor: complete
-          ? "pointer"
-          : "default",
-      }}
-    >
-      <span
-        style={{
-          ...styles.workflowNumber,
-          ...(current
-            ? styles.workflowNumberCurrent
-            : {}),
-        }}
-      >
-        {complete
-          ? "✓"
-          : String(number).padStart(
-              2,
-              "0"
-            )}
-      </span>
-
-      <span
-        style={styles.workflowTitle}
-      >
-        {title}
-      </span>
-    </button>
-  );
-}
-
-function StepIntroduction({
+function StepHeading({
   number,
   title,
   description,
@@ -2069,21 +2669,25 @@ function StepIntroduction({
   description: string;
 }) {
   return (
-    <section style={styles.stepIntroduction}>
-      <div style={styles.stepLargeNumber}>
+    <section style={styles.stepHeading}>
+      <div style={styles.stepHeadingNumber}>
         {number}
       </div>
 
       <div>
-        <div style={styles.stepLabel}>
-          REGISTRATION STEP
+        <div style={styles.stepHeadingLabel}>
+          PARTICIPANT REGISTRATION
         </div>
 
-        <h2 style={styles.stepTitle}>
+        <h2 style={styles.stepHeadingTitle}>
           {title}
         </h2>
 
-        <p style={styles.stepDescription}>
+        <p
+          style={
+            styles.stepHeadingDescription
+          }
+        >
           {description}
         </p>
       </div>
@@ -2091,37 +2695,7 @@ function StepIntroduction({
   );
 }
 
-function Panel({
-  number,
-  title,
-  children,
-}: {
-  number: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section style={styles.panel}>
-      <div style={styles.panelHeader}>
-        <div>
-          <span style={styles.panelNumber}>
-            {number}
-          </span>
-
-          <span style={styles.panelTitle}>
-            {title}
-          </span>
-        </div>
-      </div>
-
-      <div style={styles.panelBody}>
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function InfoNotice({
+function Notice({
   title,
   text,
 }: {
@@ -2129,199 +2703,202 @@ function InfoNotice({
   text: string;
 }) {
   return (
-    <section style={styles.infoNotice}>
-      <div style={styles.infoIcon}>
+    <div style={styles.notice}>
+      <div style={styles.noticeMarker}>
         i
       </div>
 
       <div>
-        <div style={styles.infoTitle}>
+        <div style={styles.noticeTitle}>
           {title}
         </div>
 
-        <div style={styles.infoText}>
+        <div style={styles.noticeText}>
           {text}
         </div>
       </div>
+    </div>
+  );
+}
+
+function SectionTitle({
+  number,
+  title,
+  reference,
+}: {
+  number: string;
+  title: string;
+  reference: string;
+}) {
+  return (
+    <div style={styles.sectionTitle}>
+      <div style={styles.sectionTitleLeft}>
+        <span style={styles.sectionNumber}>
+          {number}
+        </span>
+
+        <span style={styles.sectionHeading}>
+          {title}
+        </span>
+      </div>
+
+      <span style={styles.sectionReference}>
+        {reference}
+      </span>
+    </div>
+  );
+}
+
+function FormSection({
+  number,
+  title,
+  reference,
+  children,
+}: {
+  number: string;
+  title: string;
+  reference: string;
+  children: ReactNode;
+}) {
+  return (
+    <section style={styles.formSection}>
+      <div style={styles.formSectionHeader}>
+        <div>
+          <span
+            style={
+              styles.formSectionNumber
+            }
+          >
+            {number}
+          </span>
+
+          <span>
+            {title}
+          </span>
+        </div>
+
+        <span
+          style={
+            styles.formSectionReference
+          }
+        >
+          {reference}
+        </span>
+      </div>
+
+      {children}
     </section>
   );
 }
 
-function RuleCard({
-  number,
+function FormRow({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div style={styles.formRow}>
+      {children}
+    </div>
+  );
+}
+
+function RowNumber({
+  value,
+}: {
+  value: string;
+}) {
+  return (
+    <div style={styles.rowNumber}>
+      {value}
+    </div>
+  );
+}
+
+function FormLabel({
+  children,
+  required = false,
+}: {
+  children: ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <div style={styles.formLabel}>
+      <span>{children}</span>
+
+      {required ? (
+        <span style={styles.required}>
+          *
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function FormControl({
+  children,
+  last = false,
+}: {
+  children: ReactNode;
+  last?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        ...styles.formControl,
+
+        ...(last
+          ? styles.formControlLast
+          : {}),
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function TableHeading({
+  children,
+  width,
+}: {
+  children: ReactNode;
+  width?: string;
+}) {
+  return (
+    <th
+      style={{
+        ...styles.tableHeading,
+
+        ...(width
+          ? { width }
+          : {}),
+      }}
+    >
+      {children}
+    </th>
+  );
+}
+
+function EmptyTableState({
+  code,
   title,
   text,
 }: {
-  number: string;
+  code: string;
   title: string;
   text: string;
 }) {
   return (
-    <div style={styles.ruleCard}>
-      <div style={styles.ruleNumber}>
-        {number}
+    <div style={styles.emptyTableState}>
+      <div style={styles.emptyTableCode}>
+        {code}
       </div>
 
-      <div>
-        <div style={styles.ruleTitle}>
-          {title}
-        </div>
-
-        <p style={styles.ruleText}>
-          {text}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function TextInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-  required = false,
-  type = "text",
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  required?: boolean;
-  type?: string;
-}) {
-  return (
-    <label style={styles.field}>
-      <span style={styles.fieldLabel}>
-        {label}
-
-        {required && (
-          <span style={styles.required}>
-            {" "}*
-          </span>
-        )}
-      </span>
-
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        style={styles.input}
-      />
-    </label>
-  );
-}
-
-function SelectInput({
-  label,
-  value,
-  options,
-  onChange,
-  required = false,
-}: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
-  required?: boolean;
-}) {
-  return (
-    <label style={styles.field}>
-      <span style={styles.fieldLabel}>
-        {label}
-
-        {required && (
-          <span style={styles.required}>
-            {" "}*
-          </span>
-        )}
-      </span>
-
-      <select
-        value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        style={styles.input}
-      >
-        {options.map((option) => (
-          <option
-            key={
-              option ||
-              "select-option"
-            }
-            value={option}
-          >
-            {option ||
-              "Select an option"}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function ReadOnlyField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div style={styles.field}>
-      <span style={styles.fieldLabel}>
-        {label}
-      </span>
-
-      <div style={styles.readOnlyInput}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function StatusItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div style={styles.statusItem}>
-      <span style={styles.statusLabel}>
-        {label}
-      </span>
-
-      <span style={styles.statusValue}>
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function EmptyState({
-  title,
-  text,
-}: {
-  title: string;
-  text: string;
-}) {
-  return (
-    <div style={styles.emptyState}>
-      <div style={styles.emptyIcon}>
-        ◎
-      </div>
-
-      <div style={styles.emptyTitle}>
+      <div style={styles.emptyTableTitle}>
         {title}
       </div>
 
-      <div style={styles.emptyText}>
+      <div style={styles.emptyTableText}>
         {text}
       </div>
     </div>
@@ -2331,61 +2908,74 @@ function EmptyState({
 function ReviewSection({
   number,
   title,
-  rows,
-  editStep,
-  goToStep,
+  onEdit,
+  children,
 }: {
   number: string;
   title: string;
-  rows: [string, string][];
-  editStep: number;
-  goToStep: (step: number) => void;
+  onEdit: () => void;
+  children: ReactNode;
 }) {
   return (
-    <section style={styles.panel}>
+    <section style={styles.reviewSection}>
       <div style={styles.reviewHeader}>
         <div>
-          <span style={styles.panelNumber}>
+          <span style={styles.reviewNumber}>
             {number}
           </span>
 
-          <span style={styles.panelTitle}>
+          <span style={styles.reviewTitle}>
             {title}
           </span>
         </div>
 
         <button
           type="button"
-          onClick={() =>
-            goToStep(editStep)
-          }
+          onClick={onEdit}
           style={styles.editButton}
         >
           EDIT
         </button>
       </div>
 
-      <div style={styles.reviewGrid}>
-        {rows.map(([label, value]) => (
-          <div
-            key={label}
-            style={styles.reviewItem}
-          >
-            <div
-              style={styles.reviewLabel}
-            >
-              {label}
-            </div>
-
-            <div
-              style={styles.reviewValue}
-            >
-              {value}
-            </div>
-          </div>
-        ))}
-      </div>
+      {children}
     </section>
+  );
+}
+
+function ReviewRow({
+  label,
+  value,
+  label2,
+  value2,
+}: {
+  label: string;
+  value: string;
+  label2: string;
+  value2: string;
+}) {
+  return (
+    <div style={styles.reviewRow}>
+      <div style={styles.reviewLabel}>
+        {label}
+      </div>
+
+      <div style={styles.reviewValue}>
+        {displayValue(value)}
+      </div>
+
+      <div style={styles.reviewLabel}>
+        {label2}
+      </div>
+
+      <div
+        style={
+          styles.reviewValueLast
+        }
+      >
+        {displayValue(value2)}
+      </div>
+    </div>
   );
 }
 
@@ -2393,58 +2983,94 @@ function ReviewSection({
    HELPERS
    ============================================================ */
 
-function buildFullName(
-  data: RegistrationData
-) {
-  return [
-    data.firstName,
-    data.middleNames,
-    data.surname,
-  ]
-    .filter(Boolean)
-    .join(" ") || "—";
-}
-
-function buildGuardian(
-  data: RegistrationData
-) {
-  const name = [
-    data.guardianFirstName,
-    data.guardianSurname,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  if (!name) {
-    return "—";
-  }
-
-  return data.guardianRelationship
-    ? `${name} (${data.guardianRelationship})`
-    : name;
-}
-
-function buildAddress(
-  data: RegistrationData
-) {
-  const address = [
-    data.addressLine1,
-    data.addressLine2,
-    data.suburb,
-    data.townCity,
-    data.province,
-    data.postalCode,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  return address || "—";
-}
-
-function valueOrDash(
+function displayValue(
   value: string
 ) {
-  return value.trim() || "—";
+  return value.trim()
+    ? value
+    : "—";
+}
+
+function formatValue(
+  value: string
+) {
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    new Date(`${value}T00:00:00`);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-ZA",
+    {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(date);
+}
+
+function formatDate() {
+  return new Intl.DateTimeFormat(
+    "en-ZA",
+    {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(new Date());
+}
+
+function calculateAge(
+  dateOfBirth: string
+) {
+  if (!dateOfBirth) {
+    return null;
+  }
+
+  const birthDate =
+    new Date(
+      `${dateOfBirth}T00:00:00`
+    );
+
+  if (
+    Number.isNaN(
+      birthDate.getTime()
+    )
+  ) {
+    return null;
+  }
+
+  const today = new Date();
+
+  let age =
+    today.getFullYear() -
+    birthDate.getFullYear();
+
+  const monthDifference =
+    today.getMonth() -
+    birthDate.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 &&
+      today.getDate() <
+        birthDate.getDate())
+  ) {
+    age -= 1;
+  }
+
+  return age;
 }
 
 function alphabetPosition(
@@ -2476,7 +3102,11 @@ function buildDevelopmentParticipantNumber(
   firstName: string,
   surname: string
 ) {
-  if (!dateOfBirth) {
+  if (
+    !dateOfBirth ||
+    !firstName.trim() ||
+    !surname.trim()
+  ) {
     return "PENDING";
   }
 
@@ -2504,7 +3134,7 @@ function buildDevelopmentParticipantNumber(
     alphabetPosition(surname);
 
   /*
-    001 IS ONLY A DEVELOPMENT PREVIEW.
+    001 IS A DEVELOPMENT PREVIEW ONLY.
 
     Production must request the next
     sequence from the server/database
@@ -2519,142 +3149,209 @@ function buildDevelopmentParticipantNumber(
   );
 }
 
+function buildAddress(
+  data: RegistrationData
+) {
+  return [
+    data.addressLine1,
+    data.addressLine2,
+    data.suburb,
+    data.townCity,
+    data.postalCode,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 /* ============================================================
    STYLES
    ============================================================ */
 
 const styles: Record<
   string,
-  React.CSSProperties
+  CSSProperties
 > = {
-  breadcrumb: {
-    marginBottom: "18px",
+  page: {
+    width: "100%",
+    color: TEXT_BLUE,
+  },
+
+  topUtilityRow: {
+    minHeight: "24px",
+    marginBottom: "14px",
+
     display: "flex",
-    gap: "7px",
     alignItems: "center",
-    color: "#7b8691",
-    fontSize: "8px",
-    fontWeight: 600,
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
+    justifyContent: "space-between",
+
+    gap: "20px",
+
+    color: MUTED,
+
+    fontSize: "9px",
+  },
+
+  breadcrumb: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "7px",
+
+    whiteSpace: "nowrap",
   },
 
   breadcrumbLink: {
-    color: "#536b84",
+    color: TEXT_BLUE,
     textDecoration: "none",
   },
 
-  pageHeading: {
-    marginBottom: "20px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    gap: "20px",
+  breadcrumbSeparator: {
+    color: "#9aa3ad",
   },
 
-  eyebrow: {
-    marginBottom: "5px",
-    color: "#6f7c89",
+  currentDate: {
+    color: TEXT_BLUE,
+
+    fontSize: "9px",
+
+    whiteSpace: "nowrap",
+  },
+
+  pageHeading: {
+    minHeight: "65px",
+
+    marginBottom: "16px",
+    paddingBottom: "12px",
+
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+
+    gap: "25px",
+
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  pageReference: {
+    marginBottom: "4px",
+
+    color: "#687482",
+
     fontSize: "8px",
-    fontWeight: 700,
-    letterSpacing: "0.8px",
+    fontWeight: 600,
+
+    letterSpacing: "0.65px",
   },
 
   pageTitle: {
     margin: 0,
-    color: "#071b3b",
-    fontSize: "28px",
-    fontWeight: 600,
+
+    color: WCG_BLUE,
+
+    fontSize: "21px",
+    fontWeight: 700,
+
+    lineHeight: 1.1,
   },
 
   pageSubtitle: {
-    margin: "5px 0 0",
-    color: "#747e88",
+    margin: "4px 0 0",
+
+    color: MUTED,
+
     fontSize: "10px",
   },
 
   cancelButton: {
-    padding: "11px 14px",
-    background: "#ffffff",
-    border: "1px solid #bdc6cf",
-    color: "#53606d",
+    minHeight: "31px",
+
+    padding: "0 12px",
+
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
     textDecoration: "none",
-    fontSize: "8px",
-    fontWeight: 700,
-  },
 
-  statusBar: {
-    minHeight: "50px",
-    marginBottom: "15px",
-    padding: "0 18px",
-    display: "flex",
-    alignItems: "center",
-    gap: "38px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
-  },
-
-  statusItem: {
-    display: "flex",
-    gap: "6px",
-    alignItems: "center",
-  },
-
-  statusLabel: {
-    color: "#89939d",
     fontSize: "7px",
     fontWeight: 700,
   },
 
-  statusValue: {
-    color: "#173452",
-    fontSize: "8px",
-    fontWeight: 700,
-  },
+  /* =========================================================
+     WORKFLOW
+     NORMAL NAVIGATION — NOT DOUBLE BORDERED
+     ========================================================= */
 
   workflow: {
     marginBottom: "18px",
+
     display: "grid",
+
     gridTemplateColumns:
       "repeat(6, minmax(0, 1fr))",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
+
+    backgroundColor: "#ffffff",
+
+    borderTop: `1px solid ${BORDER}`,
+    borderBottom: `1px solid ${BORDER}`,
   },
 
   workflowStep: {
-    minHeight: "67px",
-    padding: "10px 12px",
+    minHeight: "55px",
+
+    padding: "7px 9px",
+
     display: "flex",
-    gap: "8px",
     alignItems: "center",
-    background: "#ffffff",
+
+    gap: "7px",
+
+    backgroundColor: "#ffffff",
+
     border: "none",
     borderRight:
-      "1px solid #e2e6ea",
-    color: "#89939d",
+      `1px solid ${LIGHT_BORDER}`,
+
+    color: "#697581",
+
     fontFamily: "inherit",
+
     textAlign: "left",
+
+    cursor: "pointer",
   },
 
   workflowCurrent: {
-    background: "#0b2b58",
+    backgroundColor: WCG_BLUE,
     color: "#ffffff",
   },
 
   workflowComplete: {
-    background: "#e8f0ea",
+    backgroundColor: "#edf3ef",
     color: "#315f40",
   },
 
   workflowNumber: {
-    width: "26px",
-    height: "26px",
+    width: "24px",
+    height: "24px",
+
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+
     flexShrink: 0,
-    border: "1px solid #c7ced5",
+
+    border: `1px solid #aeb7c0`,
     borderRadius: "50%",
+
+    color: "inherit",
+
     fontSize: "7px",
     fontWeight: 700,
   },
@@ -2663,544 +3360,1208 @@ const styles: Record<
     borderColor: "#ffffff",
   },
 
-  workflowTitle: {
-    fontSize: "8px",
+  workflowNumberComplete: {
+    borderColor: "#71907c",
+  },
+
+  workflowSmallLabel: {
+    display: "block",
+
+    marginBottom: "2px",
+
+    color: "inherit",
+
+    opacity: 0.72,
+
+    fontSize: "6px",
     fontWeight: 700,
-    lineHeight: 1.4,
+
+    letterSpacing: "0.4px",
   },
 
-  errorBox: {
-    marginBottom: "16px",
-    padding: "13px 16px",
-    display: "flex",
-    gap: "12px",
-    background: "#f8eded",
-    borderLeft: "4px solid #9d4242",
-    color: "#703636",
-    fontSize: "8px",
-    lineHeight: 1.6,
-  },
+  workflowTitle: {
+    display: "block",
 
-  stepIntroduction: {
-    marginBottom: "17px",
-    padding: "20px",
-    display: "grid",
-    gridTemplateColumns: "52px 1fr",
-    gap: "13px",
-    background: "#0b2b58",
-    color: "#ffffff",
-  },
+    color: "inherit",
 
-  stepLargeNumber: {
-    color: "#a8bbd0",
-    fontSize: "22px",
-    fontWeight: 300,
-  },
-
-  stepLabel: {
-    color: "#a9bbce",
     fontSize: "7px",
     fontWeight: 700,
-    letterSpacing: "1px",
+
+    lineHeight: 1.25,
   },
 
-  stepTitle: {
-    margin: "4px 0",
-    fontSize: "21px",
-    fontWeight: 500,
+  /* =========================================================
+     ERROR
+     ========================================================= */
+
+  errorBox: {
+    marginBottom: "15px",
+
+    padding: "9px 11px",
+
+    display: "flex",
+    alignItems: "center",
+
+    gap: "9px",
+
+    backgroundColor: "#f9eeee",
+
+    borderLeft: "4px solid #a33f3f",
+    borderTop: "1px solid #e0c5c5",
+    borderRight: "1px solid #e0c5c5",
+    borderBottom: "1px solid #e0c5c5",
   },
 
-  stepDescription: {
-    margin: 0,
-    color: "#d4dfeb",
-    fontSize: "9px",
-    lineHeight: 1.6,
-  },
+  errorMarker: {
+    width: "22px",
+    height: "22px",
 
-  infoNotice: {
-    marginBottom: "17px",
-    padding: "15px 17px",
-    display: "grid",
-    gridTemplateColumns: "31px 1fr",
-    gap: "10px",
-    background: "#e8eef5",
-    borderLeft: "4px solid #0b2b58",
-  },
-
-  infoIcon: {
-    width: "23px",
-    height: "23px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    border: "1px solid #7890a8",
+
+    flexShrink: 0,
+
+    border: "1px solid #a33f3f",
     borderRadius: "50%",
-    color: "#0b2b58",
-    fontSize: "9px",
+
+    color: "#8d3434",
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
+  errorTitle: {
+    color: "#823434",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    letterSpacing: "0.25px",
+  },
+
+  errorText: {
+    marginTop: "2px",
+
+    color: "#724242",
+
+    fontSize: "8px",
+  },
+
+  /* =========================================================
+     STEP HEADING
+     ========================================================= */
+
+  stepHeading: {
+    minHeight: "67px",
+
+    marginBottom: "13px",
+    padding: "10px 12px",
+
+    display: "grid",
+
+    gridTemplateColumns: "42px 1fr",
+
+    alignItems: "center",
+
+    gap: "10px",
+
+    backgroundColor:
+      "rgba(255,255,255,0.94)",
+
+    borderTop: `1px solid ${BORDER}`,
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  stepHeadingNumber: {
+    color: WCG_BLUE,
+
+    fontSize: "19px",
     fontWeight: 700,
   },
 
-  infoTitle: {
-    color: "#0b2b58",
-    fontSize: "8px",
+  stepHeadingLabel: {
+    color: "#75808b",
+
+    fontSize: "7px",
     fontWeight: 700,
-    letterSpacing: "0.5px",
+
+    letterSpacing: "0.7px",
   },
 
-  infoText: {
-    marginTop: "3px",
-    color: "#596a7b",
+  stepHeadingTitle: {
+    margin: "2px 0",
+
+    color: WCG_BLUE,
+
+    fontSize: "14px",
+    fontWeight: 700,
+  },
+
+  stepHeadingDescription: {
+    margin: 0,
+
+    color: "#66727e",
+
     fontSize: "8px",
-    lineHeight: 1.6,
+
+    lineHeight: 1.4,
   },
 
-  panel: {
-    marginBottom: "17px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
+  /* =========================================================
+     NOTICE — NOT TABULATED
+     ========================================================= */
+
+  notice: {
+    marginBottom: "13px",
+
+    padding: "9px 11px",
+
+    display: "grid",
+
+    gridTemplateColumns: "25px 1fr",
+
+    gap: "9px",
+
+    backgroundColor: PALE_BLUE,
+
+    borderLeft: `4px solid ${WCG_BLUE}`,
+    borderTop: `1px solid ${LIGHT_BORDER}`,
+    borderRight: `1px solid ${LIGHT_BORDER}`,
+    borderBottom: `1px solid ${LIGHT_BORDER}`,
   },
 
-  panelHeader: {
-    minHeight: "52px",
-    padding: "0 18px",
+  noticeMarker: {
+    width: "20px",
+    height: "20px",
+
     display: "flex",
     alignItems: "center",
-    borderBottom: "1px solid #e1e5e9",
-  },
+    justifyContent: "center",
 
-  panelNumber: {
-    marginRight: "10px",
-    color: "#8995a2",
+    border: `1px solid ${WCG_BLUE}`,
+    borderRadius: "50%",
+
+    color: WCG_BLUE,
+
     fontSize: "8px",
     fontWeight: 700,
   },
 
-  panelTitle: {
-    color: "#071b3b",
-    fontSize: "9px",
+  noticeTitle: {
+    color: WCG_BLUE,
+
+    fontSize: "7px",
     fontWeight: 700,
-    letterSpacing: "0.6px",
-  },
 
-  panelBody: {
-    padding: "20px",
-  },
-
-  instructions: {
-    maxWidth: "900px",
-    margin: "0 0 17px",
-    color: "#697581",
-    fontSize: "9px",
-    lineHeight: 1.65,
-  },
-
-  formGrid2: {
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(2, minmax(0, 1fr))",
-    gap: "16px",
-  },
-
-  formGrid3: {
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(3, minmax(0, 1fr))",
-    gap: "16px",
-  },
-
-  field: {
-    display: "block",
-  },
-
-  fieldLabel: {
-    minHeight: "18px",
-    display: "block",
-    marginBottom: "5px",
-    color: "#4f5c68",
-    fontSize: "8px",
-    fontWeight: 700,
-    textTransform: "uppercase",
     letterSpacing: "0.3px",
   },
 
+  noticeText: {
+    marginTop: "2px",
+
+    color: "#5e6b77",
+
+    fontSize: "8px",
+
+    lineHeight: 1.5,
+  },
+
+  /* =========================================================
+     SECTION TITLE
+     ========================================================= */
+
+  sectionTitle: {
+    minHeight: "30px",
+
+    marginTop: "17px",
+    marginBottom: "7px",
+
+    padding: "0 8px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    gap: "15px",
+
+    backgroundColor:
+      "rgba(255,255,255,0.93)",
+
+    borderTop: `1px solid ${BORDER}`,
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  sectionTitleLeft: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "9px",
+  },
+
+  sectionNumber: {
+    minWidth: "30px",
+
+    color: WCG_BLUE,
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
+  sectionHeading: {
+    color: TEXT_BLUE,
+
+    fontSize: "9px",
+    fontWeight: 700,
+
+    letterSpacing: "0.45px",
+  },
+
+  sectionReference: {
+    color: "#808b96",
+
+    fontSize: "7px",
+  },
+
+  /* =========================================================
+     ACTUAL ONLINE FORM
+     DOUBLE-LINE GOVERNMENT FORM TREATMENT
+     ========================================================= */
+
+  formSection: {
+    marginBottom: "14px",
+
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
+  },
+
+  formSectionHeader: {
+    minHeight: "31px",
+
+    padding: "0 10px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    gap: "15px",
+
+    boxSizing: "border-box",
+
+    backgroundColor: WCG_BLUE,
+
+    color: "#ffffff",
+
+    fontSize: "8px",
+    fontWeight: 700,
+
+    letterSpacing: "0.3px",
+  },
+
+  formSectionNumber: {
+    marginRight: "9px",
+
+    color:
+      "rgba(255,255,255,0.72)",
+
+    fontSize: "7px",
+  },
+
+  formSectionReference: {
+    color:
+      "rgba(255,255,255,0.76)",
+
+    fontSize: "7px",
+    fontWeight: 600,
+  },
+
+  formRow: {
+    minHeight: "47px",
+
+    display: "grid",
+
+    gridTemplateColumns:
+      "42px 150px minmax(170px, 1fr) 150px minmax(170px, 1fr)",
+
+    alignItems: "stretch",
+
+    borderBottom:
+      `1px solid ${BORDER}`,
+  },
+
+  rowNumber: {
+    padding: "7px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "#f1f3f5",
+
+    borderRight:
+      `1px solid ${BORDER}`,
+
+    color: "#6d7883",
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  formLabel: {
+    padding: "7px 9px",
+
+    display: "flex",
+    alignItems: "center",
+
+    gap: "3px",
+
+    backgroundColor: PALE_BLUE,
+
+    borderRight:
+      `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
   required: {
-    color: "#9c3d3d",
+    color: "#9a3535",
+  },
+
+  formControl: {
+    padding: "6px 7px",
+
+    display: "flex",
+    alignItems: "center",
+
+    borderRight:
+      `1px solid ${BORDER}`,
+  },
+
+  formControlLast: {
+    borderRight: "none",
   },
 
   input: {
-    boxSizing: "border-box",
     width: "100%",
-    height: "41px",
-    padding: "0 11px",
-    background: "#ffffff",
-    border: "1px solid #cbd2d9",
+    height: "31px",
+
+    boxSizing: "border-box",
+
+    padding: "0 8px",
+
+    backgroundColor: "#ffffff",
+
+    border: "1px solid #9da7b1",
     borderRadius: 0,
+
     outline: "none",
-    color: "#27323d",
+
+    color: "#26323d",
+
     fontFamily: "inherit",
-    fontSize: "10px",
+
+    fontSize: "9px",
   },
 
-  readOnlyInput: {
-    boxSizing: "border-box",
+  readOnlyControl: {
     width: "100%",
-    height: "41px",
-    padding: "0 11px",
+    minHeight: "31px",
+
+    padding: "0 8px",
+
     display: "flex",
     alignItems: "center",
-    background: "#f1f3f5",
-    border: "1px solid #d2d8de",
-    color: "#596571",
-    fontSize: "10px",
+
+    boxSizing: "border-box",
+
+    backgroundColor: "#f1f3f5",
+
+    border: "1px solid #c4cbd2",
+
+    color: "#5f6b76",
+
+    fontSize: "8px",
+    fontWeight: 600,
   },
 
-  actionRow: {
-    marginTop: "18px",
+  formActions: {
+    minHeight: "44px",
+
+    padding: "6px 8px",
+
     display: "flex",
-    gap: "10px",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    gap: "15px",
+
+    backgroundColor: "#f7f8f9",
   },
+
+  formActionInformation: {
+    color: "#707b86",
+
+    fontSize: "7px",
+  },
+
+  formActionButtons: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "6px",
+  },
+
+  /* =========================================================
+     BUTTONS
+     ========================================================= */
 
   primaryButton: {
-    minHeight: "40px",
-    padding: "0 18px",
-    background: "#0b2b58",
-    border: "1px solid #0b2b58",
+    minHeight: "31px",
+
+    padding: "0 13px",
+
+    backgroundColor: WCG_BLUE,
+
+    border: `1px solid ${WCG_BLUE}`,
+
     color: "#ffffff",
+
     fontFamily: "inherit",
-    fontSize: "8px",
+
+    fontSize: "7px",
     fontWeight: 700,
+
+    letterSpacing: "0.2px",
+
     cursor: "pointer",
   },
 
   secondaryButton: {
-    minHeight: "40px",
-    padding: "0 15px",
+    minHeight: "31px",
+
+    padding: "0 12px",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontFamily: "inherit",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    cursor: "pointer",
+  },
+
+  disabledButton: {
+    opacity: 0.6,
+    cursor: "default",
+  },
+
+  secondaryLink: {
+    minHeight: "31px",
+
+    padding: "0 12px",
+
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "#ffffff",
-    border: "1px solid #bdc6cf",
-    color: "#53606d",
-    fontFamily: "inherit",
+
+    boxSizing: "border-box",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
     textDecoration: "none",
-    fontSize: "8px",
+
+    fontSize: "7px",
     fontWeight: 700,
-    cursor: "pointer",
   },
 
   registerFinalButton: {
-    minHeight: "42px",
-    padding: "0 21px",
-    background: "#173f2b",
-    border: "1px solid #173f2b",
+    minHeight: "32px",
+
+    padding: "0 15px",
+
+    backgroundColor: DARK_BLUE,
+
+    border: `1px solid ${DARK_BLUE}`,
+
     color: "#ffffff",
+
     fontFamily: "inherit",
-    fontSize: "8px",
+
+    fontSize: "7px",
     fontWeight: 700,
-    letterSpacing: "0.4px",
+
+    letterSpacing: "0.25px",
+
     cursor: "pointer",
   },
 
-  emptyState: {
-    minHeight: "150px",
+  /* =========================================================
+     RESULTS TABLE
+     ========================================================= */
+
+  tableFrame: {
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
+  },
+
+  tableScroll: {
+    width: "100%",
+
+    overflowX: "auto",
+  },
+
+  table: {
+    width: "100%",
+
+    minWidth: "900px",
+
+    borderCollapse: "collapse",
+
+    tableLayout: "fixed",
+  },
+
+  tableHeading: {
+    padding: "7px 8px",
+
+    backgroundColor: TABLE_HEADER,
+
+    borderRight:
+      `1px solid ${BORDER}`,
+    borderBottom:
+      `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    textAlign: "left",
+
+    whiteSpace: "nowrap",
+  },
+
+  emptyTableCell: {
+    padding: 0,
+  },
+
+  emptyTableState: {
+    minHeight: "115px",
+
+    padding: "20px",
+
     display: "flex",
     flexDirection: "column",
+
     alignItems: "center",
     justifyContent: "center",
+
     textAlign: "center",
   },
 
-  emptyIcon: {
-    width: "42px",
-    height: "42px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "1px solid #d4dae0",
-    borderRadius: "50%",
-    color: "#758393",
-    fontSize: "16px",
-  },
-
-  emptyTitle: {
-    marginTop: "10px",
-    color: "#3f4b56",
-    fontSize: "9px",
-    fontWeight: 700,
-  },
-
-  emptyText: {
-    maxWidth: "450px",
-    marginTop: "5px",
-    color: "#838d97",
-    fontSize: "8px",
-    lineHeight: 1.6,
-  },
-
-  successSearch: {
-    padding: "5px 0",
-    display: "flex",
-    gap: "13px",
-  },
-
-  successSearchIcon: {
-    width: "38px",
-    height: "38px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    borderRadius: "50%",
-    background: "#e4efe7",
-    color: "#315f40",
-    fontWeight: 700,
-  },
-
-  successSearchTitle: {
-    color: "#315f40",
-    fontSize: "9px",
-    fontWeight: 700,
-  },
-
-  successSearchText: {
-    maxWidth: "800px",
-    margin: "5px 0 10px",
-    color: "#66727d",
-    fontSize: "8px",
-    lineHeight: 1.6,
-  },
-
-  developmentBox: {
-    padding: "9px 11px",
-    background: "#f3f5f6",
-    border: "1px solid #dde2e6",
-    color: "#69737d",
-    fontSize: "8px",
-  },
-
-  twoCards: {
-    marginBottom: "17px",
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(2, minmax(0, 1fr))",
-    gap: "12px",
-  },
-
-  ruleCard: {
-    minHeight: "120px",
-    padding: "17px",
-    display: "grid",
-    gridTemplateColumns: "38px 1fr",
-    gap: "10px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
-  },
-
-  ruleNumber: {
-    color: "#8995a2",
-    fontSize: "8px",
-    fontWeight: 700,
-  },
-
-  ruleTitle: {
-    color: "#071b3b",
-    fontSize: "9px",
-    fontWeight: 700,
-  },
-
-  ruleText: {
-    margin: "5px 0 0",
-    color: "#697581",
-    fontSize: "8px",
-    lineHeight: 1.7,
-  },
-
-  bottomNavigation: {
-    marginTop: "8px",
-    padding: "17px 0 5px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "15px",
-    borderTop: "1px solid #d8dde2",
-  },
-
-  navigationRight: {
-    display: "flex",
-    alignItems: "center",
-    gap: "13px",
-  },
-
-  stepIndicator: {
+  emptyTableCode: {
     color: "#7d8791",
+
     fontSize: "7px",
     fontWeight: 700,
+
+    letterSpacing: "0.5px",
+  },
+
+  emptyTableTitle: {
+    marginTop: "5px",
+
+    color: TEXT_BLUE,
+
+    fontSize: "9px",
+    fontWeight: 700,
+  },
+
+  emptyTableText: {
+    maxWidth: "520px",
+
+    marginTop: "4px",
+
+    color: "#707b86",
+
+    fontSize: "8px",
+
+    lineHeight: 1.5,
+  },
+
+  searchCompletionNotice: {
+    marginTop: "10px",
+
+    padding: "9px 11px",
+
+    display: "grid",
+
+    gridTemplateColumns: "25px 1fr",
+
+    gap: "9px",
+
+    backgroundColor: "#edf4ef",
+
+    borderLeft: "4px solid #427452",
+    borderTop: "1px solid #cadbce",
+    borderRight: "1px solid #cadbce",
+    borderBottom: "1px solid #cadbce",
+  },
+
+  searchCompletionMarker: {
+    width: "20px",
+    height: "20px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    border: "1px solid #427452",
+    borderRadius: "50%",
+
+    color: "#315f40",
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
+  searchCompletionTitle: {
+    color: "#315f40",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    letterSpacing: "0.3px",
+  },
+
+  searchCompletionText: {
+    marginTop: "2px",
+
+    color: "#587063",
+
+    fontSize: "8px",
+
+    lineHeight: 1.5,
+  },
+
+  /* =========================================================
+     TEXTAREA FORM
+     ========================================================= */
+
+  textAreaRow: {
+    minHeight: "105px",
+
+    display: "grid",
+
+    gridTemplateColumns:
+      "42px 150px 1fr",
+  },
+
+  textAreaNumber: {
+    padding: "8px",
+
+    display: "flex",
+    justifyContent: "center",
+
+    backgroundColor: "#f1f3f5",
+
+    borderRight:
+      `1px solid ${BORDER}`,
+
+    color: "#6d7883",
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  textAreaLabel: {
+    padding: "9px",
+
+    backgroundColor: PALE_BLUE,
+
+    borderRight:
+      `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
+  textAreaControl: {
+    padding: "7px",
+  },
+
+  textarea: {
+    width: "100%",
+    minHeight: "88px",
+
+    padding: "8px",
+
+    boxSizing: "border-box",
+
+    resize: "vertical",
+
+    backgroundColor: "#ffffff",
+
+    border: "1px solid #9da7b1",
+    borderRadius: 0,
+
+    outline: "none",
+
+    color: "#26323d",
+
+    fontFamily: "inherit",
+
+    fontSize: "9px",
+
+    lineHeight: 1.5,
+  },
+
+  developmentNotice: {
+    marginBottom: "14px",
+
+    padding: "9px 11px",
+
+    backgroundColor: "#f6f2e9",
+
+    borderLeft: "4px solid #9a7b3d",
+    borderTop: "1px solid #ddd2b8",
+    borderRight: "1px solid #ddd2b8",
+    borderBottom: "1px solid #ddd2b8",
+  },
+
+  developmentNoticeCode: {
+    color: "#765f30",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    letterSpacing: "0.3px",
+  },
+
+  developmentNoticeText: {
+    marginTop: "3px",
+
+    color: "#6c603f",
+
+    fontSize: "8px",
+
+    lineHeight: 1.5,
+  },
+
+  /* =========================================================
+     REVIEW TABLES
+     ========================================================= */
+
+  reviewSection: {
+    marginBottom: "14px",
+
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
   },
 
   reviewHeader: {
-    minHeight: "52px",
-    padding: "0 18px",
+    minHeight: "31px",
+
+    padding: "0 9px",
+
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    borderBottom: "1px solid #e1e5e9",
+
+    gap: "15px",
+
+    backgroundColor: WCG_BLUE,
+
+    color: "#ffffff",
+  },
+
+  reviewNumber: {
+    marginRight: "9px",
+
+    color:
+      "rgba(255,255,255,0.72)",
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  reviewTitle: {
+    fontSize: "8px",
+    fontWeight: 700,
+
+    letterSpacing: "0.3px",
   },
 
   editButton: {
-    padding: "7px 11px",
-    background: "#ffffff",
-    border: "1px solid #bdc6cf",
-    color: "#53606d",
+    minHeight: "23px",
+
+    padding: "0 8px",
+
+    backgroundColor: "#ffffff",
+
+    border: "1px solid #ffffff",
+
+    color: WCG_BLUE,
+
     fontFamily: "inherit",
+
     fontSize: "7px",
     fontWeight: 700,
+
     cursor: "pointer",
   },
 
-  reviewGrid: {
-    padding: "7px 18px",
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(2, minmax(0, 1fr))",
-  },
+  reviewRow: {
+    minHeight: "39px",
 
-  reviewItem: {
-    minHeight: "55px",
-    padding: "11px 5px",
-    borderBottom: "1px solid #edf0f2",
+    display: "grid",
+
+    gridTemplateColumns:
+      "145px 1fr 145px 1fr",
+
+    borderBottom:
+      `1px solid ${LIGHT_BORDER}`,
   },
 
   reviewLabel: {
-    color: "#89939d",
+    padding: "7px 9px",
+
+    display: "flex",
+    alignItems: "center",
+
+    backgroundColor: PALE_BLUE,
+
+    borderRight:
+      `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
     fontSize: "7px",
     fontWeight: 700,
-    textTransform: "uppercase",
   },
 
   reviewValue: {
-    marginTop: "4px",
-    color: "#293641",
-    fontSize: "9px",
-    fontWeight: 500,
+    padding: "7px 9px",
+
+    display: "flex",
+    alignItems: "center",
+
+    borderRight:
+      `1px solid ${BORDER}`,
+
+    color: "#596570",
+
+    fontSize: "8px",
+  },
+
+  reviewValueLast: {
+    padding: "7px 9px",
+
+    display: "flex",
+    alignItems: "center",
+
+    color: "#596570",
+
+    fontSize: "8px",
+  },
+
+  participantNumberFrame: {
+    padding: "15px",
+
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
+
+    textAlign: "center",
+  },
+
+  participantNumberLabel: {
+    color: "#74808b",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    letterSpacing: "0.5px",
+  },
+
+  participantNumberValue: {
+    marginTop: "6px",
+
+    color: WCG_BLUE,
+
+    fontSize: "21px",
+    fontWeight: 700,
+
+    letterSpacing: "2px",
+  },
+
+  participantNumberExplanation: {
+    maxWidth: "600px",
+
+    margin: "7px auto 0",
+
+    color: "#6b7681",
+
+    fontSize: "7px",
+
+    lineHeight: 1.5,
+  },
+
+  declarationBox: {
+    padding: "12px",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid ${BORDER}`,
   },
 
   declarationRow: {
     display: "flex",
     alignItems: "flex-start",
-    gap: "11px",
-    color: "#4f5d69",
-    fontSize: "9px",
-    lineHeight: 1.65,
+
+    gap: "9px",
+
+    color: "#53606c",
+
+    fontSize: "8px",
+
+    lineHeight: 1.55,
+
     cursor: "pointer",
   },
 
   checkbox: {
-    width: "17px",
-    height: "17px",
+    width: "16px",
+    height: "16px",
+
     marginTop: "1px",
+
+    flexShrink: 0,
   },
 
   finalWarning: {
-    padding: "13px 15px",
-    background: "#f5f0e4",
+    marginTop: "10px",
+
+    padding: "9px 11px",
+
+    backgroundColor: "#f6f2e9",
+
     borderLeft: "4px solid #9a7b3d",
-    color: "#6e5b35",
+
+    color: "#6c603f",
+
     fontSize: "8px",
-    lineHeight: 1.6,
+
+    lineHeight: 1.5,
   },
 
-  successPage: {
-    maxWidth: "750px",
-    margin: "35px auto",
-    padding: "45px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
-    textAlign: "center",
-  },
+  /* =========================================================
+     BOTTOM NAVIGATION
+     ========================================================= */
 
-  successMark: {
-    width: "62px",
-    height: "62px",
-    margin: "0 auto 16px",
+  bottomNavigation: {
+    marginTop: "17px",
+    paddingTop: "12px",
+
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "50%",
-    background: "#e4efe7",
-    color: "#315f40",
-    fontSize: "25px",
-    fontWeight: 700,
+    justifyContent: "space-between",
+
+    gap: "15px",
+
+    borderTop: `1px solid ${BORDER}`,
   },
 
-  successEyebrow: {
-    color: "#567461",
-    fontSize: "8px",
-    fontWeight: 700,
-    letterSpacing: "1px",
+  navigationRight: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "10px",
   },
 
-  successTitle: {
-    margin: "7px 0",
-    color: "#071b3b",
-    fontSize: "27px",
-    fontWeight: 600,
-  },
+  stepIndicator: {
+    color: "#74808b",
 
-  successDescription: {
-    margin: "0 auto",
-    color: "#697581",
-    fontSize: "10px",
-  },
-
-  participantNumberBox: {
-    maxWidth: "460px",
-    margin: "25px auto 15px",
-    border: "1px solid #ccd3da",
-  },
-
-  participantNumberLabel: {
-    padding: "9px",
-    background: "#f1f3f5",
-    color: "#76818c",
     fontSize: "7px",
     fontWeight: 700,
   },
 
-  participantNumberValue: {
-    padding: "17px",
-    color: "#071b3b",
-    fontSize: "23px",
+  /* =========================================================
+     SUCCESS
+     ========================================================= */
+
+  successPage: {
+    maxWidth: "760px",
+
+    margin: "20px auto",
+
+    padding: "28px",
+
+    boxSizing: "border-box",
+
+    backgroundColor: "#ffffff",
+
+    borderTop: `5px solid ${WCG_BLUE}`,
+    borderRight: `1px solid ${BORDER}`,
+    borderBottom: `1px solid ${BORDER}`,
+    borderLeft: `1px solid ${BORDER}`,
+
+    textAlign: "center",
+  },
+
+  successTopLine: {
+    paddingBottom: "10px",
+
+    borderBottom:
+      `1px solid ${LIGHT_BORDER}`,
+
+    color: "#74808b",
+
+    fontSize: "7px",
     fontWeight: 700,
+
+    letterSpacing: "0.5px",
+  },
+
+  successMark: {
+    width: "48px",
+    height: "48px",
+
+    margin: "24px auto 12px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    border: "2px solid #427452",
+    borderRadius: "50%",
+
+    color: "#315f40",
+
+    fontSize: "18px",
+    fontWeight: 700,
+  },
+
+  successEyebrow: {
+    color: "#61796a",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    letterSpacing: "0.6px",
+  },
+
+  successTitle: {
+    margin: "5px 0",
+
+    color: WCG_BLUE,
+
+    fontSize: "19px",
+    fontWeight: 700,
+  },
+
+  successDescription: {
+    margin: "0 auto",
+
+    color: "#65717d",
+
+    fontSize: "9px",
+  },
+
+  successNumberFrame: {
+    maxWidth: "470px",
+
+    margin: "20px auto 10px",
+
+    border: `3px double ${WCG_BLUE}`,
+  },
+
+  successNumberLabel: {
+    padding: "7px",
+
+    backgroundColor: PALE_BLUE,
+
+    borderBottom:
+      `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  successNumberValue: {
+    padding: "14px",
+
+    color: WCG_BLUE,
+
+    fontSize: "20px",
+    fontWeight: 700,
+
     letterSpacing: "2px",
   },
 
   developmentWarning: {
-    maxWidth: "550px",
+    maxWidth: "560px",
+
     margin: "0 auto",
-    padding: "12px",
-    background: "#f5f0e4",
-    color: "#6e5b35",
-    fontSize: "8px",
-    lineHeight: 1.6,
+
+    padding: "10px",
+
+    backgroundColor: "#f6f2e9",
+
+    borderLeft: "4px solid #9a7b3d",
+
+    color: "#6c603f",
+
+    fontSize: "7px",
+
+    lineHeight: 1.5,
   },
 
   successActions: {
-    marginTop: "23px",
+    marginTop: "19px",
+
     display: "flex",
     justifyContent: "center",
-    gap: "9px",
+
+    gap: "8px",
   },
 
   primaryLink: {
-    minHeight: "40px",
-    padding: "0 18px",
+    minHeight: "31px",
+
+    padding: "0 13px",
+
     display: "inline-flex",
     alignItems: "center",
-    background: "#0b2b58",
-    border: "1px solid #0b2b58",
+    justifyContent: "center",
+
+    backgroundColor: WCG_BLUE,
+
+    border: `1px solid ${WCG_BLUE}`,
+
     color: "#ffffff",
+
     textDecoration: "none",
-    fontSize: "8px",
+
+    fontSize: "7px",
     fontWeight: 700,
   },
 };

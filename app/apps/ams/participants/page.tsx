@@ -1,25 +1,91 @@
 import Link from "next/link";
+import type { CSSProperties, ReactNode } from "react";
+
+/* ============================================================
+   MyWCSA AMS
+   PARTICIPANT REGISTRY
+   ============================================================
+
+   INTERFACE STANDARD
+   ------------------------------------------------------------
+   System:      MyWCSA Administration Management System
+   Module:      Participants
+   Interface:   Staff
+   Primary:     #001489
+   Typeface:    Century Gothic (inherited from AMS layout)
+
+   DESIGN RULES
+   ------------------------------------------------------------
+   - Formal government administrative interface
+   - Compact typography
+   - Numbered sections
+   - Actual forms use structured/double-line treatment
+   - Actual registers/results use structured tables
+   - Navigation/help/utility areas are NOT over-tabulated
+   - No giant SaaS cards
+   - No marketing-style hero areas
+   ============================================================ */
+
+const WCG_BLUE = "#001489";
+const DARK_BLUE = "#00105f";
+const TEXT_BLUE = "#00175a";
+const BORDER = "#aeb6c0";
+const LIGHT_BORDER = "#d4d9df";
+const MUTED = "#626d78";
+const PALE_BLUE = "#edf2f8";
+const TABLE_HEADER = "#eef1f5";
 
 export default function ParticipantsPage() {
+  const currentDate = formatDate();
+
   return (
-    <main>
+    <div style={styles.page}>
+      {/* =====================================================
+          TOP UTILITY ROW
+          ===================================================== */}
+
+      <div style={styles.topUtilityRow}>
+        <div style={styles.breadcrumb}>
+          <Link href="/my-apps" style={styles.breadcrumbLink}>
+            MyGovApps
+          </Link>
+
+          <span style={styles.breadcrumbSeparator}>/</span>
+
+          <Link href="/apps/ams" style={styles.breadcrumbLink}>
+            MyWCSA AMS
+          </Link>
+
+          <span style={styles.breadcrumbSeparator}>/</span>
+
+          <span>Registry</span>
+
+          <span style={styles.breadcrumbSeparator}>/</span>
+
+          <strong>Participants</strong>
+        </div>
+
+        <div style={styles.currentDate}>
+          {currentDate}
+        </div>
+      </div>
+
       {/* =====================================================
           PAGE HEADING
           ===================================================== */}
 
       <section style={styles.pageHeading}>
         <div>
-          <div style={styles.breadcrumb}>
-            MyWCSA AMS / Registry / Participants
+          <div style={styles.pageReference}>
+            AMS / REGISTRY / PARTICIPANTS
           </div>
 
           <h1 style={styles.pageTitle}>
-            Participant Registry
+            PARTICIPANT REGISTRY
           </h1>
 
           <p style={styles.pageSubtitle}>
-            Search, register and manage WCSA participant records,
-            participation information and affiliations.
+            Search, register and manage participant records.
           </p>
         </div>
 
@@ -32,209 +98,260 @@ export default function ParticipantsPage() {
       </section>
 
       {/* =====================================================
-          SEARCH BEFORE REGISTRATION NOTICE
+          IMPORTANT REGISTRY NOTICE
           ===================================================== */}
 
-      <section style={styles.notice}>
-        <div style={styles.noticeNumber}>
-          01
+      <section style={styles.registryNotice}>
+        <div style={styles.noticeMarker}>
+          !
         </div>
 
-        <div>
+        <div style={styles.noticeContent}>
           <div style={styles.noticeTitle}>
             SEARCH BEFORE REGISTRATION
           </div>
 
-          <p style={styles.noticeText}>
-            Every participant should have only one permanent
-            MyWCSA participant record. Search the registry before
-            creating a new participant.
-          </p>
+          <div style={styles.noticeText}>
+            Every participant must have only one permanent
+            MyWCSA participant record. Search the registry
+            before creating a new record.
+          </div>
+        </div>
+
+        <div style={styles.noticeReference}>
+          REGISTRY CONTROL
         </div>
       </section>
 
       {/* =====================================================
-          PARTICIPANT SEARCH
+          01 PARTICIPANT SEARCH
           ===================================================== */}
 
-      <section style={styles.panel}>
-        <div style={styles.panelHeader}>
+      <SectionTitle
+        number="01"
+        title="PARTICIPANT SEARCH"
+        reference="AMS-PRT-01"
+      />
+
+      <section style={styles.formFrame}>
+        <div style={styles.formTitleBar}>
           <div>
-            <span style={styles.panelNumber}>
-              02
+            <span style={styles.formTitleNumber}>
+              01.1
             </span>
 
-            <span style={styles.panelTitle}>
-              PARTICIPANT SEARCH
-            </span>
+            PARTICIPANT IDENTITY SEARCH
           </div>
+
+          <span style={styles.formTitleReference}>
+            REGISTRY ENQUIRY
+          </span>
         </div>
 
-        <div style={styles.searchBody}>
-          <div style={styles.searchGrid}>
-            <Field
-              label="Participant Number"
-              placeholder="Enter participant number"
-            />
+        <div style={styles.formTable}>
+          <FormRow
+            number="01"
+            leftLabel="Participant Number"
+            leftControl={
+              <input
+                type="text"
+                placeholder="Enter participant number"
+                style={styles.input}
+              />
+            }
+            rightLabel="Record Status"
+            rightControl={
+              <select style={styles.input}>
+                <option>All statuses</option>
+                <option>Active</option>
+                <option>Pending</option>
+                <option>Inactive</option>
+                <option>Suspended</option>
+                <option>Archived</option>
+              </select>
+            }
+          />
 
-            <Field
-              label="First Name"
-              placeholder="Enter first name"
-            />
+          <FormRow
+            number="02"
+            leftLabel="First Name"
+            leftControl={
+              <input
+                type="text"
+                placeholder="Enter first name"
+                style={styles.input}
+              />
+            }
+            rightLabel="Surname"
+            rightControl={
+              <input
+                type="text"
+                placeholder="Enter surname"
+                style={styles.input}
+              />
+            }
+          />
 
-            <Field
-              label="Surname"
-              placeholder="Enter surname"
-            />
+          <FormRow
+            number="03"
+            leftLabel="Date of Birth"
+            leftControl={
+              <input
+                type="date"
+                style={styles.input}
+              />
+            }
+            rightLabel="Participant Type"
+            rightControl={
+              <select style={styles.input}>
+                <option>All participant types</option>
+                <option>Learner / Athlete</option>
+                <option>Coach</option>
+                <option>Official</option>
+                <option>Sports Staff</option>
+                <option>Volunteer</option>
+                <option>Other</option>
+              </select>
+            }
+          />
+        </div>
 
-            <Field
-              label="Date of Birth"
-              type="date"
-            />
-
-            <SelectField
-              label="Participant Type"
-              options={[
-                "All participant types",
-                "Learner / Athlete",
-                "Coach",
-                "Official",
-                "Sports Staff",
-                "Volunteer",
-                "Other",
-              ]}
-            />
-
-            <SelectField
-              label="Record Status"
-              options={[
-                "All statuses",
-                "Active",
-                "Pending",
-                "Inactive",
-                "Suspended",
-                "Archived",
-              ]}
-            />
+        <div style={styles.formActions}>
+          <div style={styles.formActionInformation}>
+            Complete one or more search fields.
           </div>
 
-          <div style={styles.searchActions}>
-            <button
-              type="button"
-              style={styles.primaryButton}
-            >
-              SEARCH REGISTRY
-            </button>
-
+          <div style={styles.formActionButtons}>
             <button
               type="button"
               style={styles.secondaryButton}
             >
               CLEAR
             </button>
+
+            <button
+              type="button"
+              style={styles.primaryButton}
+            >
+              SEARCH REGISTRY
+            </button>
           </div>
         </div>
       </section>
 
       {/* =====================================================
-          SUMMARY
+          02 REGISTRY SUMMARY
           ===================================================== */}
 
-      <section style={styles.summaryGrid}>
-        <SummaryBox
-          label="Total Participants"
+      <SectionTitle
+        number="02"
+        title="REGISTRY SUMMARY"
+        reference="AMS-PRT-02"
+      />
+
+      <section style={styles.summaryRegister}>
+        <SummaryItem
+          number="02.1"
+          label="TOTAL PARTICIPANTS"
           value="—"
         />
 
-        <SummaryBox
-          label="Active Records"
+        <SummaryItem
+          number="02.2"
+          label="ACTIVE RECORDS"
           value="—"
         />
 
-        <SummaryBox
-          label="Pending Records"
+        <SummaryItem
+          number="02.3"
+          label="PENDING RECORDS"
           value="—"
         />
 
-        <SummaryBox
-          label="Pending Transfers"
+        <SummaryItem
+          number="02.4"
+          label="PENDING TRANSFERS"
           value="—"
         />
       </section>
 
       {/* =====================================================
-          PARTICIPANT RECORDS
+          03 PARTICIPANT RECORDS
           ===================================================== */}
 
-      <section style={styles.panel}>
-        <div style={styles.resultsHeader}>
+      <SectionTitle
+        number="03"
+        title="PARTICIPANT RECORDS"
+        reference="AMS-PRT-03"
+      />
+
+      <section style={styles.resultsFrame}>
+        <div style={styles.resultsTitleBar}>
           <div>
-            <div>
-              <span style={styles.panelNumber}>
-                03
-              </span>
+            <span style={styles.resultsTitle}>
+              PARTICIPANT REGISTRY RESULTS
+            </span>
 
-              <span style={styles.panelTitle}>
-                PARTICIPANT RECORDS
-              </span>
-            </div>
-
-            <div style={styles.resultsDescription}>
-              Search results from the MyWCSA Participant Registry.
-            </div>
+            <span style={styles.resultsSubtitle}>
+              Search results matching the selected criteria
+            </span>
           </div>
 
-          <div style={styles.resultButtons}>
+          <div style={styles.resultActions}>
             <button
               type="button"
-              style={styles.smallButton}
+              style={styles.titleBarButton}
             >
               FILTERS
             </button>
 
             <button
               type="button"
-              style={styles.smallButton}
+              style={styles.titleBarButton}
             >
               EXPORT
             </button>
           </div>
         </div>
 
-        <div style={styles.tableContainer}>
+        <div style={styles.tableScroll}>
           <table style={styles.table}>
             <thead>
               <tr>
-                <TableHeading>
-                  Participant No.
+                <TableHeading width="55px">
+                  #
+                </TableHeading>
+
+                <TableHeading width="145px">
+                  PARTICIPANT NO.
+                </TableHeading>
+
+                <TableHeading width="190px">
+                  PARTICIPANT
+                </TableHeading>
+
+                <TableHeading width="105px">
+                  DATE OF BIRTH
+                </TableHeading>
+
+                <TableHeading width="115px">
+                  TYPE
                 </TableHeading>
 
                 <TableHeading>
-                  Participant
+                  SCHOOL / ORGANISATION
                 </TableHeading>
 
-                <TableHeading>
-                  Date of Birth
+                <TableHeading width="125px">
+                  SPORTING CODE
                 </TableHeading>
 
-                <TableHeading>
-                  Type
+                <TableHeading width="85px">
+                  STATUS
                 </TableHeading>
 
-                <TableHeading>
-                  School / Organisation
-                </TableHeading>
-
-                <TableHeading>
-                  Sporting Code
-                </TableHeading>
-
-                <TableHeading>
-                  Status
-                </TableHeading>
-
-                <TableHeading>
-                  Action
+                <TableHeading width="75px">
+                  ACTION
                 </TableHeading>
               </tr>
             </thead>
@@ -242,22 +359,23 @@ export default function ParticipantsPage() {
             <tbody>
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   style={styles.emptyCell}
                 >
-                  <div style={styles.emptyState}>
-                    <div style={styles.emptyIcon}>
-                      ◎
+                  <div style={styles.emptyResults}>
+                    <div style={styles.emptyResultCode}>
+                      NO RESULTS
                     </div>
 
-                    <div style={styles.emptyTitle}>
-                      Search the Participant Registry
+                    <div style={styles.emptyResultTitle}>
+                      PARTICIPANT REGISTRY SEARCH
                     </div>
 
-                    <div style={styles.emptyText}>
-                      Enter participant information above and
-                      select Search Registry to locate an
-                      existing participant record.
+                    <div style={styles.emptyResultText}>
+                      Enter participant information in the
+                      search form above and select
+                      <strong> Search Registry </strong>
+                      to locate an existing record.
                     </div>
                   </div>
                 </td>
@@ -268,171 +386,258 @@ export default function ParticipantsPage() {
 
         <div style={styles.tableFooter}>
           <span>
-            No participant records displayed
+            RECORDS DISPLAYED: 0
           </span>
 
           <span>
-            Page 1
+            PAGE 1 OF 1
           </span>
         </div>
       </section>
 
       {/* =====================================================
-          REGISTRY RULES
+          04 REGISTRY CONTROLS
           ===================================================== */}
 
-      <section style={styles.rulesGrid}>
-        <div style={styles.rulePanel}>
-          <div style={styles.ruleNumber}>
-            04
+      <SectionTitle
+        number="04"
+        title="REGISTRY CONTROLS"
+        reference="AMS-PRT-04"
+      />
+
+      <section style={styles.controlGrid}>
+        <RegistryControl
+          number="04.1"
+          title="PERMANENT PARTICIPANT NUMBER"
+        >
+          <p style={styles.controlText}>
+            A participant receives one permanent WCSA
+            Participant Number. The number remains linked
+            to the participant throughout their participation
+            history.
+          </p>
+
+          <div style={styles.numberExample}>
+            <span style={styles.numberExampleLabel}>
+              FORMAT EXAMPLE
+            </span>
+
+            <strong style={styles.numberExampleValue}>
+              1312162014001
+            </strong>
           </div>
+        </RegistryControl>
 
-          <div>
-            <div style={styles.ruleTitle}>
-              PERMANENT PARTICIPANT NUMBER
-            </div>
+        <RegistryControl
+          number="04.2"
+          title="AFFILIATION HISTORY"
+        >
+          <p style={styles.controlText}>
+            Changes between schools, clubs, teams and
+            associations must be recorded through the
+            appropriate affiliation, release or transfer
+            process.
+          </p>
 
-            <p style={styles.ruleText}>
-              A participant receives one permanent WCSA
-              Participant Number. The number remains attached
-              to the participant throughout their participation
-              history.
-            </p>
-
-            <div style={styles.numberExample}>
-              <span style={styles.numberLabel}>
-                EXAMPLE
-              </span>
-
-              <span style={styles.numberValue}>
-                1312162014001
-              </span>
-            </div>
+          <div style={styles.controlNote}>
+            Historical affiliations remain attached to
+            the participant record.
           </div>
-        </div>
-
-        <div style={styles.rulePanel}>
-          <div style={styles.ruleNumber}>
-            05
-          </div>
-
-          <div>
-            <div style={styles.ruleTitle}>
-              AFFILIATION HISTORY
-            </div>
-
-            <p style={styles.ruleText}>
-              Changes between schools, clubs, teams and
-              associations must be recorded through affiliation,
-              release or transfer processes. Historical records
-              should remain available in the participant profile.
-            </p>
-          </div>
-        </div>
+        </RegistryControl>
       </section>
 
       {/* =====================================================
-          QUICK FUNCTIONS
+          05 PARTICIPANT FUNCTIONS
           ===================================================== */}
 
-      <div style={styles.sectionHeading}>
-        <span style={styles.sectionNumber}>
-          06
-        </span>
+      <SectionTitle
+        number="05"
+        title="PARTICIPANT FUNCTIONS"
+        reference="AMS-PRT-05"
+      />
 
-        PARTICIPANT FUNCTIONS
-      </div>
-
-      <section style={styles.functionGrid}>
-        <FunctionCard
+      <section style={styles.functionPanel}>
+        <FunctionRow
+          number="05.1"
+          title="REGISTER PARTICIPANT"
+          description="Create a new permanent participant record."
           href="/apps/ams/participants/register"
-          title="Register Participant"
-          description="Start a new participant registration."
+          action="START"
         />
 
-        <FunctionCard
-          href="/apps/ams/affiliations"
-          title="Affiliations"
+        <FunctionRow
+          number="05.2"
+          title="AFFILIATIONS"
           description="View and manage participant affiliations."
+          href="/apps/ams/affiliations"
+          action="OPEN"
         />
 
-        <FunctionCard
+        <FunctionRow
+          number="05.3"
+          title="TRANSFERS & RELEASES"
+          description="Process participant affiliation changes."
           href="/apps/ams/affiliations/transfers"
-          title="Transfers & Releases"
-          description="Process affiliation changes and releases."
+          action="OPEN"
         />
 
-        <FunctionCard
-          href="/apps/ams/reports"
-          title="Participant Reports"
+        <FunctionRow
+          number="05.4"
+          title="PARTICIPANT REPORTS"
           description="Access participant reports and exports."
+          href="/apps/ams/reports"
+          action="OPEN"
         />
       </section>
-    </main>
+
+      {/* =====================================================
+          06 REGISTRY INFORMATION
+          ===================================================== */}
+
+      <SectionTitle
+        number="06"
+        title="REGISTRY INFORMATION"
+        reference="AMS-PRT-06"
+      />
+
+      <section style={styles.informationFrame}>
+        <div style={styles.informationRow}>
+          <div style={styles.informationLabel}>
+            Registry
+          </div>
+
+          <div style={styles.informationValue}>
+            MyWCSA Participant Registry
+          </div>
+        </div>
+
+        <div style={styles.informationRow}>
+          <div style={styles.informationLabel}>
+            Record Principle
+          </div>
+
+          <div style={styles.informationValue}>
+            One permanent participant record per person
+          </div>
+        </div>
+
+        <div style={styles.informationRow}>
+          <div style={styles.informationLabel}>
+            Participant Number
+          </div>
+
+          <div style={styles.informationValue}>
+            Permanent once officially allocated
+          </div>
+        </div>
+
+        <div style={styles.informationRow}>
+          <div style={styles.informationLabel}>
+            Historical Records
+          </div>
+
+          <div style={styles.informationValue}>
+            Retained for audit and participation history
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 
 /* ============================================================
-   COMPONENTS
+   SECTION TITLE
    ============================================================ */
 
-function Field({
-  label,
-  placeholder,
-  type = "text",
+function SectionTitle({
+  number,
+  title,
+  reference,
 }: {
-  label: string;
-  placeholder?: string;
-  type?: string;
+  number: string;
+  title: string;
+  reference: string;
 }) {
   return (
-    <label style={styles.field}>
-      <span style={styles.fieldLabel}>
-        {label}
-      </span>
+    <div style={styles.sectionTitle}>
+      <div style={styles.sectionTitleLeft}>
+        <span style={styles.sectionNumber}>
+          {number}
+        </span>
 
-      <input
-        type={type}
-        placeholder={placeholder}
-        style={styles.input}
-      />
-    </label>
+        <span style={styles.sectionHeading}>
+          {title}
+        </span>
+      </div>
+
+      <span style={styles.sectionReference}>
+        {reference}
+      </span>
+    </div>
   );
 }
 
-function SelectField({
-  label,
-  options,
+/* ============================================================
+   FORM ROW
+   ============================================================ */
+
+function FormRow({
+  number,
+  leftLabel,
+  leftControl,
+  rightLabel,
+  rightControl,
 }: {
-  label: string;
-  options: string[];
+  number: string;
+  leftLabel: string;
+  leftControl: ReactNode;
+  rightLabel: string;
+  rightControl: ReactNode;
 }) {
   return (
-    <label style={styles.field}>
-      <span style={styles.fieldLabel}>
-        {label}
-      </span>
+    <div style={styles.formRow}>
+      <div style={styles.formRowNumber}>
+        {number}
+      </div>
 
-      <select style={styles.input}>
-        {options.map((option) => (
-          <option key={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
+      <div style={styles.formLabel}>
+        {leftLabel}
+      </div>
+
+      <div style={styles.formControl}>
+        {leftControl}
+      </div>
+
+      <div style={styles.formLabel}>
+        {rightLabel}
+      </div>
+
+      <div style={styles.formControl}>
+        {rightControl}
+      </div>
+    </div>
   );
 }
 
-function SummaryBox({
+/* ============================================================
+   SUMMARY ITEM
+   ============================================================ */
+
+function SummaryItem({
+  number,
   label,
   value,
 }: {
+  number: string;
   label: string;
   value: string;
 }) {
   return (
-    <div style={styles.summaryBox}>
+    <div style={styles.summaryItem}>
+      <div style={styles.summaryNumber}>
+        {number}
+      </div>
+
       <div style={styles.summaryLabel}>
         {label}
       </div>
@@ -444,466 +649,1051 @@ function SummaryBox({
   );
 }
 
+/* ============================================================
+   TABLE HEADING
+   ============================================================ */
+
 function TableHeading({
   children,
+  width,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
+  width?: string;
 }) {
   return (
-    <th style={styles.tableHeading}>
+    <th
+      style={{
+        ...styles.tableHeading,
+        ...(width ? { width } : {}),
+      }}
+    >
       {children}
     </th>
   );
 }
 
-function FunctionCard({
-  href,
+/* ============================================================
+   REGISTRY CONTROL
+   ============================================================ */
+
+function RegistryControl({
+  number,
   title,
-  description,
+  children,
 }: {
-  href: string;
+  number: string;
   title: string;
-  description: string;
+  children: ReactNode;
 }) {
   return (
-    <Link
-      href={href}
-      style={styles.functionCard}
-    >
-      <div>
-        <div style={styles.functionTitle}>
+    <div style={styles.registryControl}>
+      <div style={styles.controlHeader}>
+        <span style={styles.controlNumber}>
+          {number}
+        </span>
+
+        <span style={styles.controlTitle}>
           {title}
-        </div>
-
-        <div style={styles.functionDescription}>
-          {description}
-        </div>
+        </span>
       </div>
 
-      <div style={styles.functionArrow}>
-        →
+      <div style={styles.controlBody}>
+        {children}
       </div>
-    </Link>
+    </div>
   );
+}
+
+/* ============================================================
+   FUNCTION ROW
+   ============================================================ */
+
+function FunctionRow({
+  number,
+  title,
+  description,
+  href,
+  action,
+}: {
+  number: string;
+  title: string;
+  description: string;
+  href: string;
+  action: string;
+}) {
+  return (
+    <div style={styles.functionRow}>
+      <div style={styles.functionNumber}>
+        {number}
+      </div>
+
+      <div style={styles.functionTitle}>
+        {title}
+      </div>
+
+      <div style={styles.functionDescription}>
+        {description}
+      </div>
+
+      <div style={styles.functionAction}>
+        <Link
+          href={href}
+          style={styles.functionButton}
+        >
+          {action}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   DATE
+   ============================================================ */
+
+function formatDate() {
+  return new Intl.DateTimeFormat("en-ZA", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
 }
 
 /* ============================================================
    STYLES
    ============================================================ */
 
-const styles: Record<string, React.CSSProperties> = {
-  pageHeading: {
-    marginBottom: "22px",
+const styles: Record<string, CSSProperties> = {
+  page: {
+    width: "100%",
+    color: TEXT_BLUE,
+  },
+
+  /* =========================================================
+     TOP UTILITY
+     ========================================================= */
+
+  topUtilityRow: {
+    minHeight: "24px",
+    marginBottom: "14px",
+
     display: "flex",
-    alignItems: "flex-end",
+    alignItems: "center",
     justifyContent: "space-between",
-    gap: "25px",
+
+    gap: "20px",
+
+    color: MUTED,
+    fontSize: "9px",
   },
 
   breadcrumb: {
-    marginBottom: "6px",
-    color: "#697582",
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    whiteSpace: "nowrap",
+  },
+
+  breadcrumbLink: {
+    color: TEXT_BLUE,
+    textDecoration: "none",
+  },
+
+  breadcrumbSeparator: {
+    color: "#9aa3ad",
+  },
+
+  currentDate: {
+    color: TEXT_BLUE,
     fontSize: "9px",
-    fontWeight: 500,
-    letterSpacing: "0.7px",
-    textTransform: "uppercase",
+    whiteSpace: "nowrap",
+  },
+
+  /* =========================================================
+     PAGE HEADING
+     ========================================================= */
+
+  pageHeading: {
+    minHeight: "65px",
+
+    marginBottom: "15px",
+    paddingBottom: "12px",
+
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+
+    gap: "25px",
+
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  pageReference: {
+    marginBottom: "4px",
+
+    color: "#687482",
+
+    fontSize: "8px",
+    fontWeight: 600,
+    letterSpacing: "0.65px",
   },
 
   pageTitle: {
     margin: 0,
-    color: "#071b3b",
-    fontSize: "28px",
-    fontWeight: 600,
+
+    color: WCG_BLUE,
+
+    fontSize: "21px",
+    fontWeight: 700,
+
+    lineHeight: 1.1,
   },
 
   pageSubtitle: {
-    margin: "5px 0 0",
-    color: "#747d87",
-    fontSize: "11px",
-    lineHeight: 1.6,
+    margin: "4px 0 0",
+
+    color: MUTED,
+
+    fontSize: "10px",
   },
 
   registerButton: {
-    padding: "12px 17px",
-    background: "#0b2b58",
-    border: "1px solid #0b2b58",
+    minHeight: "32px",
+
+    padding: "0 13px",
+
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: WCG_BLUE,
+
+    border: `1px solid ${WCG_BLUE}`,
+
     color: "#ffffff",
+
     textDecoration: "none",
-    fontSize: "9px",
-    fontWeight: 700,
-    letterSpacing: "0.5px",
-  },
 
-  notice: {
-    marginBottom: "18px",
-    padding: "17px 19px",
-    display: "grid",
-    gridTemplateColumns: "38px 1fr",
-    gap: "12px",
-    background: "#e7eef6",
-    borderLeft: "4px solid #0b2b58",
-  },
-
-  noticeNumber: {
-    color: "#74879c",
     fontSize: "8px",
     fontWeight: 700,
+
+    letterSpacing: "0.3px",
+  },
+
+  /* =========================================================
+     NOTICE
+     ========================================================= */
+
+  registryNotice: {
+    minHeight: "51px",
+
+    marginBottom: "18px",
+    padding: "8px 11px",
+
+    display: "grid",
+
+    gridTemplateColumns: "27px 1fr auto",
+
+    alignItems: "center",
+
+    gap: "10px",
+
+    boxSizing: "border-box",
+
+    backgroundColor: PALE_BLUE,
+
+    borderLeft: `4px solid ${WCG_BLUE}`,
+    borderTop: `1px solid ${LIGHT_BORDER}`,
+    borderRight: `1px solid ${LIGHT_BORDER}`,
+    borderBottom: `1px solid ${LIGHT_BORDER}`,
+  },
+
+  noticeMarker: {
+    width: "21px",
+    height: "21px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    border: `1px solid ${WCG_BLUE}`,
+    borderRadius: "50%",
+
+    color: WCG_BLUE,
+
+    fontSize: "9px",
+    fontWeight: 700,
+  },
+
+  noticeContent: {
+    minWidth: 0,
   },
 
   noticeTitle: {
-    color: "#0b2b58",
-    fontSize: "9px",
+    color: WCG_BLUE,
+
+    fontSize: "8px",
     fontWeight: 700,
-    letterSpacing: "0.6px",
+
+    letterSpacing: "0.3px",
   },
 
   noticeText: {
-    maxWidth: "850px",
-    margin: "4px 0 0",
-    color: "#596a7b",
-    fontSize: "9px",
-    lineHeight: 1.6,
+    marginTop: "2px",
+
+    color: "#5d6975",
+
+    fontSize: "8px",
+
+    lineHeight: 1.4,
   },
 
-  panel: {
-    marginBottom: "18px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
+  noticeReference: {
+    color: "#77828d",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
+    whiteSpace: "nowrap",
   },
 
-  panelHeader: {
-    minHeight: "53px",
-    padding: "0 19px",
+  /* =========================================================
+     SECTION TITLE
+     ========================================================= */
+
+  sectionTitle: {
+    minHeight: "30px",
+
+    marginTop: "19px",
+    marginBottom: "8px",
+
+    padding: "0 8px",
+
     display: "flex",
     alignItems: "center",
-    borderBottom: "1px solid #e1e5e9",
+    justifyContent: "space-between",
+
+    gap: "15px",
+
+    backgroundColor: "rgba(255,255,255,0.93)",
+
+    borderTop: `1px solid ${BORDER}`,
+    borderBottom: `1px solid ${BORDER}`,
   },
 
-  panelNumber: {
-    marginRight: "10px",
-    color: "#8995a2",
+  sectionTitleLeft: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "10px",
+  },
+
+  sectionNumber: {
+    minWidth: "27px",
+
+    color: WCG_BLUE,
+
     fontSize: "8px",
     fontWeight: 700,
   },
 
-  panelTitle: {
-    color: "#071b3b",
+  sectionHeading: {
+    color: TEXT_BLUE,
+
     fontSize: "10px",
     fontWeight: 700,
-    letterSpacing: "0.6px",
+
+    letterSpacing: "0.55px",
   },
 
-  searchBody: {
-    padding: "19px",
+  sectionReference: {
+    color: "#818b96",
+
+    fontSize: "7px",
+
+    letterSpacing: "0.3px",
   },
 
-  searchGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  /* =========================================================
+     SEARCH FORM
+     ACTUAL FORM = DOUBLE-LINE TREATMENT
+     ========================================================= */
+
+  formFrame: {
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
+  },
+
+  formTitleBar: {
+    minHeight: "31px",
+
+    padding: "0 10px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+
     gap: "15px",
-  },
 
-  field: {
-    display: "block",
-  },
+    boxSizing: "border-box",
 
-  fieldLabel: {
-    display: "block",
-    marginBottom: "6px",
-    color: "#53606d",
+    backgroundColor: WCG_BLUE,
+
+    color: "#ffffff",
+
     fontSize: "8px",
     fontWeight: 700,
-    letterSpacing: "0.4px",
-    textTransform: "uppercase",
+
+    letterSpacing: "0.35px",
+  },
+
+  formTitleNumber: {
+    marginRight: "9px",
+
+    color: "rgba(255,255,255,0.72)",
+
+    fontSize: "7px",
+  },
+
+  formTitleReference: {
+    color: "rgba(255,255,255,0.8)",
+
+    fontSize: "7px",
+
+    fontWeight: 600,
+  },
+
+  formTable: {
+    width: "100%",
+  },
+
+  formRow: {
+    minHeight: "48px",
+
+    display: "grid",
+
+    gridTemplateColumns:
+      "45px 145px minmax(180px, 1fr) 145px minmax(180px, 1fr)",
+
+    alignItems: "stretch",
+
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  formRowNumber: {
+    padding: "8px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "#f2f4f6",
+
+    borderRight: `1px solid ${BORDER}`,
+
+    color: "#6c7782",
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  formLabel: {
+    padding: "8px 10px",
+
+    display: "flex",
+    alignItems: "center",
+
+    backgroundColor: PALE_BLUE,
+
+    borderRight: `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
+  formControl: {
+    padding: "6px 8px",
+
+    display: "flex",
+    alignItems: "center",
+
+    borderRight: `1px solid ${BORDER}`,
   },
 
   input: {
-    boxSizing: "border-box",
     width: "100%",
-    height: "40px",
-    padding: "0 11px",
-    background: "#ffffff",
-    border: "1px solid #cbd2d9",
+    height: "31px",
+
+    boxSizing: "border-box",
+
+    padding: "0 9px",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid #9fa8b2`,
     borderRadius: 0,
+
     outline: "none",
-    color: "#27323d",
+
+    color: "#25303a",
+
     fontFamily: "inherit",
-    fontSize: "10px",
+
+    fontSize: "9px",
   },
 
-  searchActions: {
-    marginTop: "18px",
+  formActions: {
+    minHeight: "45px",
+
+    padding: "6px 8px",
+
     display: "flex",
-    gap: "9px",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    gap: "20px",
+
+    backgroundColor: "#f7f8f9",
+  },
+
+  formActionInformation: {
+    color: "#707a85",
+
+    fontSize: "7px",
+  },
+
+  formActionButtons: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "7px",
   },
 
   primaryButton: {
-    minHeight: "38px",
-    padding: "0 18px",
-    background: "#0b2b58",
-    border: "1px solid #0b2b58",
+    minHeight: "30px",
+
+    padding: "0 14px",
+
+    backgroundColor: WCG_BLUE,
+
+    border: `1px solid ${WCG_BLUE}`,
+
     color: "#ffffff",
+
     fontFamily: "inherit",
-    fontSize: "8px",
+
+    fontSize: "7px",
     fontWeight: 700,
-    letterSpacing: "0.4px",
+
+    letterSpacing: "0.25px",
+
     cursor: "pointer",
   },
 
   secondaryButton: {
-    minHeight: "38px",
-    padding: "0 18px",
-    background: "#ffffff",
-    border: "1px solid #adb6c0",
-    color: "#485561",
+    minHeight: "30px",
+
+    padding: "0 14px",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid #929ca7`,
+
+    color: TEXT_BLUE,
+
     fontFamily: "inherit",
-    fontSize: "8px",
+
+    fontSize: "7px",
     fontWeight: 700,
+
     cursor: "pointer",
   },
 
-  summaryGrid: {
-    marginBottom: "18px",
+  /* =========================================================
+     SUMMARY
+     ========================================================= */
+
+  summaryRegister: {
     display: "grid",
-    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-    gap: "12px",
+
+    gridTemplateColumns:
+      "repeat(4, minmax(0, 1fr))",
+
+    backgroundColor: "#ffffff",
+
+    border: `1px solid ${BORDER}`,
   },
 
-  summaryBox: {
-    minHeight: "90px",
-    padding: "17px 18px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
+  summaryItem: {
+    minHeight: "74px",
+
+    padding: "10px 12px",
+
+    boxSizing: "border-box",
+
+    borderRight: `1px solid ${LIGHT_BORDER}`,
+  },
+
+  summaryNumber: {
+    color: "#7b8691",
+
+    fontSize: "7px",
+    fontWeight: 700,
   },
 
   summaryLabel: {
-    color: "#697581",
+    marginTop: "5px",
+
+    color: TEXT_BLUE,
+
     fontSize: "8px",
     fontWeight: 700,
-    textTransform: "uppercase",
+
+    letterSpacing: "0.2px",
   },
 
   summaryValue: {
-    marginTop: "8px",
-    color: "#071b3b",
-    fontSize: "23px",
-    fontWeight: 600,
+    marginTop: "7px",
+
+    color: WCG_BLUE,
+
+    fontSize: "18px",
+    fontWeight: 700,
+
+    lineHeight: 1,
   },
 
-  resultsHeader: {
-    minHeight: "65px",
-    padding: "0 19px",
+  /* =========================================================
+     RESULTS TABLE
+     ========================================================= */
+
+  resultsFrame: {
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
+  },
+
+  resultsTitleBar: {
+    minHeight: "38px",
+
+    padding: "0 10px",
+
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+
     gap: "20px",
-    borderBottom: "1px solid #e1e5e9",
+
+    boxSizing: "border-box",
+
+    backgroundColor: WCG_BLUE,
+
+    color: "#ffffff",
   },
 
-  resultsDescription: {
-    marginTop: "4px",
-    color: "#87909a",
-    fontSize: "8px",
-  },
-
-  resultButtons: {
-    display: "flex",
-    gap: "7px",
-  },
-
-  smallButton: {
-    minHeight: "31px",
-    padding: "0 11px",
-    background: "#ffffff",
-    border: "1px solid #c7ced5",
-    color: "#53606d",
-    fontFamily: "inherit",
+  resultsTitle: {
     fontSize: "8px",
     fontWeight: 700,
+
+    letterSpacing: "0.3px",
+  },
+
+  resultsSubtitle: {
+    marginLeft: "10px",
+
+    color: "rgba(255,255,255,0.72)",
+
+    fontSize: "7px",
+  },
+
+  resultActions: {
+    display: "flex",
+    alignItems: "center",
+
+    gap: "5px",
+  },
+
+  titleBarButton: {
+    minHeight: "24px",
+
+    padding: "0 8px",
+
+    backgroundColor: "#ffffff",
+
+    border: "1px solid rgba(255,255,255,0.8)",
+
+    color: WCG_BLUE,
+
+    fontFamily: "inherit",
+
+    fontSize: "7px",
+    fontWeight: 700,
+
     cursor: "pointer",
   },
 
-  tableContainer: {
+  tableScroll: {
     width: "100%",
+
     overflowX: "auto",
   },
 
   table: {
     width: "100%",
+
+    minWidth: "1120px",
+
     borderCollapse: "collapse",
+
+    tableLayout: "fixed",
+
+    fontSize: "8px",
   },
 
   tableHeading: {
-    padding: "11px 12px",
-    background: "#f4f6f8",
-    borderBottom: "1px solid #dfe4e8",
-    color: "#53606d",
+    padding: "7px 8px",
+
+    backgroundColor: TABLE_HEADER,
+
+    borderRight: `1px solid ${BORDER}`,
+    borderBottom: `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
     fontSize: "7px",
     fontWeight: 700,
+
     textAlign: "left",
-    textTransform: "uppercase",
+
     whiteSpace: "nowrap",
   },
 
   emptyCell: {
     padding: 0,
+
+    borderBottom: `1px solid ${LIGHT_BORDER}`,
   },
 
-  emptyState: {
-    minHeight: "215px",
-    padding: "35px",
+  emptyResults: {
+    minHeight: "145px",
+
+    padding: "25px",
+
     display: "flex",
     flexDirection: "column",
+
     alignItems: "center",
     justifyContent: "center",
+
     textAlign: "center",
+
+    backgroundColor: "#ffffff",
   },
 
-  emptyIcon: {
-    width: "47px",
-    height: "47px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "1px solid #d5dbe1",
-    borderRadius: "50%",
-    color: "#718092",
-    fontSize: "18px",
-  },
+  emptyResultCode: {
+    marginBottom: "7px",
 
-  emptyTitle: {
-    marginTop: "12px",
-    color: "#394550",
-    fontSize: "10px",
-    fontWeight: 600,
-  },
+    color: "#7b8690",
 
-  emptyText: {
-    maxWidth: "420px",
-    marginTop: "5px",
-    color: "#858e98",
-    fontSize: "8px",
-    lineHeight: 1.6,
-  },
-
-  tableFooter: {
-    minHeight: "42px",
-    padding: "0 14px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderTop: "1px solid #e1e5e9",
-    color: "#7c8690",
-    fontSize: "8px",
-  },
-
-  rulesGrid: {
-    marginBottom: "18px",
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "12px",
-  },
-
-  rulePanel: {
-    minHeight: "145px",
-    padding: "18px",
-    display: "grid",
-    gridTemplateColumns: "34px 1fr",
-    gap: "11px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
-  },
-
-  ruleNumber: {
-    color: "#8793a0",
-    fontSize: "8px",
+    fontSize: "7px",
     fontWeight: 700,
-  },
 
-  ruleTitle: {
-    color: "#071b3b",
-    fontSize: "9px",
-    fontWeight: 700,
     letterSpacing: "0.5px",
   },
 
-  ruleText: {
-    margin: "5px 0 0",
-    color: "#687480",
-    fontSize: "8px",
-    lineHeight: 1.7,
+  emptyResultTitle: {
+    color: TEXT_BLUE,
+
+    fontSize: "9px",
+    fontWeight: 700,
   },
 
-  numberExample: {
-    marginTop: "12px",
-    display: "inline-flex",
-    border: "1px solid #d4dae0",
-  },
+  emptyResultText: {
+    maxWidth: "430px",
 
-  numberLabel: {
-    padding: "7px 9px",
-    background: "#f1f3f5",
+    marginTop: "5px",
+
     color: "#737e89",
+
+    fontSize: "8px",
+
+    lineHeight: 1.5,
+  },
+
+  tableFooter: {
+    minHeight: "32px",
+
+    padding: "0 9px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    backgroundColor: "#f6f7f8",
+
+    color: "#6d7883",
+
+    fontSize: "7px",
+    fontWeight: 600,
+  },
+
+  /* =========================================================
+     REGISTRY CONTROLS
+     ========================================================= */
+
+  controlGrid: {
+    display: "grid",
+
+    gridTemplateColumns:
+      "repeat(2, minmax(0, 1fr))",
+
+    gap: "12px",
+  },
+
+  registryControl: {
+    minHeight: "135px",
+
+    backgroundColor: "rgba(255,255,255,0.95)",
+
+    border: `1px solid ${BORDER}`,
+  },
+
+  controlHeader: {
+    minHeight: "31px",
+
+    padding: "0 10px",
+
+    display: "flex",
+    alignItems: "center",
+
+    gap: "9px",
+
+    backgroundColor: PALE_BLUE,
+
+    borderBottom: `1px solid ${BORDER}`,
+  },
+
+  controlNumber: {
+    color: "#74808c",
+
     fontSize: "7px",
     fontWeight: 700,
   },
 
-  numberValue: {
-    padding: "7px 11px",
-    color: "#071b3b",
-    fontSize: "10px",
-    fontWeight: 700,
-    letterSpacing: "1px",
-  },
+  controlTitle: {
+    color: TEXT_BLUE,
 
-  sectionHeading: {
-    margin: "25px 0 11px",
-    color: "#071b3b",
-    fontSize: "10px",
-    fontWeight: 700,
-    letterSpacing: "0.6px",
-  },
-
-  sectionNumber: {
-    marginRight: "10px",
-    color: "#8793a0",
     fontSize: "8px",
+    fontWeight: 700,
+
+    letterSpacing: "0.25px",
   },
 
-  functionGrid: {
+  controlBody: {
+    padding: "11px 12px",
+  },
+
+  controlText: {
+    margin: 0,
+
+    color: "#626e79",
+
+    fontSize: "8px",
+
+    lineHeight: 1.55,
+  },
+
+  numberExample: {
+    marginTop: "10px",
+
+    display: "inline-flex",
+
+    border: `1px solid ${BORDER}`,
+  },
+
+  numberExampleLabel: {
+    padding: "6px 8px",
+
+    display: "inline-flex",
+    alignItems: "center",
+
+    backgroundColor: "#f1f3f5",
+
+    borderRight: `1px solid ${BORDER}`,
+
+    color: "#6f7a85",
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  numberExampleValue: {
+    padding: "6px 9px",
+
+    color: WCG_BLUE,
+
+    fontSize: "9px",
+
+    letterSpacing: "0.8px",
+  },
+
+  controlNote: {
+    marginTop: "10px",
+
+    paddingTop: "7px",
+
+    borderTop: `1px solid ${LIGHT_BORDER}`,
+
+    color: "#697580",
+
+    fontSize: "7px",
+
+    fontStyle: "italic",
+  },
+
+  /* =========================================================
+     PARTICIPANT FUNCTIONS
+     ========================================================= */
+
+  functionPanel: {
+    backgroundColor: "#ffffff",
+
+    border: `1px solid ${BORDER}`,
+  },
+
+  functionRow: {
+    minHeight: "47px",
+
     display: "grid",
-    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-    gap: "11px",
+
+    gridTemplateColumns:
+      "65px 190px 1fr 80px",
+
+    alignItems: "stretch",
+
+    borderBottom: `1px solid ${LIGHT_BORDER}`,
   },
 
-  functionCard: {
-    minHeight: "105px",
-    padding: "16px",
+  functionNumber: {
+    padding: "8px 10px",
+
     display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: "12px",
-    background: "#ffffff",
-    border: "1px solid #dce1e6",
-    color: "inherit",
-    textDecoration: "none",
+    alignItems: "center",
+
+    borderRight: `1px solid ${LIGHT_BORDER}`,
+
+    color: "#74808b",
+
+    fontSize: "7px",
+    fontWeight: 700,
   },
 
   functionTitle: {
-    color: "#0b2b58",
-    fontSize: "9px",
+    padding: "8px 10px",
+
+    display: "flex",
+    alignItems: "center",
+
+    borderRight: `1px solid ${LIGHT_BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "8px",
     fontWeight: 700,
   },
 
   functionDescription: {
-    marginTop: "5px",
-    color: "#7a8590",
+    padding: "8px 10px",
+
+    display: "flex",
+    alignItems: "center",
+
+    borderRight: `1px solid ${LIGHT_BORDER}`,
+
+    color: "#69747f",
+
     fontSize: "8px",
-    lineHeight: 1.55,
   },
 
-  functionArrow: {
-    color: "#788594",
-    fontSize: "13px",
+  functionAction: {
+    padding: "6px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  functionButton: {
+    minWidth: "48px",
+
+    padding: "5px 7px",
+
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: WCG_BLUE,
+
+    border: `1px solid ${WCG_BLUE}`,
+
+    color: "#ffffff",
+
+    textDecoration: "none",
+
+    fontSize: "7px",
+    fontWeight: 700,
+  },
+
+  /* =========================================================
+     REGISTRY INFORMATION
+     ========================================================= */
+
+  informationFrame: {
+    marginBottom: "4px",
+
+    backgroundColor: "#ffffff",
+
+    border: `3px double ${WCG_BLUE}`,
+  },
+
+  informationRow: {
+    minHeight: "35px",
+
+    display: "grid",
+
+    gridTemplateColumns: "210px 1fr",
+
+    borderBottom: `1px solid ${LIGHT_BORDER}`,
+  },
+
+  informationLabel: {
+    padding: "8px 10px",
+
+    display: "flex",
+    alignItems: "center",
+
+    backgroundColor: PALE_BLUE,
+
+    borderRight: `1px solid ${BORDER}`,
+
+    color: TEXT_BLUE,
+
+    fontSize: "8px",
+    fontWeight: 700,
+  },
+
+  informationValue: {
+    padding: "8px 10px",
+
+    display: "flex",
+    alignItems: "center",
+
+    color: "#606c77",
+
+    fontSize: "8px",
   },
 };
