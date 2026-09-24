@@ -1,102 +1,60 @@
+import { auth } from "@/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { CSSProperties, ReactNode } from "react";
-import { auth } from "@/auth";
-
-/* ============================================================
-   MyWCSA AMS — MASTER STAFF LAYOUT
-   ============================================================
-
-   DESIGN STANDARD
-   ------------------------------------------------------------
-   Primary blue:       #001489
-   Typeface:           Century Gothic
-   Navigation:         Horizontal / Top
-   Header artwork:     /images/cape-town-header.png
-   Workspace:          White + fine grey horizontal lines
-
-   IMPORTANT
-   ------------------------------------------------------------
-   cape-town-header.png contains the completed header artwork.
-   We DO NOT place another logo, avatar or greeting over it.
-
-   The layout provides:
-   - Header
-   - Main AMS navigation
-   - Main workspace
-   - Government-style footer
-
-   Individual pages provide:
-   - Breadcrumbs
-   - Page titles
-   - Workflow
-   - Forms
-   - Registers
-   - Tables
-   - Actions
-   ============================================================ */
 
 const WCG_BLUE = "#001489";
-const WCG_DARK_BLUE = "#000f5c";
+const WCG_DARK_BLUE = "#000d5c";
 const TEXT_BLUE = "#00175a";
-const BORDER = "#b9c0c8";
-const MUTED_TEXT = "#56616d";
+const TEXT = "#1f2937";
+const MUTED = "#5f6875";
+const BORDER = "#d2d7df";
+const LIGHT_BACKGROUND = "#f5f7fa";
 
 const navigationItems = [
   {
     label: "Dashboard",
     href: "/apps/ams",
-    icon: "⌂",
   },
   {
     label: "Participants",
     href: "/apps/ams/participants",
-    icon: "♟",
   },
   {
     label: "Schools",
     href: "/apps/ams/schools",
-    icon: "▦",
   },
   {
     label: "Clubs & Teams",
-    href: "/apps/ams/clubs",
-    icon: "♟",
+    href: "/apps/ams/clubs-teams",
   },
   {
     label: "Associations",
     href: "/apps/ams/associations",
-    icon: "⌘",
   },
   {
     label: "Sporting Codes",
     href: "/apps/ams/sporting-codes",
-    icon: "⚒",
   },
   {
     label: "Competitions",
     href: "/apps/ams/competitions",
-    icon: "♜",
   },
   {
     label: "Affiliations",
     href: "/apps/ams/affiliations",
-    icon: "⌁",
   },
   {
     label: "Governance",
     href: "/apps/ams/governance",
-    icon: "◇",
   },
   {
     label: "Documents",
     href: "/apps/ams/documents",
-    icon: "▤",
   },
   {
     label: "Reports",
     href: "/apps/ams/reports",
-    icon: "▥",
   },
 ];
 
@@ -107,152 +65,188 @@ export default async function AMSLayout({
 }) {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/login/staff");
   }
 
+  /*
+   * The actual Microsoft / Entra account name is used first.
+   *
+   * The fallback is only used if the authentication session does
+   * not contain a display name.
+   */
+  const staffName =
+    session.user?.name?.trim() ||
+    "Christiaan De Villiers";
+
+  const staffEmail =
+    session.user?.email?.trim() ||
+    "";
+
+  /*
+   * Current AMS interface role.
+   *
+   * Later this should come from the AMS permissions / staff
+   * profile database rather than being hard-coded.
+   */
+  const staffRole = "ICT HOD";
+
   return (
-    <div style={styles.application}>
+    <div style={styles.shell}>
       {/* =====================================================
-          BAKED CAPE TOWN HEADER
+          CAPE TOWN / WCG HEADER
+
+          IMPORTANT:
+          The actual file is directly inside /public:
+
+          public/cape-town-header.png
+
+          Therefore the browser URL MUST be:
+
+          /cape-town-header.png
+
+          NOT:
+          /images/cape-town-header.png
           ===================================================== */}
 
       <header style={styles.header}>
         <img
-          src="/images/cape-town-header.png"
-          alt="MyWCSA"
+          src="/cape-town-header.png"
+          alt="Western Cape Government"
           style={styles.headerImage}
         />
       </header>
 
       {/* =====================================================
-          AMS MODULE NAVIGATION
+          AMS SYSTEM / STAFF IDENTITY BAR
+          ===================================================== */}
+
+      <section style={styles.identityBar}>
+        <div style={styles.identityInner}>
+          <div style={styles.systemIdentity}>
+            <div style={styles.systemName}>
+              MyWCSA AMS
+            </div>
+
+            <div style={styles.systemDivider} />
+
+            <div style={styles.systemDescription}>
+              Administrative Management System
+            </div>
+          </div>
+
+          <div style={styles.staffIdentity}>
+            <div style={styles.staffCaption}>
+              SIGNED IN AS
+            </div>
+
+            <div style={styles.staffName}>
+              {staffName}
+            </div>
+
+            <div style={styles.staffRole}>
+              {staffRole}
+              {staffEmail ? ` • ${staffEmail}` : ""}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          PRIMARY AMS NAVIGATION
           ===================================================== */}
 
       <nav
-        aria-label="MyWCSA AMS modules"
         style={styles.navigation}
+        aria-label="MyWCSA AMS navigation"
       >
         <div style={styles.navigationInner}>
           {navigationItems.map((item) => (
             <Link
-              key={item.label}
+              key={item.href}
               href={item.href}
               style={styles.navigationItem}
             >
-              <span style={styles.navigationIcon}>
-                {item.icon}
-              </span>
-
-              <span style={styles.navigationText}>
-                {item.label}
-              </span>
+              {item.label}
             </Link>
           ))}
 
-          <div style={styles.moreItem}>
-            <span style={styles.moreDots}>•••</span>
+          <button
+            type="button"
+            style={styles.moreButton}
+            aria-label="More AMS modules"
+          >
             <span>More</span>
-            <span style={styles.moreArrow}>⌄</span>
-          </div>
+
+            <span style={styles.moreArrow}>
+              ▾
+            </span>
+          </button>
         </div>
       </nav>
 
       {/* =====================================================
-          MAIN WORKSPACE
+          MAIN AMS WORKSPACE
+
+          IMPORTANT:
+          The grey horizontal line background has been removed.
+
+          This area is now a clean white government-style
+          workspace.
           ===================================================== */}
 
       <main style={styles.workspace}>
-        <div style={styles.workspaceBoundaryLeft} />
-        <div style={styles.workspaceBoundaryRight} />
-
         <div style={styles.workspaceInner}>
           {children}
         </div>
       </main>
 
       {/* =====================================================
-          SERVICE LINKS
-          ===================================================== */}
-
-      <div style={styles.serviceLinks}>
-        <div style={styles.serviceLinksInner}>
-          <div style={styles.serviceLinksLeft}>
-            <span>Western Cape Government</span>
-
-            <span style={styles.separator}>|</span>
-
-            <span>MyWCSA e-Innovation</span>
-
-            <span style={styles.separator}>|</span>
-
-            <span>Western Cape Sports Association</span>
-          </div>
-
-          <div style={styles.serviceLinksRight}>
-            <Link
-              href="/my-apps"
-              style={styles.serviceLink}
-            >
-              MyGovApps
-            </Link>
-
-            <span style={styles.separator}>|</span>
-
-            <Link
-              href="/apps/ams/help"
-              style={styles.serviceLink}
-            >
-              Help &amp; Support
-            </Link>
-
-            <span style={styles.separator}>|</span>
-
-            <span>Service Desk: 083 273 1459</span>
-          </div>
-        </div>
-      </div>
-
-      {/* =====================================================
-          FORMAL FOOTER
+          AMS FOOTER
           ===================================================== */}
 
       <footer style={styles.footer}>
-        <div style={styles.footerInner}>
-          <div style={styles.footerSection}>
-            <div style={styles.footerHeading}>
-              MyWCSA AMS
-            </div>
-
-            <div style={styles.footerSmall}>
-              Western Cape Sports Association
-            </div>
+        <div style={styles.footerPrimary}>
+          <div style={styles.footerLeft}>
+            MyWCSA e-Innovation
           </div>
 
-          <div style={styles.footerLegal}>
-            This computer system is for authorised use only.
+          <div style={styles.footerCentre}>
+            Western Cape Sports Association
           </div>
 
           <div style={styles.footerRight}>
-            <Link
-              href="/apps/ams/help"
-              style={styles.footerLink}
-            >
-              Help &amp; Support
-            </Link>
+            MyWCSA AMS
+          </div>
+        </div>
 
-            <span style={styles.footerSeparator}>|</span>
+        <div style={styles.footerSecondary}>
+          <div style={styles.footerBrand}>
+            <div style={styles.footerBrandTitle}>
+              MyWCSA GovApps
+            </div>
 
-            <Link
-              href="/my-apps"
-              style={styles.footerLink}
-            >
-              MyGovApps
-            </Link>
+            <div style={styles.footerBrandSubtitle}>
+              Administrative Management System
+            </div>
+          </div>
 
-            <span style={styles.footerSeparator}>|</span>
+          <div style={styles.footerService}>
+            <span>
+              Authorised use only
+            </span>
 
-            <span>© 2026</span>
+            <span style={styles.footerDivider} />
+
+            <span>
+              Service Desk: 083 273 1459
+            </span>
+
+            <span style={styles.footerDivider} />
+
+            <span>
+              service@westerncapegov.za
+            </span>
           </div>
         </div>
       </footer>
@@ -260,355 +254,336 @@ export default async function AMSLayout({
   );
 }
 
-/* ============================================================
-   MASTER STYLES
-   ============================================================ */
-
 const styles: Record<string, CSSProperties> = {
   /* =========================================================
-     APPLICATION
+     APPLICATION SHELL
      ========================================================= */
 
-  application: {
+  shell: {
     width: "100%",
     minHeight: "100vh",
 
     margin: 0,
+    padding: 0,
 
     backgroundColor: "#ffffff",
 
-    color: TEXT_BLUE,
+    color: TEXT,
 
     fontFamily:
-      '"Century Gothic", "CenturyGothic", "AppleGothic", Arial, sans-serif',
-
-    fontSize: "11px",
-
-    lineHeight: 1.35,
+      '"Century Gothic", "CenturyGothic", Arial, Helvetica, sans-serif',
   },
 
   /* =========================================================
-     HEADER
-
-     IMPORTANT:
-     The image already contains its own branding and profile
-     artwork, so NOTHING is layered over it.
+     CAPE TOWN HEADER
      ========================================================= */
 
   header: {
     position: "relative",
 
     width: "100%",
+    height: "150px",
 
-    height: "154px",
+    margin: 0,
+    padding: 0,
 
     overflow: "hidden",
 
     backgroundColor: WCG_BLUE,
 
-    borderBottom: `3px solid ${WCG_BLUE}`,
+    border: 0,
   },
 
   headerImage: {
+    position: "absolute",
+
+    inset: 0,
+
     display: "block",
 
     width: "100%",
     height: "100%",
 
+    margin: 0,
+    padding: 0,
+
     objectFit: "cover",
 
+    /*
+     * Keep the complete baked header artwork centred.
+     *
+     * The WCG logo and avatar are already part of the image.
+     */
     objectPosition: "center center",
+
+    border: 0,
   },
 
   /* =========================================================
-     MAIN NAVIGATION
+     SYSTEM / STAFF IDENTITY BAR
+     ========================================================= */
 
-     Deliberately slim.
-     This is navigation — NOT a row of giant cards.
+  identityBar: {
+    width: "100%",
+
+    backgroundColor: WCG_BLUE,
+
+    borderTop:
+      "1px solid rgba(255,255,255,0.20)",
+
+    borderBottom:
+      "1px solid rgba(0,0,0,0.08)",
+  },
+
+  identityInner: {
+    width: "100%",
+    minHeight: "54px",
+
+    padding: "0 30px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    gap: "30px",
+
+    boxSizing: "border-box",
+  },
+
+  systemIdentity: {
+    minWidth: 0,
+
+    display: "flex",
+    alignItems: "center",
+
+    gap: "15px",
+  },
+
+  systemName: {
+    color: "#ffffff",
+
+    fontSize: "16px",
+    fontWeight: 700,
+
+    lineHeight: 1.2,
+
+    whiteSpace: "nowrap",
+  },
+
+  systemDivider: {
+    width: "1px",
+    height: "25px",
+
+    flexShrink: 0,
+
+    backgroundColor:
+      "rgba(255,255,255,0.42)",
+  },
+
+  systemDescription: {
+    color: "#ffffff",
+
+    fontSize: "12px",
+    fontWeight: 400,
+
+    lineHeight: 1.3,
+
+    whiteSpace: "nowrap",
+  },
+
+  staffIdentity: {
+    minWidth: "250px",
+
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+
+    textAlign: "right",
+  },
+
+  staffCaption: {
+    marginBottom: "2px",
+
+    color: "#dfe4ff",
+
+    fontSize: "9px",
+    fontWeight: 700,
+
+    lineHeight: 1.2,
+
+    letterSpacing: "0.8px",
+  },
+
+  staffName: {
+    color: "#ffffff",
+
+    fontSize: "14px",
+    fontWeight: 700,
+
+    lineHeight: 1.25,
+  },
+
+  staffRole: {
+    marginTop: "2px",
+
+    color: "#e4e8f7",
+
+    fontSize: "10px",
+    fontWeight: 400,
+
+    lineHeight: 1.3,
+  },
+
+  /* =========================================================
+     AMS NAVIGATION
      ========================================================= */
 
   navigation: {
     position: "relative",
 
-    zIndex: 20,
+    zIndex: 10,
 
     width: "100%",
 
-    height: "44px",
+    margin: 0,
+    padding: 0,
 
     backgroundColor: "#ffffff",
 
-    borderBottom: `3px solid ${WCG_BLUE}`,
+    borderBottom: `1px solid ${BORDER}`,
 
-    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+    boxShadow:
+      "0 1px 4px rgba(15, 29, 64, 0.07)",
   },
 
   navigationInner: {
     width: "100%",
-    height: "44px",
+    minHeight: "44px",
+
+    margin: 0,
+    padding: 0,
 
     display: "flex",
-
     alignItems: "stretch",
 
-    overflowX: "auto",
-    overflowY: "hidden",
+    boxSizing: "border-box",
 
-    scrollbarWidth: "thin",
+    /*
+     * No horizontal scrollbar.
+     */
+    overflow: "hidden",
   },
 
   navigationItem: {
+    minWidth: 0,
     height: "44px",
 
-    padding: "0 14px",
+    padding: "0 12px",
 
-    display: "inline-flex",
+    flex: "1 1 auto",
 
+    display: "flex",
     alignItems: "center",
-
     justifyContent: "center",
-
-    gap: "6px",
-
-    flexShrink: 0,
 
     boxSizing: "border-box",
 
-    color: TEXT_BLUE,
-
     backgroundColor: "#ffffff",
 
-    border: "none",
+    borderRight: `1px solid ${BORDER}`,
 
-    borderRight: "1px solid #d1d5da",
+    color: WCG_BLUE,
 
     textDecoration: "none",
 
-    whiteSpace: "nowrap",
-  },
-
-  navigationIcon: {
-    width: "17px",
-
-    display: "inline-flex",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    color: WCG_BLUE,
-
-    fontSize: "14px",
-
+    fontSize: "11px",
     fontWeight: 700,
 
     lineHeight: 1,
+
+    whiteSpace: "nowrap",
   },
 
-  navigationText: {
-    fontSize: "10px",
-
-    fontWeight: 600,
-
-    letterSpacing: "0",
-
-    lineHeight: 1,
-  },
-
-  moreItem: {
+  moreButton: {
+    minWidth: "78px",
     height: "44px",
 
-    padding: "0 14px",
-
-    display: "inline-flex",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    gap: "6px",
+    padding: "0 13px",
 
     flexShrink: 0,
 
-    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
 
-    color: TEXT_BLUE,
+    gap: "7px",
+
+    boxSizing: "border-box",
 
     backgroundColor: "#ffffff",
 
-    whiteSpace: "nowrap",
+    border: 0,
 
-    fontSize: "10px",
-
-    fontWeight: 600,
-  },
-
-  moreDots: {
     color: WCG_BLUE,
 
+    fontFamily:
+      '"Century Gothic", "CenturyGothic", Arial, Helvetica, sans-serif',
+
+    fontSize: "11px",
     fontWeight: 700,
 
-    letterSpacing: "1px",
+    lineHeight: 1,
+
+    cursor: "pointer",
   },
 
   moreArrow: {
+    position: "relative",
+
+    top: "-1px",
+
     color: WCG_BLUE,
 
     fontSize: "10px",
-
     fontWeight: 700,
   },
 
   /* =========================================================
-     WORKSPACE
-
-     EXACT DIRECTION:
-     WHITE BACKGROUND + FINE GREY HORIZONTAL LINES
+     AMS WORKSPACE
      ========================================================= */
 
   workspace: {
-    position: "relative",
-
     width: "100%",
+    minHeight: "650px",
 
-    minHeight: "680px",
+    margin: 0,
 
-    overflow: "hidden",
+    padding: "26px 32px 50px",
 
+    boxSizing: "border-box",
+
+    /*
+     * NO LINES.
+     * NO GRID.
+     * NO REPEATING GRADIENT.
+     */
     backgroundColor: "#ffffff",
 
-    backgroundImage:
-      "repeating-linear-gradient(to bottom, rgba(110,115,120,0.12) 0px, rgba(110,115,120,0.12) 1px, transparent 1px, transparent 3px)",
+    backgroundImage: "none",
   },
 
   workspaceInner: {
-    position: "relative",
-
-    zIndex: 2,
-
     width: "100%",
-
-    maxWidth: "1540px",
+    maxWidth: "1500px",
 
     margin: "0 auto",
-
-    padding: "22px 32px 38px",
+    padding: 0,
 
     boxSizing: "border-box",
-  },
-
-  /*
-     Only two very subtle alignment boundaries.
-
-     We are NOT adding vertical grid lines across the page.
-  */
-
-  workspaceBoundaryLeft: {
-    position: "absolute",
-
-    zIndex: 1,
-
-    top: 0,
-    bottom: 0,
-
-    left: "32px",
-
-    width: "1px",
-
-    backgroundColor: "rgba(100,105,110,0.08)",
-
-    pointerEvents: "none",
-  },
-
-  workspaceBoundaryRight: {
-    position: "absolute",
-
-    zIndex: 1,
-
-    top: 0,
-    bottom: 0,
-
-    right: "32px",
-
-    width: "1px",
-
-    backgroundColor: "rgba(100,105,110,0.08)",
-
-    pointerEvents: "none",
-  },
-
-  /* =========================================================
-     SERVICE LINKS
-
-     Clean strip — NOT tabulated.
-     ========================================================= */
-
-  serviceLinks: {
-    width: "100%",
 
     backgroundColor: "#ffffff",
 
-    borderTop: `1px solid ${BORDER}`,
-
-    borderBottom: `1px solid ${BORDER}`,
-  },
-
-  serviceLinksInner: {
-    maxWidth: "1540px",
-
-    minHeight: "36px",
-
-    margin: "0 auto",
-
-    padding: "0 32px",
-
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "space-between",
-
-    gap: "20px",
-
-    boxSizing: "border-box",
-
-    color: MUTED_TEXT,
-
-    fontSize: "8px",
-  },
-
-  serviceLinksLeft: {
-    display: "flex",
-
-    alignItems: "center",
-
-    gap: "7px",
-
-    whiteSpace: "nowrap",
-  },
-
-  serviceLinksRight: {
-    display: "flex",
-
-    alignItems: "center",
-
-    justifyContent: "flex-end",
-
-    gap: "7px",
-
-    whiteSpace: "nowrap",
-  },
-
-  serviceLink: {
     color: TEXT_BLUE,
-
-    textDecoration: "none",
-
-    fontWeight: 600,
-  },
-
-  separator: {
-    color: "#a9afb6",
   },
 
   /* =========================================================
@@ -618,82 +593,111 @@ const styles: Record<string, CSSProperties> = {
   footer: {
     width: "100%",
 
-    backgroundColor: WCG_DARK_BLUE,
+    margin: 0,
+    padding: 0,
 
-    borderTop: `3px solid ${WCG_BLUE}`,
+    backgroundColor: "#ffffff",
+
+    borderTop: `1px solid ${BORDER}`,
   },
 
-  footerInner: {
-    maxWidth: "1540px",
-
-    minHeight: "54px",
-
-    margin: "0 auto",
+  footerPrimary: {
+    minHeight: "44px",
 
     padding: "0 32px",
 
     display: "grid",
 
-    gridTemplateColumns: "1fr 1fr 1fr",
+    gridTemplateColumns:
+      "1fr 1fr 1fr",
 
     alignItems: "center",
 
-    gap: "20px",
-
     boxSizing: "border-box",
 
+    backgroundColor: WCG_DARK_BLUE,
+
     color: "#ffffff",
+
+    fontSize: "11px",
+    fontWeight: 700,
   },
 
-  footerSection: {
+  footerLeft: {
     textAlign: "left",
   },
 
-  footerHeading: {
-    marginBottom: "2px",
-
-    fontSize: "9px",
-
-    fontWeight: 700,
-
-    letterSpacing: "0.3px",
-  },
-
-  footerSmall: {
-    color: "rgba(255,255,255,0.75)",
-
-    fontSize: "7px",
-  },
-
-  footerLegal: {
-    color: "rgba(255,255,255,0.8)",
-
-    fontSize: "7px",
-
+  footerCentre: {
     textAlign: "center",
   },
 
   footerRight: {
-    display: "flex",
+    textAlign: "right",
+  },
 
+  footerSecondary: {
+    minHeight: "72px",
+
+    padding: "14px 32px",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    gap: "30px",
+
+    boxSizing: "border-box",
+
+    backgroundColor: LIGHT_BACKGROUND,
+
+    color: MUTED,
+  },
+
+  footerBrand: {
+    display: "flex",
+    flexDirection: "column",
+
+    gap: "3px",
+  },
+
+  footerBrandTitle: {
+    color: WCG_BLUE,
+
+    fontSize: "12px",
+    fontWeight: 700,
+
+    lineHeight: 1.3,
+  },
+
+  footerBrandSubtitle: {
+    color: MUTED,
+
+    fontSize: "10px",
+    fontWeight: 400,
+
+    lineHeight: 1.3,
+  },
+
+  footerService: {
+    display: "flex",
     alignItems: "center",
 
-    justifyContent: "flex-end",
+    gap: "12px",
 
-    gap: "7px",
+    color: MUTED,
 
-    fontSize: "7px",
+    fontSize: "10px",
+    fontWeight: 400,
 
-    whiteSpace: "nowrap",
+    lineHeight: 1.3,
   },
 
-  footerLink: {
-    color: "#ffffff",
+  footerDivider: {
+    width: "1px",
+    height: "16px",
 
-    textDecoration: "none",
-  },
+    flexShrink: 0,
 
-  footerSeparator: {
-    opacity: 0.5,
+    backgroundColor: BORDER,
   },
 };
