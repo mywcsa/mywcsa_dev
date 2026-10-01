@@ -8,6 +8,8 @@ export default async function StaffLoginPage() {
     redirect("/my-apps");
   }
 
+  const entraConfigured = isMicrosoftEntraConfigured();
+
   return (
     <main
       style={{
@@ -60,34 +62,52 @@ export default async function StaffLoginPage() {
           Sign in using your WCSA Microsoft organisational account.
         </p>
 
-        <form
-          action={async () => {
-            "use server";
+        {entraConfigured ? (
+          <form
+            action={async () => {
+              "use server";
 
-            await signIn("microsoft-entra-id", {
-              redirectTo: "/my-apps",
-            });
-          }}
-        >
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              minHeight: "42px",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              background: "#0788f9",
-              color: "#ffffff",
-              fontFamily:
-                '"Century Gothic", CenturyGothic, AppleGothic, Arial, sans-serif',
-              fontSize: "16px",
-              cursor: "pointer",
+              await signIn("microsoft-entra-id", {
+                redirectTo: "/my-apps",
+              });
             }}
           >
-            Continue with Microsoft
-          </button>
-        </form>
+            <button
+              type="submit"
+              style={{
+                width: "100%",
+                minHeight: "42px",
+                padding: "10px 20px",
+                border: "none",
+                borderRadius: "4px",
+                background: "#0788f9",
+                color: "#ffffff",
+                fontFamily:
+                  '"Century Gothic", CenturyGothic, AppleGothic, Arial, sans-serif',
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              Continue with Microsoft
+            </button>
+          </form>
+        ) : (
+          <p
+            style={{
+              margin: "0 0 25px 0",
+              padding: "14px",
+              background: "#fff3cd",
+              border: "1px solid #ffe69c",
+              borderRadius: "4px",
+              fontSize: "13px",
+              lineHeight: "1.6",
+              color: "#664d03",
+            }}
+          >
+            Microsoft Entra ID credentials are not configured.
+            Sign-in is unavailable until they are set up.
+          </p>
+        )}
 
         <a
           href="/"
