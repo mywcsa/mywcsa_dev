@@ -1,4 +1,4 @@
-import { auth, signIn } from "@/auth";
+import { auth, isMicrosoftEntraConfigured, signIn } from "@/auth";
 import { redirect } from "next/navigation";
 
 export default async function StaffLoginPage() {
