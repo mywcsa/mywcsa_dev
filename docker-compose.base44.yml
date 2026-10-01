@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: wcsa
+      POSTGRES_PASSWORD: wcsa_dev_password
+      POSTGRES_DB: mywcsa_dev
+    volumes:
+      - wcsa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wcsa -d mywcsa_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    image: node:22-bookworm
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - wcsa_node_modules:/app/node_modules
+      - wcsa_next_cache:/app/.next
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env.base44-defaults
+      - /run/base44/app.env
+    environment:
+      - DATABASE_URL=postgresql://wcsa:wcsa_dev_password@db:5432/mywcsa_dev?schema=public
+      - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=${__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-ec", "npm install && npx prisma generate && npx prisma db push && exec npm run dev -- -H 0.0.0.0"]
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/login/member').then(r=>{if(!r.ok)throw new Error(r.status)}).catch(e=>{throw e})\" || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  wcsa_pgdata:
+  wcsa_node_modules:
+  wcsa_next_cache:

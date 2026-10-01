@@ -1,0 +1,28 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/login/member",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "AUTH_SECRET",
+      "description": "Auth.js session signing secret. Generate with `openssl rand -base64 32`.",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "AUTH_MICROSOFT_ENTRA_ID_ID",
+      "description": "Microsoft Entra ID application (client) ID for staff OAuth login.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "AUTH_MICROSOFT_ENTRA_ID_SECRET",
+      "description": "Microsoft Entra ID client secret for staff OAuth login.",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "AUTH_MICROSOFT_ENTRA_ID_ISSUER",
+      "description": "Microsoft Entra ID issuer/authority URL (tenant endpoint).",
+      "requiredAtBoot": false
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type Role = "staff" | "business-partner" | "external-user";
+type Role = "staff" | "business-partner" | "external-user" | "member";
 
 type LoginSectionProps = {
   role: Role;
@@ -96,6 +96,26 @@ export default function Home() {
             title="External User"
             href="/login/external-user"
             video="/videos/external-user-login.mp4"
+            activeRole={activeRole}
+            onInfoClick={handleInfoClick}
+          />
+        )}
+
+
+        {/* =========================================
+            MEMBER
+
+            WCSA Member login portal.
+
+            Tutorial:
+            /public/videos/member-login.mp4
+           ========================================= */}
+        {(activeRole === null || activeRole === "member") && (
+          <LoginSection
+            role="member"
+            title="Member"
+            href="/login/member"
+            video="/videos/member-login.mp4"
             activeRole={activeRole}
             onInfoClick={handleInfoClick}
           />
