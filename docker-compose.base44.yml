@@ -11,6 +11,7 @@ services:
     environment:
       - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
       - BASE44_SANDBOX_HOST_DOMAIN=${BASE44_SANDBOX_HOST_DOMAIN}
+      - AUTH_URL=https://3000-${BASE44_PUBLIC_HOST_SUFFIX}
       - NODE_ENV=development
     command: ["sh", "-ec", "npm ci && exec npx next dev --hostname 0.0.0.0 -p 3000"]
     healthcheck:

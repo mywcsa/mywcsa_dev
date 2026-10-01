@@ -11,21 +11,18 @@
     },
     {
       "name": "AUTH_MICROSOFT_ENTRA_ID_ID",
-      "description": "Microsoft Entra ID (Azure AD) OAuth client ID — from the Azure app registration overview",
-      "requiredAtBoot": true,
-      "generatedForDevelopment": true
+      "description": "Microsoft Entra ID (Azure AD) Application (client) ID — from the Azure app registration overview",
+      "requiredAtBoot": true
     },
     {
       "name": "AUTH_MICROSOFT_ENTRA_ID_SECRET",
-      "description": "Microsoft Entra ID (Azure AD) OAuth client secret — from the app registration's Certificates & secrets",
-      "requiredAtBoot": true,
-      "generatedForDevelopment": true
+      "description": "Microsoft Entra ID client secret VALUE (not the Secret ID) — from the app registration's Certificates & secrets",
+      "requiredAtBoot": true
     },
     {
       "name": "AUTH_MICROSOFT_ENTRA_ID_ISSUER",
-      "description": "Microsoft Entra ID issuer URL, e.g. https://login.microsoftonline.com/<tenant-id>/v2.0",
-      "requiredAtBoot": true,
-      "generatedForDevelopment": true
+      "description": "Microsoft Entra ID tenant ID, or the full issuer URL https://login.microsoftonline.com/<tenant-id>/v2.0",
+      "requiredAtBoot": true
     }
   ]
 }
