@@ -1,0 +1,31 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "AUTH_SECRET",
+      "description": "NextAuth session signing/encryption secret",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "AUTH_MICROSOFT_ENTRA_ID_ID",
+      "description": "Microsoft Entra ID (Azure AD) OAuth client ID — from the Azure app registration overview",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "AUTH_MICROSOFT_ENTRA_ID_SECRET",
+      "description": "Microsoft Entra ID (Azure AD) OAuth client secret — from the app registration's Certificates & secrets",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "AUTH_MICROSOFT_ENTRA_ID_ISSUER",
+      "description": "Microsoft Entra ID issuer URL, e.g. https://login.microsoftonline.com/<tenant-id>/v2.0",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    }
+  ]
+}
