@@ -17,3 +17,5 @@ Preserve the existing typography and appearance of the main GovApps login (`app/
 Membership screens are disconnected previews until explicitly authorised for integration. Never present simulated verification, payments, Registry approval, WCSA ID lookup or file selection as live operations. Staff/player registration belongs to the separate organisation interfaces, not the membership application. Do not add newsletters.
 
 Paystack integration is authorised. Keep live checkout dependent on a trusted Registry-approved AMS invoice, server-controlled fees and durable AMS settlement. Never expose secret keys or charge from a local preview draft. See `docs/membership-payments.md` for the required backend contract and environment settings.
+
+The authorised AMS invoice backend uses Supabase server-only SUPABASE_URL and SUPABASE_SECRET_KEY. Registry permissions are granted to specific Microsoft tenant/email pairs in wcsa_registry_staff. Preserve RLS/function grants, durable settlement and mode separation; do not promote local drafts or let general staff issue invoices. Database setup is in supabase/migrations/20261002_001_membership_invoices.sql.

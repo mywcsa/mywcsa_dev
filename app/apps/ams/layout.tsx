@@ -12,6 +12,7 @@ const BORDER = "#d2d7df";
 const LIGHT_BACKGROUND = "#f5f7fa";
 
 const navigationItems = [
+  { label: "Membership invoices", href: "/apps/ams/membership-invoices" },
   {
     label: "Dashboard",
     href: "/apps/ams",

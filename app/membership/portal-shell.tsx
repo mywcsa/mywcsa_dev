@@ -43,7 +43,7 @@ export default function PortalShell({ children }: { children: ReactNode }) {
           <div className={s.sidebarFoot}>Western Cape Sports Association NPC<span>WCSA · WCSSA · iKM · WCDA · WCOB</span></div>
         </aside>
         <div className={s.workspace}>
-          <div className={s.previewBanner}><strong>Interface preview</strong><span>No live account, database, Registry, map, emails or payments are connected. Drafts stay in this open browser session and are cleared on refresh.</span></div>
+          <div className={s.previewBanner}><strong>Interface preview</strong><span>Application details here remain a local preview and are not submitted to Registry. Drafts clear on refresh. Approved invoice payments use the separate Registry payment page.</span></div>
           <main id="membership-content" className={s.main}>{children}</main>
           <footer className={s.footer}>MyWCSA Membership Portal<span>Western Cape Sports Association NPC</span></footer>
         </div>
