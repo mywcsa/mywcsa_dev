@@ -383,7 +383,7 @@ const styles: Record<string, CSSProperties> = {
   systemDescription: {
     color: "#ffffff",
 
-    fontSize: "12px",
+    fontSize: "13px",
     fontWeight: 400,
 
     lineHeight: 1.3,
@@ -406,7 +406,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#dfe4ff",
 
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
 
     lineHeight: 1.2,
@@ -428,7 +428,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#e4e8f7",
 
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 400,
 
     lineHeight: 1.3,
@@ -496,7 +496,7 @@ const styles: Record<string, CSSProperties> = {
 
     textDecoration: "none",
 
-    fontSize: "11px",
+    fontSize: "13px",
     fontWeight: 700,
 
     lineHeight: 1,
@@ -529,7 +529,7 @@ const styles: Record<string, CSSProperties> = {
     fontFamily:
       'var(--font-system)',
 
-    fontSize: "11px",
+    fontSize: "13px",
     fontWeight: 700,
 
     lineHeight: 1,
@@ -544,7 +544,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: WCG_BLUE,
 
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -619,7 +619,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#ffffff",
 
-    fontSize: "11px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -663,7 +663,7 @@ const styles: Record<string, CSSProperties> = {
   footerBrandTitle: {
     color: WCG_BLUE,
 
-    fontSize: "12px",
+    fontSize: "13px",
     fontWeight: 700,
 
     lineHeight: 1.3,
@@ -672,7 +672,7 @@ const styles: Record<string, CSSProperties> = {
   footerBrandSubtitle: {
     color: MUTED,
 
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 400,
 
     lineHeight: 1.3,
@@ -686,7 +686,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: MUTED,
 
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 400,
 
     lineHeight: 1.3,

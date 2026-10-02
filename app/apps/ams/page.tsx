@@ -753,7 +753,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: MUTED,
 
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   breadcrumb: {
@@ -778,7 +778,7 @@ const styles: Record<string, CSSProperties> = {
   currentDate: {
     color: TEXT_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
 
     whiteSpace: "nowrap",
   },
@@ -808,7 +808,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#687482",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 600,
 
@@ -834,7 +834,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: MUTED,
 
-    fontSize: "10px",
+    fontSize: "13px",
 
     lineHeight: 1.35,
   },
@@ -868,7 +868,7 @@ const styles: Record<string, CSSProperties> = {
   statusLabel: {
     color: "#6d7782",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 600,
   },
@@ -878,7 +878,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#255c3a",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -919,7 +919,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: WCG_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -927,7 +927,7 @@ const styles: Record<string, CSSProperties> = {
   sectionHeading: {
     color: TEXT_BLUE,
 
-    fontSize: "10px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -937,7 +937,7 @@ const styles: Record<string, CSSProperties> = {
   sectionReference: {
     color: "#818b96",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     letterSpacing: "0.3px",
   },
@@ -979,7 +979,7 @@ const styles: Record<string, CSSProperties> = {
   metricReference: {
     color: "#78838f",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -989,7 +989,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1015,7 +1015,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#737e89",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   /* =========================================================
@@ -1058,7 +1058,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#ffffff",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1072,7 +1072,7 @@ const styles: Record<string, CSSProperties> = {
 
     textUnderlineOffset: "2px",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   table: {
@@ -1082,7 +1082,7 @@ const styles: Record<string, CSSProperties> = {
 
     tableLayout: "fixed",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   numberHeader: {
@@ -1097,7 +1097,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     borderBottom: `1px solid ${BORDER}`,
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1114,7 +1114,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     borderBottom: `1px solid ${BORDER}`,
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1133,7 +1133,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     borderBottom: `1px solid ${BORDER}`,
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1152,7 +1152,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     borderBottom: `1px solid ${BORDER}`,
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1170,7 +1170,7 @@ const styles: Record<string, CSSProperties> = {
 
     borderBottom: `1px solid ${BORDER}`,
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1246,7 +1246,7 @@ const styles: Record<string, CSSProperties> = {
 
     textUnderlineOffset: "2px",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1289,7 +1289,7 @@ const styles: Record<string, CSSProperties> = {
   quickActionNumber: {
     color: "#7c8792",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1301,7 +1301,7 @@ const styles: Record<string, CSSProperties> = {
   quickActionTitle: {
     color: WCG_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1313,7 +1313,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#707b86",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     lineHeight: 1.35,
   },
@@ -1352,7 +1352,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#ffffff",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1411,7 +1411,7 @@ const styles: Record<string, CSSProperties> = {
 
     borderRight: `1px solid ${LIGHT_BORDER}`,
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1426,7 +1426,7 @@ const styles: Record<string, CSSProperties> = {
 
     borderRight: `1px solid ${LIGHT_BORDER}`,
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1441,7 +1441,7 @@ const styles: Record<string, CSSProperties> = {
 
     borderRight: `1px solid ${LIGHT_BORDER}`,
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   moduleAction: {
@@ -1469,7 +1469,7 @@ const styles: Record<string, CSSProperties> = {
 
     textDecoration: "none",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1521,7 +1521,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: WCG_BLUE,
 
-    fontSize: "10px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1533,7 +1533,7 @@ const styles: Record<string, CSSProperties> = {
   informationTitle: {
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1547,7 +1547,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#707a84",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     lineHeight: 1.45,
   },
@@ -1561,7 +1561,7 @@ const styles: Record<string, CSSProperties> = {
 
     textUnderlineOffset: "2px",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 700,
 
@@ -1585,7 +1585,7 @@ const styles: Record<string, CSSProperties> = {
 
     borderCollapse: "collapse",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   systemLabelCell: {
@@ -1602,7 +1602,7 @@ const styles: Record<string, CSSProperties> = {
 
     textAlign: "left",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     fontWeight: 700,
   },
@@ -1616,6 +1616,6 @@ const styles: Record<string, CSSProperties> = {
 
     borderBottom: `1px solid ${LIGHT_BORDER}`,
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 };

@@ -1899,7 +1899,7 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: "20px",
     color: MUTED,
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   breadcrumb: {
@@ -1919,7 +1919,7 @@ const styles: Record<string, CSSProperties> = {
 
   date: {
     color: TEXT_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     whiteSpace: "nowrap",
   },
 
@@ -1937,7 +1937,7 @@ const styles: Record<string, CSSProperties> = {
   pageReference: {
     marginBottom: "4px",
     color: "#687482",
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 600,
     letterSpacing: "0.65px",
   },
@@ -1953,7 +1953,7 @@ const styles: Record<string, CSSProperties> = {
   pageSubtitle: {
     margin: "4px 0 0",
     color: MUTED,
-    fontSize: "10px",
+    fontSize: "13px",
   },
 
   cancelButton: {
@@ -1966,7 +1966,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
     textDecoration: "none",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2012,7 +2012,7 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "center",
     border: `1px solid ${BORDER}`,
     color: WCG_BLUE,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2022,7 +2022,7 @@ const styles: Record<string, CSSProperties> = {
   },
 
   workflowTitle: {
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     lineHeight: 1.25,
   },
@@ -2036,7 +2036,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: "1px solid #e0b7b7",
     borderBottom: "1px solid #e0b7b7",
     color: "#7a2424",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
@@ -2049,7 +2049,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: "1px solid #bfd7c4",
     borderBottom: "1px solid #bfd7c4",
     color: "#315e39",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
@@ -2075,13 +2075,13 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${WCG_BLUE}`,
     borderRadius: "50%",
     color: WCG_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   noticeTitle: {
     color: WCG_BLUE,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -2089,7 +2089,7 @@ const styles: Record<string, CSSProperties> = {
   noticeText: {
     marginTop: "2px",
     color: "#5e6b77",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
@@ -2114,7 +2114,7 @@ const styles: Record<string, CSSProperties> = {
 
   stepHeadingTitle: {
     color: TEXT_BLUE,
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.35px",
   },
@@ -2122,7 +2122,7 @@ const styles: Record<string, CSSProperties> = {
   stepHeadingText: {
     marginTop: "2px",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   sectionHeading: {
@@ -2148,20 +2148,20 @@ const styles: Record<string, CSSProperties> = {
   sectionNumber: {
     minWidth: "28px",
     color: WCG_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   sectionTitle: {
     color: TEXT_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.4px",
   },
 
   sectionReference: {
     color: "#7b8792",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 600,
   },
 
@@ -2178,7 +2178,7 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     backgroundColor: WCG_BLUE,
     color: "#ffffff",
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -2208,7 +2208,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: "#f1f3f5",
     borderRight: `1px solid ${BORDER}`,
     color: "#6d7883",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2219,7 +2219,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2251,7 +2251,7 @@ const styles: Record<string, CSSProperties> = {
     outline: "none",
     color: "#26323d",
     fontFamily: "inherit",
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   textarea: {
@@ -2266,7 +2266,7 @@ const styles: Record<string, CSSProperties> = {
     outline: "none",
     color: "#26323d",
     fontFamily: "inherit",
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   readOnlyValue: {
@@ -2279,7 +2279,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: "#f3f5f7",
     border: `1px solid ${LIGHT_BORDER}`,
     color: "#5f6b77",
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   formActions: {
@@ -2294,7 +2294,7 @@ const styles: Record<string, CSSProperties> = {
 
   formHelp: {
     color: "#707b86",
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   buttonGroup: {
@@ -2310,7 +2310,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${WCG_BLUE}`,
     color: "#ffffff",
     fontFamily: "inherit",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     cursor: "pointer",
   },
@@ -2322,7 +2322,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
     fontFamily: "inherit",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     cursor: "pointer",
   },
@@ -2351,7 +2351,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     borderBottom: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     textAlign: "left",
     whiteSpace: "nowrap",
@@ -2373,7 +2373,7 @@ const styles: Record<string, CSSProperties> = {
 
   emptyCode: {
     color: "#7d8791",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.5px",
   },
@@ -2381,7 +2381,7 @@ const styles: Record<string, CSSProperties> = {
   emptyTitle: {
     marginTop: "5px",
     color: TEXT_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2389,7 +2389,7 @@ const styles: Record<string, CSSProperties> = {
     maxWidth: "580px",
     marginTop: "4px",
     color: "#707b86",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
@@ -2416,7 +2416,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2425,7 +2425,7 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     color: "#5f6b76",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.4,
   },
 
@@ -2438,7 +2438,7 @@ const styles: Record<string, CSSProperties> = {
 
   registryNumberLabel: {
     color: MUTED,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.5px",
   },
@@ -2455,7 +2455,7 @@ const styles: Record<string, CSSProperties> = {
     maxWidth: "650px",
     margin: "7px auto 0",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
@@ -2471,7 +2471,7 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "flex-start",
     gap: "9px",
     color: "#56626e",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
     cursor: "pointer",
   },
@@ -2499,7 +2499,7 @@ const styles: Record<string, CSSProperties> = {
 
   stepIndicator: {
     color: MUTED,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2512,7 +2512,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: "1px solid #ddd2b8",
     borderBottom: "1px solid #ddd2b8",
     color: "#6c603f",
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
@@ -2527,7 +2527,7 @@ const styles: Record<string, CSSProperties> = {
 
   successCode: {
     color: "#52705a",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.5px",
   },
@@ -2542,7 +2542,7 @@ const styles: Record<string, CSSProperties> = {
   successText: {
     marginTop: "4px",
     color: "#52705a",
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   informationFrame: {
@@ -2568,7 +2568,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -2577,7 +2577,7 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     alignItems: "center",
     color: "#616d78",
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   successActions: {
@@ -2597,7 +2597,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
     textDecoration: "none",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 };

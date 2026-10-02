@@ -3188,7 +3188,7 @@ const styles: Record<
 
     color: MUTED,
 
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   breadcrumb: {
@@ -3212,7 +3212,7 @@ const styles: Record<
   currentDate: {
     color: TEXT_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
 
     whiteSpace: "nowrap",
   },
@@ -3237,7 +3237,7 @@ const styles: Record<
 
     color: "#687482",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 600,
 
     letterSpacing: "0.65px",
@@ -3259,7 +3259,7 @@ const styles: Record<
 
     color: MUTED,
 
-    fontSize: "10px",
+    fontSize: "13px",
   },
 
   cancelButton: {
@@ -3279,7 +3279,7 @@ const styles: Record<
 
     textDecoration: "none",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -3352,7 +3352,7 @@ const styles: Record<
 
     color: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -3373,7 +3373,7 @@ const styles: Record<
 
     opacity: 0.72,
 
-    fontSize: "6px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.4px",
@@ -3384,7 +3384,7 @@ const styles: Record<
 
     color: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     lineHeight: 1.25,
@@ -3427,14 +3427,14 @@ const styles: Record<
 
     color: "#8d3434",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   errorTitle: {
     color: "#823434",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.25px",
@@ -3445,7 +3445,7 @@ const styles: Record<
 
     color: "#724242",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   /* =========================================================
@@ -3483,7 +3483,7 @@ const styles: Record<
   stepHeadingLabel: {
     color: "#75808b",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.7px",
@@ -3503,7 +3503,7 @@ const styles: Record<
 
     color: "#66727e",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.4,
   },
@@ -3544,14 +3544,14 @@ const styles: Record<
 
     color: WCG_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   noticeTitle: {
     color: WCG_BLUE,
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -3562,7 +3562,7 @@ const styles: Record<
 
     color: "#5e6b77",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -3604,14 +3604,14 @@ const styles: Record<
 
     color: WCG_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   sectionHeading: {
     color: TEXT_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.45px",
@@ -3620,7 +3620,7 @@ const styles: Record<
   sectionReference: {
     color: "#808b96",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   /* =========================================================
@@ -3653,7 +3653,7 @@ const styles: Record<
 
     color: "#ffffff",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -3665,14 +3665,14 @@ const styles: Record<
     color:
       "rgba(255,255,255,0.72)",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   formSectionReference: {
     color:
       "rgba(255,255,255,0.76)",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 600,
   },
 
@@ -3704,7 +3704,7 @@ const styles: Record<
 
     color: "#6d7883",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -3723,7 +3723,7 @@ const styles: Record<
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -3764,7 +3764,7 @@ const styles: Record<
 
     fontFamily: "inherit",
 
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   readOnlyControl: {
@@ -3784,7 +3784,7 @@ const styles: Record<
 
     color: "#5f6b76",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 600,
   },
 
@@ -3805,7 +3805,7 @@ const styles: Record<
   formActionInformation: {
     color: "#707b86",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   formActionButtons: {
@@ -3832,7 +3832,7 @@ const styles: Record<
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.2px",
@@ -3853,7 +3853,7 @@ const styles: Record<
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     cursor: "pointer",
@@ -3883,7 +3883,7 @@ const styles: Record<
 
     textDecoration: "none",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -3900,7 +3900,7 @@ const styles: Record<
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.25px",
@@ -3946,7 +3946,7 @@ const styles: Record<
 
     color: TEXT_BLUE,
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     textAlign: "left",
@@ -3975,7 +3975,7 @@ const styles: Record<
   emptyTableCode: {
     color: "#7d8791",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.5px",
@@ -3986,7 +3986,7 @@ const styles: Record<
 
     color: TEXT_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -3997,7 +3997,7 @@ const styles: Record<
 
     color: "#707b86",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4034,14 +4034,14 @@ const styles: Record<
 
     color: "#315f40",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   searchCompletionTitle: {
     color: "#315f40",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -4052,7 +4052,7 @@ const styles: Record<
 
     color: "#587063",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4083,7 +4083,7 @@ const styles: Record<
 
     color: "#6d7883",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -4097,7 +4097,7 @@ const styles: Record<
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -4126,7 +4126,7 @@ const styles: Record<
 
     fontFamily: "inherit",
 
-    fontSize: "9px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4147,7 +4147,7 @@ const styles: Record<
   developmentNoticeCode: {
     color: "#765f30",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -4158,7 +4158,7 @@ const styles: Record<
 
     color: "#6c603f",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4197,12 +4197,12 @@ const styles: Record<
     color:
       "rgba(255,255,255,0.72)",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   reviewTitle: {
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -4221,7 +4221,7 @@ const styles: Record<
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     cursor: "pointer",
@@ -4252,7 +4252,7 @@ const styles: Record<
 
     color: TEXT_BLUE,
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -4267,7 +4267,7 @@ const styles: Record<
 
     color: "#596570",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   reviewValueLast: {
@@ -4278,7 +4278,7 @@ const styles: Record<
 
     color: "#596570",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   participantNumberFrame: {
@@ -4294,7 +4294,7 @@ const styles: Record<
   participantNumberLabel: {
     color: "#74808b",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.5px",
@@ -4318,7 +4318,7 @@ const styles: Record<
 
     color: "#6b7681",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4339,7 +4339,7 @@ const styles: Record<
 
     color: "#53606c",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.55,
 
@@ -4366,7 +4366,7 @@ const styles: Record<
 
     color: "#6c603f",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4398,7 +4398,7 @@ const styles: Record<
   stepIndicator: {
     color: "#74808b",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -4433,7 +4433,7 @@ const styles: Record<
 
     color: "#74808b",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.5px",
@@ -4461,7 +4461,7 @@ const styles: Record<
   successEyebrow: {
     color: "#61796a",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.6px",
@@ -4481,7 +4481,7 @@ const styles: Record<
 
     color: "#65717d",
 
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   successNumberFrame: {
@@ -4502,7 +4502,7 @@ const styles: Record<
 
     color: TEXT_BLUE,
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -4530,7 +4530,7 @@ const styles: Record<
 
     color: "#6c603f",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -4561,7 +4561,7 @@ const styles: Record<
 
     textDecoration: "none",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 };

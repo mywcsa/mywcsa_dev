@@ -20,11 +20,9 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ## Typography
 
-Source Sans 3 is the default font for MyWCSA system screens, including the membership portal and AMS. The official Adobe variable upright and italic WOFF2 files are bundled in `app/fonts/`, loaded through `next/font/local` in `app/fonts.ts`, and licensed under the included SIL Open Font License (`app/fonts/OFL.txt`). No external font service is required.
+Segoe UI is the default for MyWCSA system screens through `var(--font-system)` in `app/globals.css`. Windows devices use their installed Segoe UI; other devices use their native system font. No Microsoft font files or external font requests are used. The earlier Adobe Source Sans 3 files remain available but are no longer loaded.
 
-New screens should inherit the default body font. Where an explicit font is necessary, use `var(--font-system)` in CSS or inline styles; controls should inherit their surrounding font. Avoid adding page-specific font families.
-
-Exceptions: preserve the existing typography and appearance of the main GovApps login (`app/page.tsx` and its gateway styles), the staff authentication gateway (`app/login/staff/page.tsx`), and the app-selection page (`app/my-apps/page.tsx`).
+New screens inherit the body default. Use 14px body/fields, 13–14px menus/tables, and 18–20px section headings. Preserve the original GovApps and staff login typography and the launcher font.
 
 ## Learn More
 
@@ -40,3 +38,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Membership preview
+
+Open `/membership/dashboard` or use the MyWCSA Membership card on `/my-apps`. The login screen at `/membership/login` links to the dashboard preview and the application wizard at `/membership/apply`. The membership dashboard includes profile, membership/payments, participants, programmes, teams, fixtures, calendar, documents, messages, support and settings routes.
+
+This is a disconnected browser prototype. Account verification and the renewal lookup are labelled simulations; WCSA ID `0547071626` loads a single sample school and opens the confirmation wizard before Step 4. New applications use all six steps. Only the school fee is confirmed at R350/year; other fees are shown as to be confirmed. No IDs are allocated, files uploaded, official documents issued, applications submitted, payments taken, emails sent or accounts/access created. No API, database or browser-persistent storage is used. Drafts remain in React memory while navigating the membership layout and clear on refresh or leaving it. Passwords are never placed in draft state or downloads.
+
+The illustrated address map is a placeholder, not live geocoding. Learners, players and staff are registered later in the organisation interfaces. No newsletters are collected.
+
+All staff launcher cards are links. AMS opens its existing interface; Applications, CSD, Payroll and MSuite open authenticated information pages labelled as planned apps, rather than broken routes. The membership card opens the public preview.

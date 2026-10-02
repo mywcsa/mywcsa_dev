@@ -1,3 +1,5 @@
+import Link from "next/link";
+import styles from "./launcher.module.css";
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 
@@ -122,26 +124,37 @@ export default async function MyAppsPage() {
         >
           <AppCard
             title="MyWCSA AMS"
+            href="/apps/ams"
             description="Administration and management"
           />
 
           <AppCard
             title="MyWCSA Applications"
+            href="/apps/applications"
             description="Applications and workflows"
           />
 
           <AppCard
             title="MyWCSA CSD"
+            href="/apps/csd"
             description="Suppliers, procurement and assets"
           />
 
           <AppCard
             title="MyWCSA Payroll"
+            href="/apps/payroll"
             description="HR, payroll and employee services"
           />
 
           <AppCard
+            title="MyWCSA Membership"
+            href="/membership/dashboard"
+            description="Membership portal preview"
+          />
+
+          <AppCard
             title="MyWCSA MSuite"
+            href="/apps/msuite"
             description="Microsoft services"
           />
         </div>
@@ -153,12 +166,16 @@ export default async function MyAppsPage() {
 function AppCard({
   title,
   description,
+  href,
 }: {
   title: string;
   description: string;
+  href: string;
 }) {
   return (
-    <div
+    <Link
+      href={href}
+      className={styles.card}
       style={{
         minHeight: "150px",
         padding: "24px",
@@ -189,6 +206,6 @@ function AppCard({
       >
         {description}
       </p>
-    </div>
+    </Link>
   );
 }

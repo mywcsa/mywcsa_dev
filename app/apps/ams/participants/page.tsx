@@ -785,7 +785,7 @@ const styles: Record<string, CSSProperties> = {
     gap: "20px",
 
     color: MUTED,
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   breadcrumb: {
@@ -806,7 +806,7 @@ const styles: Record<string, CSSProperties> = {
 
   currentDate: {
     color: TEXT_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     whiteSpace: "nowrap",
   },
 
@@ -834,7 +834,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#687482",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 600,
     letterSpacing: "0.65px",
   },
@@ -855,7 +855,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: MUTED,
 
-    fontSize: "10px",
+    fontSize: "13px",
   },
 
   registerButton: {
@@ -875,7 +875,7 @@ const styles: Record<string, CSSProperties> = {
 
     textDecoration: "none",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -922,7 +922,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: WCG_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -933,7 +933,7 @@ const styles: Record<string, CSSProperties> = {
   noticeTitle: {
     color: WCG_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -944,7 +944,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#5d6975",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.4,
   },
@@ -952,7 +952,7 @@ const styles: Record<string, CSSProperties> = {
   noticeReference: {
     color: "#77828d",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     whiteSpace: "nowrap",
@@ -994,14 +994,14 @@ const styles: Record<string, CSSProperties> = {
 
     color: WCG_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   sectionHeading: {
     color: TEXT_BLUE,
 
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.55px",
@@ -1010,7 +1010,7 @@ const styles: Record<string, CSSProperties> = {
   sectionReference: {
     color: "#818b96",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     letterSpacing: "0.3px",
   },
@@ -1043,7 +1043,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#ffffff",
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.35px",
@@ -1054,13 +1054,13 @@ const styles: Record<string, CSSProperties> = {
 
     color: "rgba(255,255,255,0.72)",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   formTitleReference: {
     color: "rgba(255,255,255,0.8)",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontWeight: 600,
   },
@@ -1095,7 +1095,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#6c7782",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1111,7 +1111,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1143,7 +1143,7 @@ const styles: Record<string, CSSProperties> = {
 
     fontFamily: "inherit",
 
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   formActions: {
@@ -1163,7 +1163,7 @@ const styles: Record<string, CSSProperties> = {
   formActionInformation: {
     color: "#707a85",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   formActionButtons: {
@@ -1186,7 +1186,7 @@ const styles: Record<string, CSSProperties> = {
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.25px",
@@ -1207,7 +1207,7 @@ const styles: Record<string, CSSProperties> = {
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     cursor: "pointer",
@@ -1241,7 +1241,7 @@ const styles: Record<string, CSSProperties> = {
   summaryNumber: {
     color: "#7b8691",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1250,7 +1250,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.2px",
@@ -1296,7 +1296,7 @@ const styles: Record<string, CSSProperties> = {
   },
 
   resultsTitle: {
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.3px",
@@ -1307,7 +1307,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "rgba(255,255,255,0.72)",
 
-    fontSize: "7px",
+    fontSize: "13px",
   },
 
   resultActions: {
@@ -1330,7 +1330,7 @@ const styles: Record<string, CSSProperties> = {
 
     fontFamily: "inherit",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     cursor: "pointer",
@@ -1351,7 +1351,7 @@ const styles: Record<string, CSSProperties> = {
 
     tableLayout: "fixed",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   tableHeading: {
@@ -1364,7 +1364,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: TEXT_BLUE,
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     textAlign: "left",
@@ -1399,7 +1399,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#7b8690",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.5px",
@@ -1408,7 +1408,7 @@ const styles: Record<string, CSSProperties> = {
   emptyResultTitle: {
     color: TEXT_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1419,7 +1419,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#737e89",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.5,
   },
@@ -1437,7 +1437,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#6d7883",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 600,
   },
 
@@ -1480,14 +1480,14 @@ const styles: Record<string, CSSProperties> = {
   controlNumber: {
     color: "#74808c",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   controlTitle: {
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
 
     letterSpacing: "0.25px",
@@ -1502,7 +1502,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#626e79",
 
-    fontSize: "8px",
+    fontSize: "13px",
 
     lineHeight: 1.55,
   },
@@ -1527,7 +1527,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#6f7a85",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1536,7 +1536,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: WCG_BLUE,
 
-    fontSize: "9px",
+    fontSize: "13px",
 
     letterSpacing: "0.8px",
   },
@@ -1550,7 +1550,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#697580",
 
-    fontSize: "7px",
+    fontSize: "13px",
 
     fontStyle: "italic",
   },
@@ -1588,7 +1588,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#74808b",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1602,7 +1602,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1616,7 +1616,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#69747f",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   functionAction: {
@@ -1644,7 +1644,7 @@ const styles: Record<string, CSSProperties> = {
 
     textDecoration: "none",
 
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1682,7 +1682,7 @@ const styles: Record<string, CSSProperties> = {
 
     color: TEXT_BLUE,
 
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1694,6 +1694,6 @@ const styles: Record<string, CSSProperties> = {
 
     color: "#606c77",
 
-    fontSize: "8px",
+    fontSize: "13px",
   },
 };

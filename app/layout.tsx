@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { sourceSans3 } from "./fonts";
 
 export const metadata: Metadata = {
   title: "MyWCSA GovApps",
@@ -13,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={sourceSans3.variable}>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

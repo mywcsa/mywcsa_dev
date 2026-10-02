@@ -1,0 +1,4 @@
+.card { display: block; color: inherit; text-decoration: none; transition: border-color .15s, box-shadow .15s; }
+.card:hover { border-color: #001489 !important; box-shadow: 0 4px 14px #00148918 !important; }
+.card:focus-visible { outline: 3px solid #001489; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }

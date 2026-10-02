@@ -3,7 +3,7 @@
 /* Default for current and future system screens. GovApps gateway and
    My Apps retain their explicit, existing font families below/in-page. */
 :root {
-  --font-system: var(--font-source-sans-3), Arial, sans-serif;
+  --font-system: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
 body {

@@ -864,7 +864,7 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: "15px",
     color: MUTED,
-    fontSize: "9px",
+    fontSize: "13px",
   },
 
   breadcrumb: {
@@ -885,7 +885,7 @@ const styles: Record<string, CSSProperties> = {
 
   currentDate: {
     color: MUTED,
-    fontSize: "9px",
+    fontSize: "13px",
     whiteSpace: "nowrap",
   },
 
@@ -903,7 +903,7 @@ const styles: Record<string, CSSProperties> = {
   pageReference: {
     marginBottom: "3px",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.7px",
   },
@@ -919,7 +919,7 @@ const styles: Record<string, CSSProperties> = {
   pageSubtitle: {
     margin: "5px 0 0",
     color: MUTED,
-    fontSize: "10px",
+    fontSize: "13px",
     lineHeight: 1.45,
   },
 
@@ -942,7 +942,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${WCG_BLUE}`,
     color: "#ffffff",
     textDecoration: "none",
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -958,7 +958,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${WCG_BLUE}`,
     color: WCG_BLUE,
     textDecoration: "none",
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -998,7 +998,7 @@ const styles: Record<string, CSSProperties> = {
   recordHeaderLabel: {
     marginBottom: "5px",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.6px",
   },
@@ -1022,7 +1022,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     border: `1px solid ${WCG_BLUE}`,
     color: WCG_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1045,7 +1045,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     color: "#ffffff",
     textDecoration: "none",
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -1059,7 +1059,7 @@ const styles: Record<string, CSSProperties> = {
     borderRight: `1px solid ${BORDER}`,
     color: WCG_BLUE,
     textDecoration: "none",
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -1089,7 +1089,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${WCG_BLUE}`,
     borderRadius: "50%",
     color: WCG_BLUE,
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1099,7 +1099,7 @@ const styles: Record<string, CSSProperties> = {
 
   noticeTitle: {
     color: WCG_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.4px",
   },
@@ -1107,13 +1107,13 @@ const styles: Record<string, CSSProperties> = {
   noticeText: {
     marginTop: "2px",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.45,
   },
 
   noticeReference: {
     color: MUTED,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
     whiteSpace: "nowrap",
   },
@@ -1141,20 +1141,20 @@ const styles: Record<string, CSSProperties> = {
   sectionNumber: {
     minWidth: "25px",
     color: WCG_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   sectionHeading: {
     color: TEXT_BLUE,
-    fontSize: "10px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.5px",
   },
 
   sectionReference: {
     color: MUTED,
-    fontSize: "7px",
+    fontSize: "13px",
     letterSpacing: "0.3px",
   },
 
@@ -1174,14 +1174,14 @@ const styles: Record<string, CSSProperties> = {
 
   summaryNumber: {
     color: MUTED,
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   summaryLabel: {
     marginTop: "5px",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.4px",
   },
@@ -1216,7 +1216,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: TABLE_HEADER,
     borderRight: `1px solid ${BORDER}`,
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1227,7 +1227,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1237,7 +1237,7 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     borderRight: `1px solid ${BORDER}`,
     color: "#303b47",
-    fontSize: "9px",
+    fontSize: "13px",
     lineHeight: 1.35,
   },
 
@@ -1262,7 +1262,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: TABLE_HEADER,
     borderRight: `1px solid ${BORDER}`,
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1273,7 +1273,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1283,7 +1283,7 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     borderRight: `1px solid ${BORDER}`,
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.4,
   },
 
@@ -1305,7 +1305,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${WCG_BLUE}`,
     color: "#ffffff",
     textDecoration: "none",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1330,7 +1330,7 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "center",
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1340,7 +1340,7 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     borderRight: `1px solid ${BORDER}`,
     color: TEXT_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1360,7 +1360,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: PALE_BLUE,
     borderRight: `1px solid ${BORDER}`,
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1370,13 +1370,13 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     borderRight: `1px solid ${BORDER}`,
     color: "#303b47",
-    fontSize: "8px",
+    fontSize: "13px",
   },
 
   tableAction: {
     color: WCG_BLUE,
     textDecoration: "none",
-    fontSize: "7px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
@@ -1404,13 +1404,13 @@ const styles: Record<string, CSSProperties> = {
 
   controlNumber: {
     color: WCG_BLUE,
-    fontSize: "8px",
+    fontSize: "13px",
     fontWeight: 700,
   },
 
   controlTitle: {
     color: TEXT_BLUE,
-    fontSize: "9px",
+    fontSize: "13px",
     fontWeight: 700,
     letterSpacing: "0.3px",
   },
@@ -1418,7 +1418,7 @@ const styles: Record<string, CSSProperties> = {
   controlBody: {
     padding: "10px",
     color: MUTED,
-    fontSize: "8px",
+    fontSize: "13px",
     lineHeight: 1.5,
   },
 
