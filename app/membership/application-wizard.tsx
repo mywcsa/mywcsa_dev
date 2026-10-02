@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
+import { PdfDownload } from "./pdf-download";
 import { useRef, useState, type FormEvent } from "react";
-import { usePreview, downloadDraft } from "./portal-shell";
+import { usePreview } from "./portal-shell";
 import { initiatives, applicationStages, demoOrganisation, emptyOrganisation, feeLabel, isIndividual } from "./portal-data";
 import { AnnualFields, DocumentFields, OrganisationFields, Panel, Field } from "./portal-content";
 import s from "./portal.module.css";
@@ -52,7 +53,7 @@ export default function ApplicationWizard() {
     setDraft(d => ({ ...d, initiative: "WCSSA", category: "School", organisation: { ...demoOrganisation }, sample: true, step: update ? 3 : 4 })); confirmDialog.current?.close(); setError(""); window.scrollTo({ top: 0, behavior: "smooth" });
   }
   return <>
-    <div className={s.pageTitle}><div><p className={s.eyebrow}>MEMBERSHIP APPLICATION · {draft.year}</p><h1>{draft.application === "Renewal" ? "Renew your membership" : "Start your membership"}</h1><p>Account, annual information and supporting documents.</p></div><button className={s.secondary} onClick={() => downloadDraft(draft)}>Download draft</button></div>
+    <div className={s.pageTitle}><div><p className={s.eyebrow}>MEMBERSHIP APPLICATION · {draft.year}</p><h1>{draft.application === "Renewal" ? "Renew your membership" : "Start your membership"}</h1><p>Account, annual information and supporting documents.</p></div><PdfDownload /></div>
     <ol className={s.wizardSteps} aria-label="Application progress">{applicationStages.map((name, i) => <li key={name} className={step === i + 1 ? s.currentStep : step > i + 1 ? s.pastStep : ""} aria-current={step === i + 1 ? "step" : undefined}><span>{i + 1}</span><strong>{name}</strong></li>)}</ol>
     <Panel title={`Step ${step} · ${applicationStages[step - 1]}`}>
       <form onSubmit={continueStep}>

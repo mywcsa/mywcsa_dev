@@ -9,11 +9,6 @@ import s from "./portal.module.css";
 type PreviewContext = { draft: Draft; setDraft: Dispatch<SetStateAction<Draft>>; notice: (title: string, message: string) => void; requests: { subject: string; detail: string; kind: string }[]; setRequests: Dispatch<SetStateAction<{ subject: string; detail: string; kind: string }[]>>; messages: { subject: string; detail: string }[]; setMessages: Dispatch<SetStateAction<{ subject: string; detail: string }[]>>; users: { name: string; email: string; role: string }[]; setUsers: Dispatch<SetStateAction<{ name: string; email: string; role: string }[]>>; preferences: { email: boolean; reminders: boolean }; setPreferences: Dispatch<SetStateAction<{ email: boolean; reminders: boolean }>> };
 const Context = createContext<PreviewContext | null>(null);
 export function usePreview() { const context = useContext(Context); if (!context) throw new Error("Membership preview context missing"); return context; }
-export function downloadDraft(draft: Draft) {
-  const content = JSON.stringify({ notice: "LOCAL PREVIEW DRAFT — NOT SUBMITTED, VERIFIED OR APPROVED", ...draft }, null, 2);
-  const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
-  const a = document.createElement("a"); a.href = url; a.download = "MyWCSA-membership-draft.json"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 
 export default function PortalShell({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<Draft>(emptyDraft);
