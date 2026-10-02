@@ -10,6 +10,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## MyWCSA typography
 
-Use Source Sans 3 for all new and updated system interfaces. It is bundled in `app/fonts/` and loaded by `app/fonts.ts`; inherit the body default or use `var(--font-system)` for explicit font declarations. Keep form controls in the surrounding font.
+Use Segoe UI for all new and updated system interfaces, through the shared `var(--font-system)` stack in `app/globals.css`. The stack uses locally installed Segoe UI on Windows and native system fonts elsewhere; do not redistribute Microsoft font files. Use 14px body/field text, 13–14px navigation and table text, and 18–20px section headings. Controls should inherit their surrounding font.
 
-Preserve the existing fonts and appearance of the main GovApps login (`app/page.tsx` and its gateway styles), staff authentication gateway (`app/login/staff/page.tsx`), and app launcher (`app/my-apps/page.tsx`). Do not apply Source Sans 3 overrides to those pages.
+Preserve the existing typography and appearance of the main GovApps login (`app/page.tsx` and its gateway styles) and staff authentication gateway (`app/login/staff/page.tsx`). The app launcher (`app/my-apps/page.tsx`) keeps its existing font; its cards must be accessible links to real routes.
+
+Membership screens are disconnected previews until explicitly authorised for integration. Never present simulated verification, payments, Registry approval, WCSA ID lookup or file selection as live operations. Staff/player registration belongs to the separate organisation interfaces, not the membership application. Do not add newsletters.

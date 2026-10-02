@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
 import styles from "./login.module.css";
+import { useHydrated } from "../use-hydrated";
 
 type Notice = { title: string; message: string };
 
@@ -18,6 +20,7 @@ function Icon({ name }: { name: "arrow" | "mail" | "lock" | "eye" | "help" }) {
 }
 
 export default function MembershipLogin() {
+  const hydrated = useHydrated();
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -83,12 +86,13 @@ export default function MembershipLogin() {
               <div className={styles.passwordLabel}><label htmlFor="membership-password">Password</label><button type="button" onClick={() => openNotice("reset")}>Forgot password?</button></div>
               <div className={styles.inputWrap}><Icon name="lock" /><input id="membership-password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" required /><button type="button" className={styles.showPassword} onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword}><Icon name="eye" /></button></div>
 
-              <button type="submit" className={styles.primary}>Sign in<Icon name="arrow" /></button>
+              <button type="submit" className={styles.primary} disabled={!hydrated}>Sign in<Icon name="arrow" /></button>
             </form>
 
             <div className={styles.separator}><span>New to MyWCSA?</span></div>
-            <button type="button" className={styles.secondary} onClick={() => openNotice("register")}>Create an account<Icon name="arrow" /></button>
+            <Link className={styles.secondary} href="/membership/apply">Create an account<Icon name="arrow" /></Link>
             <p className={styles.preview}><span aria-hidden="true" /> Screen preview · Sign-in opens soon</p>
+            <Link href="/membership/dashboard" className={styles.previewLink}>Explore dashboard preview →</Link>
           </section>
         </div>
       </main>
