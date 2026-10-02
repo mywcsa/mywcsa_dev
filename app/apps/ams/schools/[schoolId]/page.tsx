@@ -853,7 +853,7 @@ const styles: Record<string, CSSProperties> = {
   page: {
     width: "100%",
     color: TEXT_BLUE,
-    fontFamily: '"Century Gothic", CenturyGothic, Arial, sans-serif',
+    fontFamily: 'var(--font-system)',
   },
 
   topUtilityRow: {

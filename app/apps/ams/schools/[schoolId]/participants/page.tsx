@@ -683,7 +683,7 @@ const styles: Record<string, CSSProperties> = {
   page: {
     width: "100%",
     color: TEXT_BLUE,
-    fontFamily: '"Century Gothic", CenturyGothic, Arial, sans-serif',
+    fontFamily: 'var(--font-system)',
   },
 
   topUtilityRow: {
@@ -1073,7 +1073,7 @@ const styles: Record<string, CSSProperties> = {
     borderRadius: 0,
     outline: "none",
     color: "#303b47",
-    fontFamily: '"Century Gothic", CenturyGothic, Arial, sans-serif',
+    fontFamily: 'var(--font-system)',
     fontSize: "8px",
   },
 
@@ -1104,7 +1104,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: WCG_BLUE,
     border: `1px solid ${WCG_BLUE}`,
     color: "#ffffff",
-    fontFamily: '"Century Gothic", CenturyGothic, Arial, sans-serif',
+    fontFamily: 'var(--font-system)',
     fontSize: "7px",
     fontWeight: 700,
     cursor: "pointer",
@@ -1116,7 +1116,7 @@ const styles: Record<string, CSSProperties> = {
     backgroundColor: "#ffffff",
     border: `1px solid ${WCG_BLUE}`,
     color: WCG_BLUE,
-    fontFamily: '"Century Gothic", CenturyGothic, Arial, sans-serif',
+    fontFamily: 'var(--font-system)',
     fontSize: "7px",
     fontWeight: 700,
     cursor: "pointer",
