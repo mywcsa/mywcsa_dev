@@ -15,3 +15,5 @@ Use Segoe UI for all new and updated system interfaces, through the shared `var(
 Preserve the existing typography and appearance of the main GovApps login (`app/page.tsx` and its gateway styles) and staff authentication gateway (`app/login/staff/page.tsx`). The app launcher (`app/my-apps/page.tsx`) keeps its existing font; its cards must be accessible links to real routes.
 
 Membership screens are disconnected previews until explicitly authorised for integration. Never present simulated verification, payments, Registry approval, WCSA ID lookup or file selection as live operations. Staff/player registration belongs to the separate organisation interfaces, not the membership application. Do not add newsletters.
+
+Paystack integration is authorised. Keep live checkout dependent on a trusted Registry-approved AMS invoice, server-controlled fees and durable AMS settlement. Never expose secret keys or charge from a local preview draft. See `docs/membership-payments.md` for the required backend contract and environment settings.
