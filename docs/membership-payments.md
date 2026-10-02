@@ -1,59 +1,59 @@
-# Membership PDF downloads and Paystack activation
+# Membership invoices, Supabase and Paystack
 
-Application, organisation profile and annual plan buttons now download paginated A4 PDFs with the portal header, dark blue section bars, embedded open-source Source Sans 3 and page numbers. Local drafts are explicitly labelled unsubmitted; they are not official certificates, invoices or receipts. Uploaded file contents and passwords are never included. Interface typography remains unchanged.
+## Current implementation
 
-## Deployment configuration
+MyWCSA AMS owns Registry invoice issuance, persistent payments, receipts and membership state. The membership portal redirects to Paystack only for an invoice approved by an authorised Registry user. A local browser draft is never a live application or proof of approval. Current fee: 2027 WCSSA School membership, R350 (35000 cents), ZAR. Other categories and years remain disabled until their fees and rules are agreed.
 
-The payment integration is implemented, but deliberately returns 503 until **all** secure settings and the AMS invoice API are configured. It does not create invoices from the public preview. No live payment has been made during implementation.
+The backend now connects directly to Supabase from server code. No separate `WCSA_AMS_API_URL` or `WCSA_AMS_API_KEY` is required for this setup. The legacy external AMS adapter remains available only when neither Supabase variable is set.
 
-Set these in Vercel **Production**, then redeploy:
+## Vercel Production settings
 
-- `PAYSTACK_MODE=live`
-- `PAYSTACK_SECRET_KEY`: the merchant's live `sk_live_…` key, obtained in Paystack. Never put it in a client/public variable, GitHub, or chat.
-- `MEMBERSHIP_PUBLIC_ORIGIN=https://govapps.wcsports.co.za`
-- `WCSA_AMS_API_URL`: HTTPS base URL of the staff-controlled persistent AMS invoice service.
-- `WCSA_AMS_API_KEY`: dedicated server-to-server credential restricted to invoice claims, lookups and settlements.
+| Name | Value |
+|---|---|
+| PAYSTACK_MODE | live |
+| PAYSTACK_SECRET_KEY | Merchant live sk_live_… key |
+| MEMBERSHIP_PUBLIC_ORIGIN | https://govapps.wcsports.co.za |
+| SUPABASE_URL | Supabase project base URL, https://<project-ref>.supabase.co |
+| SUPABASE_SECRET_KEY | Supabase backend sb_secret_… key |
 
-No public Paystack key is necessary for hosted redirect checkout. For staging only, use `PAYSTACK_MODE=test`, an `sk_test_…` key, a staging origin and a staging AMS service. Production and preview settings should stay separate.
+Secrets go directly into Vercel; never in source control, chat, browser variables or URLs. No public Paystack/Supabase key is needed for this invoice backend. Deploy again after changing environment settings. Production settings and test/preview settings must be separate.
 
-Configure the live Paystack webhook:
+## Install the database
+
+1. In the Supabase project's SQL Editor, open a new query and run `supabase/migrations/20261002_001_membership_invoices.sql` using the project owner's database role. It creates only the namespaced AMS invoice tables and functions; it does not delete existing records or insert sample invoices. Re-running the same version preserves existing records. If any statement fails, the entire transaction rolls back.
+2. Grant the actual Registry approver's Microsoft tenant UUID and exact sign-in email using `supabase/bootstrap-registry-staff.example.sql`. This is an explicit administrative grant, not automatic access for every Microsoft user. Use your own verified staff account or a specifically authorised reviewer. The Microsoft issuer must point to your tenant UUID, not common or organisations.
+3. Sign in to GovApps with that staff account and open `/apps/ams/membership-invoices`. For diagnostics, `/api/ams/setup-status` returns database/schema status, the current signed-in account's email/tenant, Registry access and gateway configuration flags; no secrets are returned.
+
+Tables include organisations, authorised Registry staff, approved invoices, payments, receipts, membership state, audit events and short-lived checkout rate-limit counters. Row Level Security is enabled on all tables. Anonymous and Supabase-authenticated browser users have no table access or function execution privileges. Server service_role has read privileges for invoice tables and can mutate invoice records only through the explicitly granted functions. Security-definer functions use an empty search_path and qualified object names. Staff creation/grants are owner-controlled SQL operations.
+
+## Registry workflow
+
+At the AMS invoice page, authorised Registry staff enter a real school's name and 10-digit EMIS/paypoint, the authorised payer email, the existing reviewed application/file reference and review notes. They must attest that details, representative authority and required documents have been checked. The server records the Microsoft identity, controls year/category/fee/mode and issues one invoice per school/year/mode. This supports a completed offline/existing Registry review while public account registration, live uploads and application submission are still being implemented; it never promotes a preview draft automatically.
+
+The private 256-bit payment code is shown only when issuing the invoice. Only its SHA256 hash is stored. Give the code securely to the authorised payer, with the approved invoice reference; no automated email is sent. Codes expire after 30 days. Do not create another invoice or invent a new provider reference if the code is lost or checkout fails; contact the database administrator for recovery/reconciliation. Self-service code rotation is not implemented in this version.
+
+Clients use `/membership/payments`. The database locks the invoice to prevent concurrent initialization, persists its stable provider reference, and caches the checkout URL for retries. Attempts are limited to 20 per minute per keyed client-address hash; raw IP addresses are not stored. On Vercel, the platform-overwritten x-forwarded-for header supplies the address. Non-Vercel local runs use a shared local bucket. SQL schema installation is required for these checks; missing configuration or functions block checkout.
+
+## Payment notifications
+
+Live webhook URL in Paystack:
 `https://govapps.wcsports.co.za/api/membership/payments/webhook`
 
-Callback set by the server:
+Server-generated callback:
 `https://govapps.wcsports.co.za/membership/payments/return`
 
-Clients open `https://govapps.wcsports.co.za/membership/payments` and enter their Registry-issued private code. Tokens never appear in URLs or browser storage. The callback shows pending verification, never fabricated success.
+The callback never claims success. The server checks raw-body HMAC SHA512 signatures, verifies transactions with Paystack, and matches success, reference, amount, currency, payment mode, payer email, transaction ID and paid-at before settlement. Settlement locks the approved invoice and commits one payment, one receipt record, active annual membership state and one payment audit event together. Duplicate events return the same receipt; conflicting payments and provider-ID reuse fail. Failed processing returns non-2xx for Paystack retry. Pending state after checkout/initialization failures must be reconciled against Paystack before another action; no fallback invents a second reference.
 
-## AMS contract (must be implemented in the real AMS backend)
+Receipt records and payment status are visible to Registry in AMS. Public receipt PDF downloads, client account/application submission, document storage wiring and organisation-interface feeds are not part of this invoice release. Active membership records are stored centrally; no notification to another interface is claimed without its own authenticated integration. Membership numbers are not generated or changed by this migration.
 
-All endpoints require the dedicated Bearer credential. They return no-store JSON, never redirects. Approval is controlled by Registry, not the membership preview. A school invoice uses 2027, WCSSA, School, 35000 cents, ZAR. Other years/categories are intentionally not enabled.
+## Validation and go-live
 
-`POST /payment-invoices/claim` body `{ "token": "32-to-256-character-base64url-private-code" }`
+`npm run test:payments` runs provider validation, actual PostgreSQL migration/permission/transaction tests with PGlite, and server API authorization/adapter checks. `npm run build` validates production compilation. Tests use isolated fixture keys and no live network payments.
 
-Atomically validate a high-entropy, expiring payment token (minimum 256 bits), Registry approval and unpaid status. Rate-limit failed claims. Persist a globally unique `wcsa-<uuid>` reference before replying. Concurrent/repeated claims must return the same reference to prevent duplicate charges; never create a fresh invoice on retry. Return a flat invoice:
+After installing the schema and Registry grant, confirm setup status in your real deployment. Exercise isolated test mode and a separate test database/project for approval, checkout, duplicate events and settlement failure recovery before an authorised live payment. Test transactions remain separated by mode and cannot activate live membership records. A real live test charge must be explicitly authorised; configuring the keys does not authorise charging a user.
 
-```json
-{
-  "reference": "wcsa-550e8400-e29b-41d4-a716-446655440000",
-  "status": "approved_for_payment",
-  "initiative": "WCSSA", "category": "School", "year": "2027",
-  "amount": 35000, "currency": "ZAR",
-  "email": "authorised-payer@example.org",
-  "organisationName": "School official name",
-  "expiresAt": "2027-12-31T23:59:59Z"
-}
-```
+Official references: https://supabase.com/docs/guides/getting-started/api-keys , https://supabase.com/docs/guides/database/functions , https://paystack.com/docs/api/transaction/ , https://paystack.com/docs/payments/webhooks/ .
 
-`GET /payment-invoices/by-reference/<reference>` returns the same persistent invoice (including paid invoices). Missing/unapproved records must fail; no synthetic sample invoice.
+## PDF downloads
 
-`POST /payment-invoices/<reference>/settle` body `{ "reference", "provider":"paystack", "transactionId", "amount", "currency", "mode", "paidAt" }`.
-
-Atomically match the reserved reference and approved amount/currency, enforce unique provider transaction ID/reference, persist payment, issue the official receipt and publish the resulting membership state to the separate organisation interfaces. Repeated identical events return `{ "status":"paid" }` without duplicating a receipt or membership. Contradictory events must fail. Keep an audit trail and reconcile pending payments. Expiration prevents new checkout but must not discard a payment already made against a reserved approved invoice. Return paid only after durable commit. Do not acknowledge a failed settlement.
-
-The portal initializes on the server, controls the R350 amount, enforces the configured origin, validates Paystack's checkout host, checks raw-body HMAC SHA512 webhook signatures using timing-safe comparison, verifies transactions server-side, and matches status, reference, amount, currency, mode, payer email and transaction ID before calling settlement. Invalid or mismatched events never activate membership. Unknown unrelated events are acknowledged; processing failures return non-2xx so Paystack can retry. AMS must enforce durable idempotency and token rate limits; serverless process memory is never a payment ledger.
-
-## Activation check
-
-Implement and test the AMS contract against a persistent database before setting live credentials. Test approved/unapproved/expired/already-paid claims, simultaneous retries, callback without webhook, duplicate events, signature failures, verification mismatches and settlement outage using isolated test mode. Confirm the live merchant supports ZAR. Then configure the live settings and webhook. The public draft portal still has no live registration, document storage or Registry submission backend; payment code does not connect those unrelated previews automatically.
-
-Official API references: https://paystack.com/docs/api/transaction/ and https://paystack.com/docs/payments/webhooks/ .
+Membership application, organisation profile and annual plan buttons export paginated A4 PDFs with the existing portal header, dark-blue styling, embedded open-source Source Sans 3 and page numbers. Local drafts are explicitly unsubmitted; they are not official certificates, invoices or receipts. File contents and passwords are excluded.

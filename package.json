@@ -7,16 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:payments": "node --test tests/payments.test.cjs"
+    "test:payments": "node --test tests/payments.test.cjs tests/membership-database.test.cjs tests/supabase-api.test.cjs"
   },
   "dependencies": {
     "jspdf": "^4.2.1",
     "next": "16.3.5",
     "next-auth": "^5.0.0-beta.32",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
