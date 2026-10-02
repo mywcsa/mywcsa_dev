@@ -271,7 +271,7 @@ const styles: Record<string, CSSProperties> = {
     color: TEXT,
 
     fontFamily:
-      '"Century Gothic", "CenturyGothic", Arial, Helvetica, sans-serif',
+      'var(--font-system)',
   },
 
   /* =========================================================
@@ -527,7 +527,7 @@ const styles: Record<string, CSSProperties> = {
     color: WCG_BLUE,
 
     fontFamily:
-      '"Century Gothic", "CenturyGothic", Arial, Helvetica, sans-serif',
+      'var(--font-system)',
 
     fontSize: "11px",
     fontWeight: 700,
