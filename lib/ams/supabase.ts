@@ -10,8 +10,8 @@ export function usesSupabase() {
   return Boolean(
     first(process.env.SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     first(
-      process.env.SUPABASE_SECRET_KEY,
       process.env.SUPABASE_SERVICE_ROLE_KEY,
+      process.env.SUPABASE_SECRET_KEY,
       process.env.SUPABASE_SERVICE_ROLE_SECRET,
       process.env.SUPABASE_KEY,
     ),
@@ -21,8 +21,8 @@ export function usesSupabase() {
 export function supabaseConfig() {
   const origin = first(process.env.SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_URL);
   const secret = first(
-    process.env.SUPABASE_SECRET_KEY,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_SECRET_KEY,
     process.env.SUPABASE_SERVICE_ROLE_SECRET,
     process.env.SUPABASE_KEY,
   );
@@ -32,9 +32,9 @@ export function supabaseConfig() {
   if (!secret)
     throw new PaymentError(503, "The Supabase server credential is not available to the MyWCSA server.");
 
-  // Do not guess the format of credentials supplied by the connected Supabase
-  // integration. Supabase itself is the authority that validates the key.
-  // The credential stays server-only and is never exposed to the browser.
+  // Prefer the service-role credential supplied by the connected Supabase/Vercel
+  // integration. Supabase itself validates the key. The credential remains
+  // server-only and is never exposed to the browser.
   let url: URL;
   try {
     url = new URL(origin);
