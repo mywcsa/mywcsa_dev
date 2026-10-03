@@ -4,6 +4,6 @@ import PortalShell from "../portal-shell";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect("/login/staff?returnTo=/membership/dashboard");
+  if (!session?.user) redirect("/membership/login?returnTo=/membership");
   return <PortalShell>{children}</PortalShell>;
 }
