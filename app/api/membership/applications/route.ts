@@ -1,0 +1,40 @@
+import { rpc } from "@/lib/ams/supabase";
+import { PaymentError } from "@/lib/payments/errors";
+
+export const runtime = "nodejs";
+
+function apiError(error: unknown) {
+  return Response.json(
+    { error: error instanceof Error ? error.message : "Membership application service is unavailable." },
+    { status: error instanceof PaymentError ? error.status : 502, headers: { "Cache-Control": "no-store" } },
+  );
+}
+
+function requireOfficialOrigin(request: Request) {
+  const configured = process.env.MEMBERSHIP_PUBLIC_ORIGIN?.replace(/\/$/, "");
+  const origin = request.headers.get("origin");
+  if (configured && origin !== configured) throw new PaymentError(403, "Use the official MyWCSA Membership Portal to submit an application.");
+}
+
+export async function POST(request: Request) {
+  try {
+    requireOfficialOrigin(request);
+    const raw = await request.text();
+    if (raw.length > 100_000) throw new PaymentError(413, "Membership application is too large.");
+    let body: unknown;
+    try { body = JSON.parse(raw); } catch { throw new PaymentError(400, "Invalid membership application."); }
+    const result = await rpc<{ id: string; reference: string; status: string; submittedAt: string }>("wcsa_submit_membership_application", { p_payload: body });
+    return Response.json(result, { status: 201, headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return apiError(error); }
+}
+
+export async function GET(request: Request) {
+  try {
+    requireOfficialOrigin(request);
+    const id = new URL(request.url).searchParams.get("wcsaId")?.trim() || "";
+    if (!/^05[0-9]{8}$/.test(id)) throw new PaymentError(400, "Enter a valid 10-digit WCSA ID starting with 05.");
+    const member = await rpc<unknown>("wcsa_lookup_member", { p_wcsa_id: id });
+    if (!member) throw new PaymentError(404, "No active membership was found for that WCSA ID.");
+    return Response.json(member, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) { return apiError(error); }
+}
