@@ -9,7 +9,9 @@ export const sections = [
   { id: "messages", label: "Registry Correspondence", mark: "✉", description: "Membership notices and Registry correspondence" },
   { id: "support", label: "Help & Support", mark: "?", description: "Membership enquiries and Service Desk support" },
 ] as const;
-export type SectionId = typeof sections[number]["id"];
+export type CurrentSectionId = typeof sections[number]["id"];
+export type LegacySectionId = "programmes" | "participants" | "teams" | "fixtures" | "events" | "settings";
+export type SectionId = CurrentSectionId | LegacySectionId;
 export const initiatives = [
   { id: "WCSSA", name: "Western Cape Schools Sports Association", shortName: "WCSSA", categories: ["School"] },
   { id: "WCSA", name: "Western Cape Sports Association", shortName: "WCSA", categories: ["Club", "Association", "Community Organisation", "Provincial / Umbrella Body", "Athlete", "Coach", "Official", "Sports Staff", "Volunteer"] },
