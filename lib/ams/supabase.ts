@@ -13,19 +13,18 @@ export function usesSupabase() {
       process.env.SUPABASE_SECRET_KEY,
       process.env.SUPABASE_SERVICE_ROLE_KEY,
       process.env.SUPABASE_SERVICE_ROLE_SECRET,
+      process.env.SUPABASE_KEY,
     ),
   );
 }
 
 export function supabaseConfig() {
-  // Vercel's Supabase integration commonly supplies NEXT_PUBLIC_SUPABASE_URL and
-  // a server-side service-role/secret variable. Keep the original MyWCSA names
-  // supported as well so existing deployments do not break.
   const origin = first(process.env.SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_URL);
   const secret = first(
     process.env.SUPABASE_SECRET_KEY,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     process.env.SUPABASE_SERVICE_ROLE_SECRET,
+    process.env.SUPABASE_KEY,
   );
 
   if (!origin)
@@ -33,12 +32,9 @@ export function supabaseConfig() {
   if (!secret)
     throw new PaymentError(503, "The Supabase server credential is not available to the MyWCSA server.");
 
-  // Supabase supports both the current sb_secret_ key format and legacy
-  // service_role JWTs. These credentials remain server-only and are never sent
-  // to the browser.
-  if (!(secret.startsWith("sb_secret_") || secret.startsWith("eyJ")))
-    throw new PaymentError(503, "The configured Supabase server credential format is not supported.");
-
+  // Do not guess the format of credentials supplied by the connected Supabase
+  // integration. Supabase itself is the authority that validates the key.
+  // The credential stays server-only and is never exposed to the browser.
   let url: URL;
   try {
     url = new URL(origin);
@@ -86,8 +82,8 @@ export async function rpc<T = unknown>(
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    if (response.status === 401)
-      throw new PaymentError(503, "The MyWCSA Supabase server credential was rejected.");
+    if (response.status === 401 || response.status === 403 && (data?.message || "").toLowerCase().includes("jwt"))
+      throw new PaymentError(503, "The connected Supabase credential was rejected by Supabase.");
     if (data?.code === "42501")
       throw new PaymentError(403, "Registry permission is required for this operation.");
     if (data?.code === "23505")
