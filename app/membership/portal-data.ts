@@ -1,22 +1,35 @@
 export const sections = [
   { id: "dashboard", label: "Dashboard", mark: "▦", description: "Membership status, renewals and important actions" },
-  { id: "membership", label: "My Membership", mark: "◈", description: "Current membership, WCSA ID and membership history" },
-  { id: "renewals", label: "Renewals", mark: "↻", description: "Renew your organisation membership" },
-  { id: "payments", label: "Payments & Invoices", mark: "R", description: "WCSA membership charges, invoices, receipts and Paystack payments" },
+  { id: "membership", label: "My Membership", mark: "◈", description: "Current membership, member ID and membership history" },
+  { id: "renewals", label: "Renewals", mark: "↻", description: "Renew your organisation or individual membership" },
+  { id: "payments", label: "Payments & Invoices", mark: "R", description: "Membership charges, invoices, receipts and approved payments" },
   { id: "certificates", label: "Certificates", mark: "✓", description: "Official membership certificates and verification records" },
-  { id: "profile", label: "Organisation Profile", mark: "⌂", description: "Verified organisation and authorised representative details" },
+  { id: "profile", label: "Member Profile", mark: "⌂", description: "Verified member, organisation and authorised representative details" },
   { id: "documents", label: "Membership Documents", mark: "▤", description: "Documents submitted for membership and Registry verification" },
   { id: "messages", label: "Registry Correspondence", mark: "✉", description: "Membership notices and Registry correspondence" },
   { id: "support", label: "Help & Support", mark: "?", description: "Membership enquiries and Service Desk support" },
 ] as const;
 export type SectionId = typeof sections[number]["id"];
+
 export const initiatives = [
-  { id: "WCSSA", name: "Western Cape Schools Sports Association", categories: ["School"] },
-  { id: "WCSA", name: "Western Cape Sports Association", categories: ["Club", "Association", "Community Organisation", "Provincial / Umbrella Body", "Athlete", "Coach", "Official", "Sports Staff", "Volunteer"] },
-  { id: "IKM", name: "iKapa Kultuur Mosaic", categories: ["Art Group", "Cultural Organisation", "Artist / Individual"] },
-  { id: "WCDA", name: "Western Cape Development Authority", categories: ["Development Organisation", "Community Organisation", "Programme Partner"] },
-  { id: "WCOB", name: "Western Cape Organisations Board", categories: ["Organisation", "Association", "Umbrella Body"] },
+  { id: "WCSSA", name: "Western Cape Schools Sports Association", shortName: "WCSSA", categories: ["School"] },
+  { id: "WCSA", name: "Western Cape Sports Association", shortName: "WCSA", categories: ["Club", "Association", "Community Organisation", "Provincial / Umbrella Body", "Athlete", "Coach", "Official", "Sports Staff", "Volunteer"] },
+  { id: "IKM", name: "iKapa Kultuur Mosaic", shortName: "iKapa Kultuur Mosaic", categories: ["Art Group", "Cultural Organisation", "Artist / Individual"] },
+  { id: "WCDA", name: "Western Cape Development Authority", shortName: "WCDA", categories: ["Development Organisation", "Community Organisation", "Programme Partner"] },
+  { id: "WCOB", name: "Western Cape Organisations Board", shortName: "WCOB", categories: ["Organisation", "Association", "Umbrella Body"] },
 ] as const;
+
+export type InitiativeId = typeof initiatives[number]["id"];
+export type BrandTheme = { id: string; organisation: string; shortName: string; primary: string; secondary: string; accent: string; surface: string; logo?: string };
+export const brandThemes: Record<string, BrandTheme> = {
+  WCSA: { id: "WCSA", organisation: "Western Cape Sports Association NPC", shortName: "WCSA", primary: "#001489", secondary: "#0a2f86", accent: "#d71920", surface: "#eef3fb", logo: "/mywcsa-logo.png" },
+  WCSSA: { id: "WCSSA", organisation: "Western Cape Schools Sports Association", shortName: "WCSSA", primary: "#001489", secondary: "#0a2f86", accent: "#d71920", surface: "#eef3fb", logo: "/mywcsa-logo.png" },
+  IKM: { id: "IKM", organisation: "iKapa Kultuur Mosaic", shortName: "iKapa Kultuur Mosaic", primary: "#082f9c", secondary: "#e40013", accent: "#50aa16", surface: "#fff7dc" },
+  WCDA: { id: "WCDA", organisation: "Western Cape Development Authority", shortName: "WCDA", primary: "#001489", secondary: "#173f82", accent: "#d71920", surface: "#eef3fb", logo: "/mywcsa-logo.png" },
+  WCOB: { id: "WCOB", organisation: "Western Cape Organisations Board", shortName: "WCOB", primary: "#001489", secondary: "#173f82", accent: "#d71920", surface: "#eef3fb", logo: "/mywcsa-logo.png" },
+};
+export function brandFor(initiative: string) { return brandThemes[initiative] || brandThemes.WCSA; }
+
 export const sports = ["Athletics", "Rugby", "Netball", "Cricket", "Football", "Basketball", "Hockey", "Chess", "Tennis", "Table Tennis", "Swimming", "Volleyball", "Coding & Robotics", "Other"];
 export const arts = ["Visual Arts", "Music", "Dance", "Theatre", "Cultural Heritage", "Creative Writing", "Other"];
 export const development = ["Youth Development", "Skills Development", "Community Development", "Education & STEM", "Organisation Development", "Other"];
