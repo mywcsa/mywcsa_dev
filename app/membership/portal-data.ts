@@ -10,7 +10,6 @@ export const sections = [
   { id: "support", label: "Help & Support", mark: "?", description: "Membership enquiries and Service Desk support" },
 ] as const;
 export type SectionId = typeof sections[number]["id"];
-
 export const initiatives = [
   { id: "WCSSA", name: "Western Cape Schools Sports Association", shortName: "WCSSA", categories: ["School"] },
   { id: "WCSA", name: "Western Cape Sports Association", shortName: "WCSA", categories: ["Club", "Association", "Community Organisation", "Provincial / Umbrella Body", "Athlete", "Coach", "Official", "Sports Staff", "Volunteer"] },
@@ -18,7 +17,6 @@ export const initiatives = [
   { id: "WCDA", name: "Western Cape Development Authority", shortName: "WCDA", categories: ["Development Organisation", "Community Organisation", "Programme Partner"] },
   { id: "WCOB", name: "Western Cape Organisations Board", shortName: "WCOB", categories: ["Organisation", "Association", "Umbrella Body"] },
 ] as const;
-
 export type InitiativeId = typeof initiatives[number]["id"];
 export type BrandTheme = { id: string; organisation: string; shortName: string; primary: string; secondary: string; accent: string; surface: string; logo?: string };
 export const brandThemes: Record<string, BrandTheme> = {
@@ -29,7 +27,6 @@ export const brandThemes: Record<string, BrandTheme> = {
   WCOB: { id: "WCOB", organisation: "Western Cape Organisations Board", shortName: "WCOB", primary: "#001489", secondary: "#173f82", accent: "#d71920", surface: "#eef3fb", logo: "/mywcsa-logo.png" },
 };
 export function brandFor(initiative: string) { return brandThemes[initiative] || brandThemes.WCSA; }
-
 export const sports = ["Athletics", "Rugby", "Netball", "Cricket", "Football", "Basketball", "Hockey", "Chess", "Tennis", "Table Tennis", "Swimming", "Volleyball", "Coding & Robotics", "Other"];
 export const arts = ["Visual Arts", "Music", "Dance", "Theatre", "Cultural Heritage", "Creative Writing", "Other"];
 export const development = ["Youth Development", "Skills Development", "Community Development", "Education & STEM", "Organisation Development", "Other"];
@@ -40,6 +37,7 @@ export const applicationStages = ["Account & Verification", "Choose Membership",
 export const reviewStages = ["Submitted", "Under Review", "Information Required", "Approved for Payment", "Payment Verified", "Active"];
 export type Organisation = { name: string; emis: string; registration: string; address: string; town: string; postalCode: string; district: string; municipality: string; province: string; email: string; phone: string; head: string; headEmail: string; coordinator: string; coordinatorEmail: string; representative: string; position: string; authority: boolean; addressConfirmed: boolean; dob: string; guardian: string; guardianEmail: string };
 export const emptyOrganisation: Organisation = { name: "", emis: "", registration: "", address: "", town: "", postalCode: "", district: "", municipality: "", province: "Western Cape", email: "", phone: "", head: "", headEmail: "", coordinator: "", coordinatorEmail: "", representative: "", position: "", authority: false, addressConfirmed: false, dob: "", guardian: "", guardianEmail: "" };
+export const demoOrganisation: Organisation = { name: "Charleston Hill Primary School", emis: "010470716", registration: "", address: "Hilaris Avenue", town: "Paarl", postalCode: "7646", district: "Cape Winelands", municipality: "Drakenstein", province: "Western Cape", email: "admin@example.org", phone: "021 000 0000", head: "School Principal", headEmail: "principal@example.org", coordinator: "Sports Coordinator", coordinatorEmail: "sport@example.org", representative: "Authorised Representative", position: "School Administrator", authority: true, addressConfirmed: true, dob: "", guardian: "", guardianEmail: "" };
 export type LocalDocument = { name: string; size: number; type: string; status: "Selected locally" };
 export type Draft = { initiative: string; category: string; year: string; application: "New Application" | "Renewal"; wcsaId: string; account: { firstName: string; surname: string; email: string; mobile: string; terms: boolean; privacy: boolean; verifiedPreview: boolean }; organisation: Organisation; codes: string[]; otherCode: string; level: string; divisions: string; participationTarget: string; performanceTarget: string; priorities: string; assistance: string; estimates: Record<string, { teams: string; participants: string }>; documents: LocalDocument[]; step: number; reviewedPreview: boolean; sample: boolean };
 export const emptyDraft: Draft = { initiative: "WCSSA", category: "School", year: "2027", application: "New Application", wcsaId: "", account: { firstName: "", surname: "", email: "", mobile: "", terms: false, privacy: false, verifiedPreview: false }, organisation: emptyOrganisation, codes: [], otherCode: "", level: "Development", divisions: "", participationTarget: "", performanceTarget: "", priorities: "", assistance: "", estimates: {}, documents: [], step: 1, reviewedPreview: false, sample: false };
