@@ -1,2 +1,6 @@
 import ApplicationWizard from "../../application-wizard";
-export default function Page() { return <ApplicationWizard />; }
+import PostSubmitPayment from "../../post-submit-payment";
+
+export default function Page() {
+  return <><PostSubmitPayment /><ApplicationWizard /></>;
+}
