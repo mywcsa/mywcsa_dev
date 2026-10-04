@@ -1,0 +1,1 @@
+"use client";import {useEffect} from "react";import {useRouter} from "next/navigation";import {usePreview} from "./portal-shell";export default function PostSubmitPayment(){const{draft}=usePreview();const router=useRouter();useEffect(()=>{if(draft.reviewedPreview)router.replace("/membership/payments")},[draft.reviewedPreview,router]);return null}
