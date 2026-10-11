@@ -1,0 +1,23 @@
+"use client";
+import {useState} from "react";
+import Link from "next/link";
+import {usePathname,useRouter} from "next/navigation";
+import {WorkHubIcon,type WorkHubIconName} from "./WorkHubIcon";
+import styles from "./workhub.module.css";
+const nav:[WorkHubIconName,string,string][]=[
+["house","Dashboard","/workhub"],["id","My Employment","/workhub/employment"],["heart","My Benefits","/workhub/benefits"],["calendar","My Leave","/workhub/leave"],["file","My Documents","/workhub/documents"],["clipboard","My Requests","/workhub/requests"],["ticket","My Tickets","/workhub/tickets"],["check","My Work","/workhub/work"],["users","My Team","/workhub/team"],["graduation","My Learning","/workhub/learning"],["briefcase","My Applications","/workhub/applications"]];
+export default function WorkHubShell({name,children}:{name:string;children:React.ReactNode}){
+ const [collapsed,setCollapsed]=useState(false);const [pinned,setPinned]=useState(true);const [query,setQuery]=useState("");const [focus,setFocus]=useState(false);
+ const pathname=usePathname();const router=useRouter();
+ const matches=query.trim()?nav.filter(([,label])=>label.toLowerCase().includes(query.toLowerCase())):[];
+ return <div className={styles.shell}>
+ <header className={styles.top}><div className={styles.brand}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/><span><strong>MyWCSA WorkHub</strong><small>People | Teams | Progress</small></span></div>
+ <div style={{position:"relative",width:"min(440px,33vw)"}}><form className={styles.search} role="search" style={{width:"100%"}} onSubmit={e=>{e.preventDefault();if(matches[0]){router.push(matches[0][2]);setQuery("");setFocus(false)}}}><WorkHubIcon name="search" size={17}/><input aria-label="Search WorkHub pages" placeholder="Search WorkHub pages..." value={query} onFocus={()=>setFocus(true)} onBlur={()=>setTimeout(()=>setFocus(false),180)} onChange={e=>setQuery(e.target.value)} style={{background:"transparent",border:0,outline:0,flex:1,minWidth:0,font:"inherit",color:"#183e70"}}/></form>{focus&&query&&<div style={{position:"absolute",zIndex:20,top:"100%",left:0,right:0,background:"#ffffffed",backdropFilter:"blur(20px)",borderRadius:15,boxShadow:"0 10px 30px #7c9abc55",padding:8}}>{matches.length?matches.map(([icon,label,href])=><Link key={href} href={href} onClick={()=>setQuery("")} style={{display:"flex",gap:10,padding:12,alignItems:"center"}}><WorkHubIcon name={icon} size={17}/>{label}</Link>):<span style={{padding:12,display:"block"}}>No matching WorkHub page</span>}</div>}</div>
+ <div className={styles.user}><Link href="/my-apps">My Apps <WorkHubIcon name="external" size={13}/></Link><span className={styles.avatar}>{name.charAt(0).toUpperCase()}</span><span>{name}<small>Employee</small></span></div></header>
+ <div className={styles.layout} style={{gridTemplateColumns:collapsed?"76px minmax(0,1fr)":undefined}}>
+ <aside className={styles.sidebar} style={{margin:10,borderRadius:20,border:"1px solid #ffffff",boxShadow:"0 8px 28px #8aacc72b",background:"rgba(255,255,255,.47)",position:pinned?"sticky":"relative",top:pinned?10:undefined,alignSelf:"start",maxHeight:"calc(100vh - 100px)",overflowY:"auto"}}>
+ <div><div style={{display:"flex",justifyContent:"space-between",gap:6,marginBottom:12}}><button aria-label={collapsed?"Expand navigation":"Minimize navigation"} title={collapsed?"Expand navigation":"Minimize navigation"} onClick={()=>setCollapsed(!collapsed)} style={{cursor:"pointer",border:"1px solid #d5e4f7",background:"#ffffffb8",borderRadius:9,padding:9,color:"#286ac1"}}><WorkHubIcon name="chevron" size={17}/></button>{!collapsed&&<button title={pinned?"Unpin sidebar":"Pin sidebar"} aria-pressed={pinned} onClick={()=>setPinned(!pinned)} style={{cursor:"pointer",border:"1px solid #d5e4f7",background:"#ffffffb8",borderRadius:9,padding:"8px 12px",color:"#286ac1"}}>{pinned?"Pinned":"Pin"}</button>}</div>
+ <nav aria-label="WorkHub navigation">{nav.map(([icon,label,href])=><Link title={label} aria-current={pathname===href?"page":undefined} key={href} href={href} className={pathname===href?styles.active:""} style={{padding:collapsed?"10px 8px":undefined,justifyContent:collapsed?"center":undefined}}><span className={styles.navIcon}><WorkHubIcon name={icon} size={19}/></span>{!collapsed&&<>{label}<span className={styles.chevron}><WorkHubIcon name="chevron" size={16}/></span></>}</Link>)}</nav></div>
+ {!collapsed&&<div className={styles.sideBottom}><strong>WCSA</strong><small>Western Cape Sports Association</small><p>Employee workspace</p></div>}</aside>
+ <main className={styles.main} style={{minWidth:0}}>{children}<footer className={styles.footer}>© Western Cape Sports Association NPC · MyWCSA WorkHub <Link href="/my-apps">Back to GovApps</Link></footer></main></div></div>;
+}
