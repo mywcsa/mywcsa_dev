@@ -15,18 +15,7 @@ export default async function WorkHubPage() {
   const session = await auth();
   if (!session?.user) redirect("/login/staff?returnTo=%2Fworkhub");
   const name = session.user.name || "WCSA employee";
-  return <div className={styles.shell}>
-    <header className={styles.top}>
-      <div className={styles.brand}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps" /><span><strong>MyWCSA WorkHub</strong><small>People | Teams | Progress</small></span></div>
-      <div className={styles.search}><WorkHubIcon name="search" size={17}/> <span>Search WorkHub</span></div>
-      <div className={styles.user}><Link href="/my-apps">My Apps <WorkHubIcon name="external" size={13}/></Link><span className={styles.avatar}>{name.charAt(0).toUpperCase()}</span><span>{name}<small>Employee</small></span></div>
-    </header>
-    <div className={styles.layout}>
-      <aside className={styles.sidebar}>
-        <nav aria-label="WorkHub navigation">{nav.map(([icon,label,href],i)=><Link key={href} href={href} className={i===0?styles.active:""}><span className={styles.navIcon}><WorkHubIcon name={icon} size={19}/></span>{label}<span className={styles.chevron}><WorkHubIcon name="chevron" size={16}/></span></Link>)}</nav>
-        <div className={styles.sideBottom}><strong>WCSA</strong><small>Western Cape Sports Association</small><p>Employee workspace</p></div>
-      </aside>
-      <main className={styles.main}>
+  return <>
         <section className={styles.hero}>
           <div className={styles.heroOverlay}><span className={styles.eyebrow}>WELCOME BACK</span><h1>{name} <span aria-hidden="true">👋</span></h1><p>Your digital workplace for people, teams and progress.</p><Link href="/workhub/employment" className={styles.primary}>View My Profile <WorkHubIcon name="arrow" size={17}/></Link></div>
           <div className={styles.heroQuote}>People.<br/>Participation.<br/>Progress.</div>
@@ -41,8 +30,5 @@ export default async function WorkHubPage() {
           <section className={styles.panel+" "+styles.quick}><div className={styles.panelHead}><h2><WorkHubIcon name="bolt" size={19}/> Quick Actions</h2></div><div className={styles.quickGrid}>{quick.map(([icon,title,href])=><Link key={href} href={href}><span><WorkHubIcon name={icon} size={24}/></span><small>{title}</small></Link>)}</div></section>
           <section className={styles.panel}><div className={styles.panelHead}><h2><WorkHubIcon name="users" size={19}/> My Team</h2></div><div className={styles.empty}>Chats, groups, channels and video meetings.</div></section>
         </div>
-        <footer className={styles.footer}>© Western Cape Sports Association NPC · MyWCSA WorkHub <Link href="/my-apps">Back to GovApps</Link></footer>
-      </main>
-    </div>
-  </div>;
+        </>;
 }
