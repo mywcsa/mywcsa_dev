@@ -33,14 +33,14 @@ export default async function EmploymentPage(){
      <p>A beautiful, organised home for your employment profile, official documents and HR services. Welcome, {first}.</p>
      <div className={ui.heroActions}><Link href="/workhub/employment/letters" className={ui.cta}>Explore employment letters <WorkHubIcon name="arrow" size={18}/></Link><Link href="/workhub/requests" className={ui.secondary}>HR service requests <WorkHubIcon name="external" size={15}/></Link></div>
     </div>
-    <div className={ui.heroArt} aria-hidden="true"><div className={ui.orbit}><div className={ui.artBadge}><WorkHubIcon name="id" size={53}/></div></div><span className={ui.floatOne}>✦</span><span className={ui.floatTwo}>✧</span><div className={ui.artMini}><WorkHubIcon name="shield" size={18}/> HR protected</div></div>
+    <div className={ui.heroArt} aria-hidden="true"><div className={ui.orbit}><div className={ui.artBadge}><WorkHubIcon name="id" size={53}/></div></div><span className={ui.floatOne}>✦</span><span className={ui.floatTwo}>✧</span><div className={ui.artMini}><WorkHubIcon name="check" size={18}/> HR protected</div></div>
    </section>
    <div className={ui.columns}>
     <section className={ui.profile}>
-     <div className={ui.sectionHeader}><div><span className={ui.kicker}>YOUR PROFILE</span><h2>Employee overview</h2></div><span className={ui.lockLabel}><WorkHubIcon name="shield" size={15}/> Confidential</span></div>
+     <div className={ui.sectionHeader}><div><span className={ui.kicker}>YOUR PROFILE</span><h2>Employee overview</h2></div><span className={ui.lockLabel}><WorkHubIcon name="check" size={15}/> Confidential</span></div>
      <div className={ui.identity}><div className={ui.avatar}>{initials}</div><div className={ui.identityText}><strong>{name}</strong><span>Signed in with Microsoft 365</span></div></div>
      <div className={ui.profileGrid}><div><small>Personnel number</small><strong>Not linked</strong></div><div><small>Employment status</small><strong>Awaiting HR record</strong></div><div><small>Department</small><strong>Not available</strong></div><div><small>HR verification</small><strong>Not confirmed</strong></div></div>
-     <div className={ui.notice}><WorkHubIcon name="shield" size={20}/><p>Your Microsoft sign-in is working. Verified employment information will appear after HR securely links your personnel record.</p></div>
+     <div className={ui.notice}><WorkHubIcon name="check" size={20}/><p>Your Microsoft sign-in is working. Verified employment information will appear after HR securely links your personnel record.</p></div>
     </section>
     <aside className={ui.sideCard}><span className={ui.kicker}>QUICK ACCESS</span><h2>What would you like to do?</h2><Link href="/workhub/employment/letters"><span className={ui.quickIcon}><WorkHubIcon name="file" size={22}/></span><span><strong>Employment letters</strong><small>Templates & eligibility</small></span><WorkHubIcon name="arrow" size={17}/></Link><Link href="/workhub/requests"><span className={ui.quickIcon}><WorkHubIcon name="clipboard" size={22}/></span><span><strong>Request a profile change</strong><small>HR approval required</small></span><WorkHubIcon name="arrow" size={17}/></Link><Link href="/workhub/documents"><span className={ui.quickIcon}><WorkHubIcon name="file" size={22}/></span><span><strong>My documents</strong><small>Employee document centre</small></span><WorkHubIcon name="arrow" size={17}/></Link></aside>
    </div>
