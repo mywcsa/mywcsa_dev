@@ -1,18 +1,5 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import styles from "../../workhub.module.css";
-export default async function LettersPage(){
- const session=await auth(); if(!session?.user)redirect("/login/staff?returnTo=%2Fworkhub%2Femployment%2Fletters");
- return <main className={styles.shell} style={{padding:"28px max(18px,6vw)"}}>
- <Link href="/workhub/employment">← My Employment</Link>
- <section className={styles.panel} style={{minHeight:"auto",marginTop:24,padding:28}}>
- <small>MYWCSA WORKHUB / HR DOCUMENT SERVICES</small><h1>Employment Letters</h1>
- <p>Available letter categories</p>
- <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:12}}>
- {["Confirmation of Employment","Proof of Service","Confirmation of Position","Employment Status Confirmation"].map(t=><div key={t} style={{padding:20,background:"rgba(255,255,255,.65)",borderRadius:14,border:"1px solid white"}}><strong>{t}</strong><p style={{color:"#59718b"}}>Official HR-verified document</p><small>Issuance unavailable until HR Registry integration and template approval.</small></div>)}
- </div>
- <h2>Generation policy</h2><p>Only active, HR-verified employees are eligible. A complete document preview and employee confirmation are mandatory. Letters use approved electronic issuance without handwritten signatures. Public verification will reveal only validity, document type and issue date.</p>
- <p style={{fontWeight:600}}>Official generation is disabled while secure HR integration is incomplete.</p>
- </section></main>;
-}
+import {WorkHubIcon} from "../../WorkHubIcon";
+const types=["Confirmation of Employment","Proof of Service","Confirmation of Position","Employment Status Confirmation"];
+export default function LettersPage(){return <><section className={styles.hero} style={{minHeight:220,background:"linear-gradient(110deg,#eaf4ff,#d4e9ff)"}}><div className={styles.heroOverlay}><span className={styles.eyebrow}>MY EMPLOYMENT / HR DOCUMENT SERVICES</span><h1>Employment Letters</h1><p>Official employment verification with approved templates and mandatory document preview.</p></div><div className={styles.heroQuote}><WorkHubIcon name="file" size={72}/></div></section><div className={styles.panels} style={{marginTop:16,gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))"}}>{types.map((type,i)=><section className={styles.panel} key={type} style={{padding:24,minHeight:200}}><div className={styles.metricIcon} data-tone={i}><WorkHubIcon name="file" size={25}/></div><h2>{type}</h2><p style={{color:"#60768f"}}>Approved HR employment verification category</p><small>Generation awaits verified HR records and approved issuance policy.</small></section>)}</div><section className={styles.panel} style={{marginTop:16,minHeight:"auto",padding:24}}><h2>Electronic issuance safeguards</h2><p>Only active, HR-verified employees may generate letters. Full preview and explicit confirmation are required. Public verification must reveal only validity, letter type and issue date.</p><p><strong>Official issuance is currently disabled.</strong></p><Link href="/workhub/employment" className={styles.primary}>Back to My Employment <WorkHubIcon name="arrow" size={16}/></Link></section></>}
