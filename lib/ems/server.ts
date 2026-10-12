@@ -84,16 +84,27 @@ export async function getEmsActor(): Promise<EmsActor | null> {
   const id = str(user.id);
   if (!email || !id) return null;
   if (user.authProvider === "microsoft-entra-id") {
-    const rows = await database<Array<{role:string;active:boolean}>>(
-      "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&limit=1"
-    );
-    if (!rows.length || !rows[0].active) return null;
-    return {id,email,name:str(user.name)||email,mode:"staff",role:rows[0].role};
+    // All authenticated Entra staff may see a non-sensitive EMS landing workspace.
+    // The role registry controls actual data access and write privileges separately.
+    let role = "viewer";
+    try {
+      const rows = await database<Array<{role:string;active:boolean}>>(
+        "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&limit=1"
+      );
+      if (rows.length && rows[0].active) role = rows[0].role;
+    } catch (error) {
+      if (!(error instanceof EmsError) || error.status !== 503) throw error;
+    }
+    return {id,email,name:str(user.name)||email,mode:"staff",role};
   }
   if (user.authProvider === "business-partner" || user.authProvider === "external-user") {
     return {id,email,name:str(user.name)||email,mode:"organiser"};
   }
-  return null; // Legacy sessions must reauthenticate to populate their verified provider.
+  // Existing pre-EMS sessions carry no provider marker. Permit only an empty,
+  // read-only shell for organisational email accounts until they reauthenticate.
+  if (!user.authProvider && email.endsWith("@wcsports.co.za"))
+    return {id,email,name:str(user.name)||email,mode:"staff",role:"viewer"};
+  return null;
 }
 
 export async function requireEmsActor(): Promise<EmsActor> {
@@ -103,6 +114,8 @@ export async function requireEmsActor(): Promise<EmsActor> {
 }
 
 export async function listEmsEvents(actor: EmsActor): Promise<EmsEvent[]> {
+  if (actor.mode === "staff" && (!actor.role || actor.role === "viewer"))
+    throw new EmsError(403, "A formal EMS staff role is required to access event records.");
   const fields = "id,reference,organiser_name,name,category,venue_name,start_date,end_date,status,created_at";
   const ownerFilter = actor.mode === "organiser" ? "&created_by_id=eq." + encodeURIComponent(actor.id) : "";
   return database<EmsEvent[]>("wcda_ems_events?select=" + fields + ownerFilter + "&order=created_at.desc&limit=100");
