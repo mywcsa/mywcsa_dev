@@ -1,0 +1,27 @@
+name: Personnel verification
+on:
+  pull_request:
+    paths:
+      - "app/personnel/**"
+      - "app/persal/**"
+      - "auth.ts"
+      - "lib/personnel/**"
+      - "tests/persal-authorisation.test.cjs"
+      - ".github/workflows/personnel-checks.yml"
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx eslint auth.ts app/personnel lib/personnel
+      - run: npx tsc --noEmit
+      - run: node --test tests/persal-authorisation.test.cjs
+      - run: npm run build
