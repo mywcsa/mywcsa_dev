@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (!origin || origin !== new URL(request.url).origin)
       throw new EmsError(403, "Requests must originate from the active GovApps page.");
     const actor = await requireEmsActor();
-    if (actor.mode === "staff" && !["registrar","manager","assessor"].includes(actor.role || ""))
+    if (actor.mode === "staff" && !["registrar","manager","assessor","intake"].includes(actor.role || ""))
       throw new EmsError(403, "Your EMS role cannot create applications.");
     const bodyText = await request.text();
     if (bodyText.length > 16000) throw new EmsError(413,"Application exceeds the allowed request size.");
