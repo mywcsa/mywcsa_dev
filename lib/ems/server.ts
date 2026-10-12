@@ -41,7 +41,7 @@ function str(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-async function database<T>(pathname: string, init: RequestInit = {}): Promise<T> {
+export async function emsDatabase<T>(pathname: string, init: RequestInit = {}): Promise<T> {
   const config = supabaseConfig();
   let result: Response;
   try {
@@ -86,12 +86,12 @@ export async function getEmsActor(): Promise<EmsActor | null> {
   if (user.authProvider === "microsoft-entra-id") {
     // All authenticated Entra staff may see a non-sensitive EMS landing workspace.
     // The role registry controls actual data access and write privileges separately.
-    let role = "viewer";
+    let role = "intake";
     try {
-      const rows = await database<Array<{role:string;active:boolean}>>(
+      const rows = await emsDatabase<Array<{role:string;active:boolean}>>(
         "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&limit=1"
       );
-      if (rows.length && rows[0].active) role = rows[0].role;
+      if (rows.length) role = rows[0].active ? rows[0].role : "viewer";
     } catch (error) {
       if (!(error instanceof EmsError) || error.status !== 503) throw error;
     }
@@ -115,10 +115,10 @@ export async function requireEmsActor(): Promise<EmsActor> {
 
 export async function listEmsEvents(actor: EmsActor): Promise<EmsEvent[]> {
   if (actor.mode === "staff" && (!actor.role || actor.role === "viewer"))
-    throw new EmsError(403, "A formal EMS staff role is required to access event records.");
+    throw new EmsError(403, "Your EMS account has no active data access.");
   const fields = "id,reference,organiser_name,name,category,venue_name,start_date,end_date,status,created_at";
-  const ownerFilter = actor.mode === "organiser" ? "&created_by_id=eq." + encodeURIComponent(actor.id) : "";
-  return database<EmsEvent[]>("wcda_ems_events?select=" + fields + ownerFilter + "&order=created_at.desc&limit=100");
+  const ownerFilter = (actor.mode === "organiser" || (actor.mode === "staff" && actor.role === "intake")) ? "&created_by_id=eq." + encodeURIComponent(actor.id) : "";
+  return emsDatabase<EmsEvent[]>("wcda_ems_events?select=" + fields + ownerFilter + "&order=created_at.desc&limit=100");
 }
 
 export type CreateEmsInput = {
@@ -155,7 +155,7 @@ export function validateEmsInput(raw: unknown): CreateEmsInput {
 }
 
 export async function createEmsEvent(actor: EmsActor, input: CreateEmsInput): Promise<{id:string;reference:string;status:string;created_at:string}> {
-  return database("rpc/wcda_ems_create_event", {
+  return emsDatabase("rpc/wcda_ems_create_event", {
     method: "POST",
     body: JSON.stringify({
       p_actor_id:actor.id,
