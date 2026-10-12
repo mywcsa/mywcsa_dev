@@ -118,7 +118,7 @@ export async function requireEmsActor(): Promise<EmsActor> {
 export async function listEmsEvents(actor: EmsActor): Promise<EmsEvent[]> {
   if (actor.mode === "staff" && (!actor.role || actor.role === "viewer"))
     throw new EmsError(403, "Your EMS account has no active data access.");
-  const fields = "id,reference,organiser_name,name,category,venue_name,start_date,end_date,status,assigned_to_email,priority,risk_level,review_due,created_at";
+  const fields = "id,reference,organiser_name,name,category,venue_name,start_date,end_date,status,capture_channel,date_received,captured_by_email,assigned_to_email,priority,risk_level,review_due,created_at";
   const ownerFilter = actor.mode === "organiser"
     ? "&created_by_id=eq." + encodeURIComponent(actor.id)
     : actor.mode === "staff" && actor.role === "intake"
