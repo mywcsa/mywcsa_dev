@@ -1,4 +1,5 @@
--- Staff may operate cases that they created or have been formally assigned.\ncreate or replace function public.wcda_ems_staff_action(
+-- Staff may operate cases that they created or have been formally assigned.
+create or replace function public.wcda_ems_staff_action(
  p_actor_id text, p_actor_email text, p_event_id uuid, p_action text, p_payload jsonb default '{}'::jsonb
 ) returns jsonb
 language plpgsql security definer set search_path=''
