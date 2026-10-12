@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import styles from "./workhub.module.css";
+import OutlookCalendar from "./OutlookCalendar";
 import { WorkHubIcon, type WorkHubIconName } from "./WorkHubIcon";
 
 const nav: [WorkHubIconName,string,string][] = [
@@ -25,7 +26,7 @@ export default async function WorkHubPage() {
         </section>
         <div className={styles.panels}>
           <section className={styles.panel}><div className={styles.panelHead}><h2><WorkHubIcon name="activity" size={19}/> Recent Activity</h2><span>Private employee updates</span></div><div className={styles.empty}>Your leave approvals, payslips, requests and training updates will appear here once connected to authorised data.</div></section>
-          <section className={styles.panel}><div className={styles.panelHead}><h2><WorkHubIcon name="calendar" size={19}/> My Calendar</h2><span>Today</span></div><div className={styles.empty}>No calendar events loaded.<p>Upcoming meetings and assigned work will appear here.</p></div></section>
+          <section className={styles.panel}><div className={styles.panelHead}><h2><WorkHubIcon name="calendar" size={19}/> My Calendar</h2><span>Today</span></div><div className={styles.empty}><OutlookCalendar/></div></section>
           <section className={styles.panel}><div className={styles.panelHead}><h2><WorkHubIcon name="megaphone" size={19}/> Announcements</h2><span>WCSA</span></div><div className={styles.empty}>Official internal announcements will appear here.</div></section>
           <section className={styles.panel+" "+styles.quick}><div className={styles.panelHead}><h2><WorkHubIcon name="bolt" size={19}/> Quick Actions</h2></div><div className={styles.quickGrid}>{quick.map(([icon,title,href])=><Link key={href} href={href}><span><WorkHubIcon name={icon} size={24}/></span><small>{title}</small></Link>)}</div></section>
           <section className={styles.panel}><div className={styles.panelHead}><h2><WorkHubIcon name="users" size={19}/> My Team</h2></div><div className={styles.empty}>Chats, groups, channels and video meetings.</div></section>
