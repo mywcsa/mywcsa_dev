@@ -76,7 +76,7 @@ security definer
 set search_path = ''
 as $$
 declare
-  v_year integer := extract(year from current_date)::integer;
+  v_year integer := extract(year from timezone('Africa/Johannesburg', now()))::integer;
   v_next bigint;
   v_reference text;
   v_event public.wcda_ems_events%rowtype;
