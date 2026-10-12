@@ -22,7 +22,7 @@ export default async function MyAppsPage() {
         <AppCard title="MyWCSA AMS" href="/apps/ams" description="Administration and management" />
         <AppCard title="MyWCSA Applications" href="/apps/applications" description="Applications and workflows" />
         <AppCard title="MyWCSA CSD" href="/apps/csd" description="Suppliers, procurement and assets" />
-        <AppCard title="MyWCSA Payroll" href="/apps/payroll" description="HR, payroll and employee services" />
+        <AppCard title="MyWCSA PERSAL" href="/persal" description="Personnel administration, HR and employee services" />
         <AppCard title="MyWCSA Membership" href="/membership/dashboard" description="Membership, organisation applications and renewals" />
         <AppCard title="MyWCSA MSuite" href="/apps/msuite" description="Microsoft services" />
       </div>
