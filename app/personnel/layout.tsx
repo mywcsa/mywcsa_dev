@@ -5,17 +5,16 @@ import { notFound } from "next/navigation";
 
 export const metadata: Metadata = { title: "MyWCSA Personnel | GovApps" };
 
-/**
- * PERSAL is restricted to the 18 approved people, but their immutable Entra
- * object IDs must be reconciled by an authorised administrator first.
- * An empty allowlist deliberately denies everybody rather than guessing IDs
- * from names, email addresses, or roles.
- */
 export default async function PersonnelLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login/staff?returnTo=%2Fpersonnel");
-
-  // The current session does not expose a verified Entra tenant/object ID.
-  // Never grant PERSAL access using the mutable session name or email.
-  notFound();
+  const oid = session.user.entraOid?.toLowerCase();
+  const tid = session.user.entraTid?.toLowerCase();
+  if (!oid || !tid) notFound();
+  const allowed = new Set(
+    (process.env.PERSAL_ALLOWED_ENTRA_IDENTITIES ?? "")
+      .split(",").map(value => value.trim().toLowerCase()).filter(Boolean)
+  );
+  if (!allowed.has(tid + ":" + oid)) notFound();
+  return children;
 }
