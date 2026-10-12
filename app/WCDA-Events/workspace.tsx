@@ -126,7 +126,7 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
         </form></section>}
         {actor.mode==="staff"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
         {actor.mode!=="staff"&&registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
-          <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>{actor.mode==="staff"?"Event Registry":"My Events"}</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
+          <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>My Events</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
           {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
           <p className={styles.empty}>{isStaffViewer?"No records are displayed until your WCDA EMS role is approved.":notice?"The event service needs configuration before records can be shown.":"No matching event records have been registered."}</p>}
         </section>}
