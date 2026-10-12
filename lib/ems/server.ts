@@ -66,6 +66,8 @@ export async function emsDatabase<T>(pathname: string, init: RequestInit = {}): 
     if (error?.code === "42P01" || error?.code === "PGRST205" || error?.code === "PGRST202") {
       throw new EmsError(503, "EMS database setup is pending. No event records have been created.");
     }
+    if (error?.code === "42501") throw new EmsError(403, "This action requires additional WCDA authorisation.");
+    if (error?.code === "22023" || error?.code === "22P02") throw new EmsError(400, "The requested EMS update contains invalid details.");
     if (result.status === 401 || result.status === 403) {
       throw new EmsError(503, "The EMS database connection is not authorised.");
     }
@@ -117,7 +119,11 @@ export async function listEmsEvents(actor: EmsActor): Promise<EmsEvent[]> {
   if (actor.mode === "staff" && (!actor.role || actor.role === "viewer"))
     throw new EmsError(403, "Your EMS account has no active data access.");
   const fields = "id,reference,organiser_name,name,category,venue_name,start_date,end_date,status,assigned_to_email,priority,risk_level,review_due,created_at";
-  const ownerFilter = (actor.mode === "organiser" || (actor.mode === "staff" && actor.role === "intake")) ? "&created_by_id=eq." + encodeURIComponent(actor.id) : "";
+  const ownerFilter = actor.mode === "organiser"
+    ? "&created_by_id=eq." + encodeURIComponent(actor.id)
+    : actor.mode === "staff" && actor.role === "intake"
+      ? "&or=(" + ["created_by_id.eq." + actor.id,"assigned_to_email.eq." + actor.email].join(",") + ")"
+      : "";
   return emsDatabase<EmsEvent[]>("wcda_ems_events?select=" + fields + ownerFilter + "&order=created_at.desc&limit=100");
 }
 
