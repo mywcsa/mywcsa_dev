@@ -18,13 +18,13 @@ export default async function MyAppsPage() {
       <h1 style={{margin:0,color:"#171717",fontSize:30,fontWeight:600}}>My Apps</h1>
       <p style={{margin:"10px 0 35px",color:"#555",fontSize:15}}>Welcome, {staffName}</p>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(210px, 1fr))",gap:20}}>
+        <AppCard title="MyWCDA Events" href="/WCDA-Events" description="WCDA employee event cases, assigned tasks, reviews and tracking" />
         <AppCard title="MyWCSA WorkHub" href="/workhub" description="Employee workplace, services and collaboration" />
         <AppCard title="MyWCSA AMS" href="/apps/ams" description="Administration and management" />
         <AppCard title="MyWCSA Applications" href="/apps/applications" description="Applications and workflows" />
         <AppCard title="MyWCSA CSD" href="/apps/csd" description="Suppliers, procurement and assets" />
         <AppCard title="MyWCSA PERSAL" href="/persal" description="Personnel administration, HR and employee services" />
         <AppCard title="MyWCSA Membership" href="/membership/dashboard" description="Membership, organisation applications and renewals" />
-        <AppCard title="MyWCDA Events" href="/WCDA-Events" description="WCDA event registration, assessment and operations" />
         <AppCard title="MyWCSA MSuite" href="/apps/msuite" description="Microsoft services" />
       </div>
     </section>
