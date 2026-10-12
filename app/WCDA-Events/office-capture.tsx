@@ -56,7 +56,7 @@ export default function OfficeCapture({actor,events,onCaptured}:{actor:EmsActor;
   <form onSubmit={submit}>
     {stage===1&&<div className={styles.grid}>
        <label>How was the application received? <select required value={form.captureChannel} onChange={e=>update("captureChannel",e.target.value)}>{channels.map(o=><option value={o.value} key={o.value}>{o.label}</option>)}</select></label>
-       <label>Date physically received <input required type="date" max={todaySA()} value={form.dateReceived} onChange={e=>update("dateReceived",e.target.value)}/></label>
+       <label>Date application received <input required type="date" max={todaySA()} value={form.dateReceived} onChange={e=>update("dateReceived",e.target.value)}/></label>
        <label>Organiser / organisation name <input required maxLength={200} value={form.organiserName} onChange={e=>update("organiserName",e.target.value)} placeholder="Name stated on the application"/></label>
        <label>Applicant / contact person <input required maxLength={150} value={form.contactName} onChange={e=>update("contactName",e.target.value)} placeholder="Person submitting the application"/></label>
        <label>Applicant's email (if available) <input type="email" maxLength={254} value={form.contactEmail} onChange={e=>update("contactEmail",e.target.value)} placeholder="organiser@example.co.za"/></label>
