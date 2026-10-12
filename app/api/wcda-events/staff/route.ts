@@ -20,7 +20,7 @@ export async function GET(request:Request){
   const url=new URL(request.url);
   const id=url.searchParams.get("eventId");
   if(id && (!uuid.test(id)|| !ids.includes(id)))throw new EmsError(403,"You are not authorised to view this event.");
-  const taskFields="id,event_id,title,details,assigned_to_email,created_by_email,status,priority,due_date,created_at,updated_at";
+  const taskFields="id,event_id,title,details,category,assigned_to_email,created_by_email,status,priority,due_date,created_at,updated_at";
   const taskFilter=privileged(actor)?"":ids.length?"&event_id=in.("+ids.join(",")+")":"";
   const tasks=(!privileged(actor)&&!ids.length)?[]:await emsDatabase<Array<Record<string,unknown>>>(
     "wcda_ems_tasks?select="+taskFields+taskFilter+"&order=created_at.desc&limit=250"
