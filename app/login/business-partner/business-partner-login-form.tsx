@@ -13,7 +13,7 @@ function SignInButton() {
   const { pending } = useFormStatus();
   return (
     <button className={styles.submit} type="submit" disabled={pending} aria-busy={pending}>
-      <span>{pending ? "Verifying your account…" : "Sign in to GovApps"}</span>
+      <span>{pending ? "Verifying your account…" : "Sign in"}</span>
       {!pending && <span aria-hidden="true" className={styles.arrow}>↗</span>}
     </button>
   );
@@ -69,11 +69,9 @@ export default function BusinessPartnerLoginForm({ action, registrationUrl }: Pr
           {showPassword ? "Hide" : "Show"}
         </button>
       </div>
-      <p className={styles.fieldHint}>Your registered WCSA ID also works as a username.</p>
       <SignInButton />
       <div className={styles.registration}>
-        <span>New to MyWCSA GovApps?</span>
-        <a href={registrationUrl}>Register your organisation <span aria-hidden="true">↗</span></a>
+        <a href={registrationUrl}>Register a Business Partner account <span aria-hidden="true">↗</span></a>
       </div>
     </form>
   );
