@@ -1,0 +1,173 @@
+import "server-only";
+import { auth } from "@/auth";
+import { supabaseConfig } from "@/lib/ams/supabase";
+
+export const EMS_ROOT = "/WCDA-Events" as const;
+export const EMS_PRODUCTION_URL = "https://GovApps.wcsports.co.za/WCDA-Events" as const;
+export const EMS_MAILBOXES = {
+  billing: "finances@wcsports.co.za",
+  certificates: "WCDA.Certificates@wcsports.co.za",
+  notifications: "WCDAEms@govapps.wcsports.co.za",
+  support: "ServiceDesk@wcsports.co.za",
+} as const;
+
+export type EmsEvent = {
+  id: string;
+  reference: string;
+  organiser_name: string;
+  name: string;
+  category: string;
+  venue_name: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  created_at: string;
+};
+export type EmsActor = {
+  id: string;
+  email: string;
+  name: string;
+  mode: "staff" | "organiser";
+  role?: string;
+};
+
+export class EmsError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+    this.name = "EmsError";
+  }
+}
+function str(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+async function database<T>(pathname: string, init: RequestInit = {}): Promise<T> {
+  const config = supabaseConfig();
+  let result: Response;
+  try {
+    result = await fetch(config.origin + "/rest/v1/" + pathname, {
+      ...init,
+      headers: {
+        apikey: config.secret,
+        Authorization: "Bearer " + config.secret,
+        "Content-Type": "application/json",
+        ...(init.headers || {}),
+      },
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(12000),
+    });
+  } catch {
+    throw new EmsError(503, "The WCDA EMS database is currently unavailable.");
+  }
+  const json: unknown = await result.json().catch(() => null);
+  if (!result.ok) {
+    const error = json as {code?: string; message?: string} | null;
+    if (error?.code === "42P01" || error?.code === "PGRST205" || error?.code === "PGRST202") {
+      throw new EmsError(503, "EMS database setup is pending. No event records have been created.");
+    }
+    if (result.status === 401 || result.status === 403) {
+      throw new EmsError(503, "The EMS database connection is not authorised.");
+    }
+    if (result.status === 409) throw new EmsError(409, "An EMS record conflict occurred. Please retry.");
+    if (result.status >= 500) throw new EmsError(503, "The EMS database cannot complete the operation.");
+    throw new EmsError(result.status, "EMS could not process the request.");
+  }
+  return json as T;
+}
+
+export async function getEmsActor(): Promise<EmsActor | null> {
+  const session = await auth();
+  if (!session?.user) return null;
+  const user = session.user as typeof session.user & {id?: string; authProvider?: string};
+  const email = str(user.email).toLowerCase();
+  const id = str(user.id);
+  if (!email || !id) return null;
+  if (user.authProvider === "microsoft-entra-id") {
+    // All authenticated Entra staff may see a non-sensitive EMS landing workspace.
+    // The role registry controls actual data access and write privileges separately.
+    let role = "viewer";
+    try {
+      const rows = await database<Array<{role:string;active:boolean}>>(
+        "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&limit=1"
+      );
+      if (rows.length && rows[0].active) role = rows[0].role;
+    } catch (error) {
+      if (!(error instanceof EmsError) || error.status !== 503) throw error;
+    }
+    return {id,email,name:str(user.name)||email,mode:"staff",role};
+  }
+  if (user.authProvider === "business-partner" || user.authProvider === "external-user") {
+    return {id,email,name:str(user.name)||email,mode:"organiser"};
+  }
+  // Existing pre-EMS sessions carry no provider marker. Permit only an empty,
+  // read-only shell for organisational email accounts until they reauthenticate.
+  if (!user.authProvider && email.endsWith("@wcsports.co.za"))
+    return {id,email,name:str(user.name)||email,mode:"staff",role:"viewer"};
+  return null;
+}
+
+export async function requireEmsActor(): Promise<EmsActor> {
+  const actor = await getEmsActor();
+  if (!actor) throw new EmsError(403, "You do not have an authorised EMS session. Sign in or contact the service desk.");
+  return actor;
+}
+
+export async function listEmsEvents(actor: EmsActor): Promise<EmsEvent[]> {
+  if (actor.mode === "staff" && (!actor.role || actor.role === "viewer"))
+    throw new EmsError(403, "A formal EMS staff role is required to access event records.");
+  const fields = "id,reference,organiser_name,name,category,venue_name,start_date,end_date,status,created_at";
+  const ownerFilter = actor.mode === "organiser" ? "&created_by_id=eq." + encodeURIComponent(actor.id) : "";
+  return database<EmsEvent[]>("wcda_ems_events?select=" + fields + ownerFilter + "&order=created_at.desc&limit=100");
+}
+
+export type CreateEmsInput = {
+  organiserName: string;
+  name: string;
+  category: string;
+  venueName: string;
+  venueAddress: string;
+  startDate: string;
+  endDate: string;
+  estimatedAttendance: number | null;
+};
+
+export function validateEmsInput(raw: unknown): CreateEmsInput {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new EmsError(400,"Enter the event details.");
+  const obj = raw as Record<string,unknown>;
+  const organiserName = str(obj.organiserName), name = str(obj.name), category = str(obj.category);
+  const venueName = str(obj.venueName), venueAddress = str(obj.venueAddress);
+  const startDate = str(obj.startDate), endDate = str(obj.endDate);
+  const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0,10) === value;
+  if (organiserName.length < 2 || organiserName.length > 200 ||
+      name.length < 3 || name.length > 200 ||
+      category.length < 2 || category.length > 100 ||
+      venueName.length < 2 || venueName.length > 200 ||
+      venueAddress.length > 300 || !validDate(startDate) || !validDate(endDate) || endDate < startDate)
+    throw new EmsError(400,"Check the organiser, event, venue and valid event dates.");
+  let estimatedAttendance: number | null = null;
+  if (obj.estimatedAttendance !== "" && obj.estimatedAttendance != null) {
+    const n = Number(obj.estimatedAttendance);
+    if (!Number.isSafeInteger(n) || n < 0 || n > 100000000) throw new EmsError(400,"Attendance must be a valid non-negative whole number.");
+    estimatedAttendance = n;
+  }
+  return {organiserName,name,category,venueName,venueAddress,startDate,endDate,estimatedAttendance};
+}
+
+export async function createEmsEvent(actor: EmsActor, input: CreateEmsInput): Promise<{id:string;reference:string;status:string;created_at:string}> {
+  return database("rpc/wcda_ems_create_event", {
+    method: "POST",
+    body: JSON.stringify({
+      p_actor_id:actor.id,
+      p_actor_email:actor.email,
+      p_organiser_name:input.organiserName,
+      p_name:input.name,
+      p_category:input.category,
+      p_venue_name:input.venueName,
+      p_venue_address:input.venueAddress,
+      p_start_date:input.startDate,
+      p_end_date:input.endDate,
+      p_estimated_attendance:input.estimatedAttendance,
+    }),
+  });
+}
