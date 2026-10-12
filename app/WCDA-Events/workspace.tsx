@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { WorkHubIcon, type WorkHubIconName } from "@/app/workhub/WorkHubIcon";
 import type { EmsActor, EmsEvent } from "@/lib/ems/types";
 import styles from "./workspace.module.css";
+import StaffConsole from "./staff-console";
 
 type NavGroup = { name: string; items: string[] };
 const internal: NavGroup[] = [
@@ -38,7 +39,7 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
   const [saving,setSaving]=useState(false);
   const [form,setForm]=useState<EmsForm>(emptyForm);
   const isStaffViewer=actor.mode==="staff" && actor.role==="viewer";
-  const canCreate=actor.mode==="organiser"||["registrar","manager","assessor"].includes(actor.role||"");
+  const canCreate=actor.mode==="organiser"||["registrar","manager","assessor","intake"].includes(actor.role||"");
   const registryTabs=["Dashboard","Event Applications","Event Registry","My Events"];
   const navigable=groups.flatMap(g=>g.items);
   const matches=query.trim()?navigable.filter(x=>x.toLowerCase().includes(query.toLowerCase())).slice(0,5):[];
@@ -123,12 +124,13 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
           <label>Estimated attendance<input type="number" min={0} max={100000000} value={form.estimatedAttendance} onChange={e=>setForm(v=>({...v,estimatedAttendance:e.target.value}))}/></label>
           <div className={styles.formWide}><button type="submit" className={styles.primaryButton} disabled={saving}>{saving?"Submitting…":"Submit application"}</button></div>
         </form></section>}
-        {registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
+        {actor.mode==="staff"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
+        {actor.mode!=="staff"&&registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
           <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>{actor.mode==="staff"?"Event Registry":"My Events"}</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
           {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
           <p className={styles.empty}>{isStaffViewer?"No records are displayed until your WCDA EMS role is approved.":notice?"The event service needs configuration before records can be shown.":"No matching event records have been registered."}</p>}
         </section>}
-        {!registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
+        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
           <a href="mailto:finances@wcsports.co.za">Finance · finances@wcsports.co.za</a>
           <a href="mailto:WCDA.Certificates@wcsports.co.za">Certificates · WCDA.Certificates@wcsports.co.za</a>
           <a href="mailto:WCDAEms@govapps.wcsports.co.za">System · WCDAEms@govapps.wcsports.co.za</a>
