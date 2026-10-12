@@ -38,7 +38,7 @@ export async function POST(request:Request){
   if(!request.headers.get("origin")||request.headers.get("origin")!==new URL(request.url).origin)
     throw new EmsError(403,"Open MyWCDA Events through GovApps to capture applications.");
   const actor=await requireEmsActor();
-  if(actor.mode!=="staff"||!["intake","registrar","manager","assessor","executive","compliance","operations"].includes(actor.role||""))
+  if(actor.mode!=="staff"||!["intake","registrar","manager","assessor","executive","compliance","operations","finance","certificates"].includes(actor.role||""))
     throw new EmsError(403,"Employee intake access is required. An external organiser cannot use staff capture.");
   const raw=await request.text();
   if(raw.length>14000)throw new EmsError(413,"Application data exceeds the allowed limit.");
