@@ -1,164 +1,140 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { WorkHubIcon, type WorkHubIconName } from "@/app/workhub/WorkHubIcon";
 import type { EmsActor, EmsEvent } from "@/lib/ems/types";
 import styles from "./workspace.module.css";
 
-type NavGroup={name:string;items:string[]};
-const staffNavigation:NavGroup[]=[
+type NavGroup = { name: string; items: string[] };
+const internal: NavGroup[] = [
   {name:"Command Centre",items:["Dashboard","My Work","Events Calendar & GIS"]},
   {name:"Events Administration",items:["Event Applications","Event Registry","Organisers & Stakeholders","Venues & Locations","Programmes & Scheduling"]},
   {name:"Governance & Safety",items:["Reviews & Endorsements","Safety & Compliance","Inspections & Corrective Actions"]},
   {name:"People & Operations",items:["Contractors & Vendors","Personnel & Rosters","Logistics & Facilities","Access & Accreditation","Live Operations Centre","Incidents & Emergencies"]},
-  {name:"Documentation",items:["Letters & Memoranda","Certificates & Verification","Documents & Records"]},
-  {name:"Finance & Correspondence",items:["Finance & Payments","Correspondence & Cases"]},
-  {name:"Intelligence & Administration",items:["Reports & Intelligence","Administration & Audit"]},
+  {name:"Official Documents",items:["Letters & Memoranda","Certificates & Verification","Documents & Records"]},
+  {name:"Finance & Support",items:["Finance & Payments","Correspondence & Cases"]},
+  {name:"Intelligence & Control",items:["Reports & Intelligence","Administration & Audit"]},
 ];
-const organiserNavigation:NavGroup[]=[
-  {name:"MyWCDA Organiser Portal",items:["Dashboard","Event Applications","My Events","Documents & Compliance","Event Operations","Payments & Invoices","Letters & Certificates","Messages & Support"]},
-];
+const external: NavGroup[] = [{name:"Organiser Workspace",items:["Dashboard","Event Applications","My Events","Documents & Compliance","Event Operations","Payments & Invoices","Letters & Certificates","Messages & Support"]}];
 const categories=["Festival","Sport","Concert","Market","Conference","Cultural","Community","Religious","Exhibition","Other"];
 const emptyForm={organiserName:"",name:"",category:"Festival",venueName:"",venueAddress:"",startDate:"",endDate:"",estimatedAttendance:""};
-type EventForm=typeof emptyForm;
+type EmsForm=typeof emptyForm;
 const dateZA=(date:string)=>date?new Date(date+"T12:00:00").toLocaleDateString("en-ZA",{day:"2-digit",month:"short",year:"numeric"}):"—";
-const titleCase=(value:string)=>value.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
+const readable=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
+const iconFor=(s:string):WorkHubIconName=>
+ s==="Dashboard"?"house":/Calendar|Scheduling/.test(s)?"calendar":/Certificate|Compliance|Inspection/.test(s)?"check":/Finance|Payment|Invoice/.test(s)?"briefcase":/Work|People|Personnel|Organiser|Contractor|Vendor/.test(s)?"users":/Correspondence|Messages|Support/.test(s)?"mail":/Document|Letter|Record/.test(s)?"file":/Application|Event/.test(s)?"clipboard":/Report|Live|Incident/.test(s)?"activity":"id";
 
 export default function EmsWorkspace({actor}:{actor:EmsActor}) {
-  const nav=actor.mode==="staff"?staffNavigation:organiserNavigation;
-  const [active,setActive]=useState("Dashboard");
+  const groups=actor.mode==="staff"?internal:external;
+  const [tab,setTab]=useState("Dashboard");
   const [collapsed,setCollapsed]=useState(false);
+  const [pinned,setPinned]=useState(true);
+  const [query,setQuery]=useState("");
   const [events,setEvents]=useState<EmsEvent[]>([]);
-  const [loading,setLoading]=useState(true);
+  const [loading,setLoading]=useState(false);
   const [notice,setNotice]=useState("");
-  const [search,setSearch]=useState("");
   const [showForm,setShowForm]=useState(false);
   const [saving,setSaving]=useState(false);
-  const [form,setForm]=useState<EventForm>(emptyForm);
-  const canCreate=actor.mode==="organiser" || ["registrar","manager","assessor"].includes(actor.role||"");
-  const tabsWithEventRegistry=["Dashboard","Event Registry","Event Applications","My Events"];
-  const filtered=useMemo(()=>events.filter(e=>(e.reference+" "+e.name+" "+e.organiser_name+" "+e.venue_name).toLowerCase().includes(search.toLowerCase())),[events,search]);
+  const [form,setForm]=useState<EmsForm>(emptyForm);
+  const isStaffViewer=actor.mode==="staff" && actor.role==="viewer";
+  const canCreate=actor.mode==="organiser"||["registrar","manager","assessor"].includes(actor.role||"");
+  const registryTabs=["Dashboard","Event Applications","Event Registry","My Events"];
+  const navigable=groups.flatMap(g=>g.items);
+  const matches=query.trim()?navigable.filter(x=>x.toLowerCase().includes(query.toLowerCase())).slice(0,5):[];
+  const found=useMemo(()=>events.filter(e=>(e.name+" "+e.reference+" "+e.organiser_name+" "+e.venue_name).toLowerCase().includes(query.toLowerCase())),[events,query]);
 
-  async function refresh(){
+  async function refresh() {
+    if(isStaffViewer){
+      setLoading(false);
+      setEvents([]);
+      setNotice("You can view the EMS workspace. Access to official event records requires an assigned WCDA EMS role.");
+      return;
+    }
     setLoading(true);
-    try {
+    try{
       const response=await fetch("/api/wcda-events/events",{cache:"no-store"});
-      const json=await response.json() as {events?:EmsEvent[];error?:string};
-      if(!response.ok)throw new Error(json.error||"Event records are unavailable.");
-      setEvents(Array.isArray(json.events)?json.events:[]);
+      const data=await response.json() as {events?:EmsEvent[];error?:string};
+      if(!response.ok)throw new Error(data.error||"The EMS event service is unavailable.");
+      setEvents(data.events||[]);
       setNotice("");
-    } catch(error) {
-      setNotice(error instanceof Error?error.message:"Could not load EMS event records.");
-    } finally {setLoading(false);}
+    }catch(e){setEvents([]);setNotice(e instanceof Error?e.message:"The event registry is unavailable.");}
+    finally{setLoading(false);}
   }
   useEffect(()=>{void refresh();},[]);
-
-  async function submit(event:FormEvent<HTMLFormElement>){
-    event.preventDefault();
-    if(saving)return;
-    setSaving(true);
-    setNotice("");
+  async function submit(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();if(saving||!canCreate)return;
+    setSaving(true);setNotice("");
     try{
-      const response=await fetch("/api/wcda-events/events",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(form),
-      });
-      const json=await response.json() as {event?:{reference:string};error?:string};
-      if(!response.ok)throw new Error(json.error||"The application could not be submitted.");
-      setShowForm(false);
-      setForm(emptyForm);
-      setActive(actor.mode==="staff"?"Event Registry":"My Events");
-      await refresh();
-      setNotice("Application registered successfully: "+(json.event?.reference||"see event registry"));
-    } catch(error){
-      setNotice(error instanceof Error?error.message:"Application submission failed.");
-    } finally{setSaving(false);}
+      const response=await fetch("/api/wcda-events/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});
+      const data=await response.json() as {event?:{reference:string};error?:string};
+      if(!response.ok)throw new Error(data.error||"The application could not be submitted.");
+      setForm(emptyForm);setShowForm(false);setTab(actor.mode==="staff"?"Event Registry":"My Events");
+      await refresh();setNotice("Event registered as "+(data.event?.reference||"an official EMS event")+".");
+    }catch(error){setNotice(error instanceof Error?error.message:"The application could not be submitted.");}
+    finally{setSaving(false);}
   }
-  const summary=[
-    {label:"Registered events",value:loading?"—":String(events.length),symbol:"▦"},
-    {label:"Awaiting assessment",value:loading?"—":String(events.filter(e=>["submitted","under_review","corrections_requested"].includes(e.status)).length),symbol:"◷"},
-    {label:"Endorsed",value:loading?"—":String(events.filter(e=>e.status==="endorsed").length),symbol:"✓"},
-    {label:"Upcoming dates",value:loading?"—":String(events.filter(e=>e.start_date>=new Date().toISOString().slice(0,10)).length),symbol:"◇"},
+  const upcoming=events.filter(e=>e.start_date>=new Date().toISOString().slice(0,10));
+  const metrics=[
+    {label:"Registered events",value:isStaffViewer?"—":loading?"—":String(events.length),icon:"calendar" as WorkHubIconName,subtitle:"Events in authorised records"},
+    {label:"Awaiting review",value:isStaffViewer?"—":loading?"—":String(events.filter(e=>["submitted","under_review","corrections_requested"].includes(e.status)).length),icon:"clipboard" as WorkHubIconName,subtitle:"Pending assessments"},
+    {label:"Endorsed events",value:isStaffViewer?"—":loading?"—":String(events.filter(e=>e.status==="endorsed").length),icon:"check" as WorkHubIconName,subtitle:"Approved decisions"},
+    {label:"Upcoming events",value:isStaffViewer?"—":loading?"—":String(upcoming.length),icon:"video" as WorkHubIconName,subtitle:"In the event calendar"},
   ];
 
   return <div className={styles.shell}>
-    <aside className={`${styles.sidebar} ${collapsed?styles.sidebarCollapsed:""}`}>
-      <div className={styles.brand}><span className={styles.brandIcon}>W</span>{!collapsed&&<span><strong>MyWCDA Events</strong><small>EVENT MANAGEMENT SYSTEM</small></span>}</div>
-      <button type="button" className={styles.collapse} onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expand navigation":"Collapse navigation"}>{collapsed?"›":"‹"} {!collapsed&&"Collapse menu"}</button>
-      <nav aria-label="EMS navigation">
-        {nav.map(group=><section key={group.name} className={styles.navGroup}>
-          {!collapsed&&<span className={styles.navHeading}>{group.name}</span>}
-          {group.items.map((item,i)=><button key={item} title={item} type="button" aria-current={active===item?"page":undefined}
-            className={`${styles.navItem} ${active===item?styles.navActive:""}`}
-            onClick={()=>{setActive(item);setShowForm(false);}}>
-            <span className={styles.navSymbol} aria-hidden="true">{item==="Dashboard"?"▦":item.includes("Event")?"▤":item.includes("Finance")||item.includes("Payment")?"◇":item.includes("Certificate")?"✧":item.includes("Support")?"◉":i%2?"◷":"▣"}</span>
-            {!collapsed&&<span>{item}</span>}
-          </button>)}
-        </section>)}
-      </nav>
-      {!collapsed&&<div className={styles.sidebarBottom}><strong>WCDA</strong><span>Events & Safety Department</span><small>Access is governed by official delegation and permissions.</small></div>}
-    </aside>
-
-    <div className={styles.content}>
-      <header className={styles.topbar}>
-        <div className={styles.breadcrumb}><span>GovApps</span><b>/</b><span>MyWCDA Events</span><b>/</b><strong>{active}</strong></div>
-        <div className={styles.topActions}>
-          <span className={styles.userBadge}>{actor.mode==="staff"?actor.role||"WCDA Staff":"Organiser"}</span>
-          <Link href={actor.mode==="staff"?"/my-apps":"/"} className={styles.backLink}>GovApps ↗</Link>
-        </div>
-      </header>
+    <header className={styles.topbar}>
+      <div className={styles.topBrand}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/><span><strong>MyWCDA Events</strong><small>Events | Safety | Progress</small></span></div>
+      <div className={styles.headerSearch}><WorkHubIcon name="search" size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search EMS pages and events" placeholder="Search MyWCDA Events..."/>
+        {matches.length>0&&<div className={styles.searchResults}>{matches.map(x=><button type="button" key={x} onClick={()=>{setTab(x);setQuery("");setShowForm(false);}}><WorkHubIcon name={iconFor(x)} size={17}/>{x}</button>)}</div>}
+      </div>
+      <div className={styles.topActions}><Link href={actor.mode==="staff"?"/my-apps":"/"} className={styles.backLink}>My Apps <WorkHubIcon name="external" size={13}/></Link><span className={styles.avatar}>{actor.name.slice(0,1).toUpperCase()}</span><span className={styles.accountName}>{actor.name}<small>{actor.mode==="staff"?"Employee":"Organiser"}</small></span></div>
+    </header>
+    <div className={`${styles.appBody} ${collapsed?styles.layoutCollapsed:""}`}>
+      <aside className={styles.sidebar} style={{position:pinned?"sticky":"relative",top:pinned?10:undefined}}>
+        <div className={styles.navControls}><button className={styles.collapse} type="button" onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expand navigation":"Collapse navigation"}><WorkHubIcon name="chevron" size={18}/></button>{!collapsed&&<button className={styles.pin} type="button" aria-pressed={pinned} onClick={()=>setPinned(v=>!v)}>{pinned?"Pinned":"Pin"}</button>}</div>
+        <nav aria-label="EMS sections">
+          {groups.map(group=><section key={group.name} className={styles.navGroup}>{!collapsed&&<span className={styles.navHeading}>{group.name}</span>}
+          {group.items.map(item=><button className={`${styles.navItem} ${tab===item?styles.navActive:""}`} key={item} title={item} aria-current={tab===item?"page":undefined} type="button" onClick={()=>{setTab(item);setShowForm(false);}}>
+          <span className={styles.navSymbol}><WorkHubIcon name={iconFor(item)} size={18}/></span>{!collapsed&&<><span>{item}</span><span className={styles.navChevron}><WorkHubIcon name="chevron" size={14}/></span></>}</button>)}</section>)}
+        </nav>
+        {!collapsed&&<div className={styles.sidebarBottom}><strong>WCDA</strong><small>Western Cape Development Authority</small><p>Events & Safety Department</p></div>}
+      </aside>
       <main className={styles.main}>
-        <div className={styles.titleRow}>
-          <div><span className={styles.eyebrow}>WESTERN CAPE DEVELOPMENT AUTHORITY · EVENTS & SAFETY</span>
-          <h1>{active==="Dashboard"?"Welcome to MyWCDA Events":active}</h1>
-          <p>{active==="Dashboard"?"One secure workspace for the event lifecycle, from registration to close-out.":"Event reference format: EMS YY/NNNNN · Official GovApps workspace."}</p></div>
-          {canCreate&&tabsWithEventRegistry.includes(active)&&<button className={styles.primaryButton} onClick={()=>setShowForm(v=>!v)} type="button">{showForm?"Close form":"+ New event application"}</button>}
-        </div>
-
+        {tab!=="Dashboard"&&<div className={styles.titleRow}><div><span className={styles.eyebrow}>MYWCDA EVENTS · OFFICIAL GOVAPPS WORKSPACE</span><h1>{tab}</h1><p>Event reference: EMS YY/NNNNN</p></div>{canCreate&&registryTabs.includes(tab)&&<button type="button" className={styles.primaryButton} onClick={()=>setShowForm(v=>!v)}>{showForm?"Close form":"New event +"}</button>}</div>}
         {notice&&<div className={styles.notice} role="status">{notice}</div>}
-
-        {showForm&&canCreate&&<section className={styles.glassPanel} aria-label="Event application form">
-          <div className={styles.panelHeader}><div><h2>New Event Application</h2><p>Complete the required details. Submission allocates an official EMS reference only after successful database registration.</p></div></div>
-          <form onSubmit={submit} className={styles.eventForm}>
-            <label>Organiser / legal entity<input required minLength={2} maxLength={200} value={form.organiserName} onChange={e=>setForm(v=>({...v,organiserName:e.target.value}))}/></label>
-            <label>Event name<input required minLength={3} maxLength={200} value={form.name} onChange={e=>setForm(v=>({...v,name:e.target.value}))}/></label>
-            <label>Category<select value={form.category} onChange={e=>setForm(v=>({...v,category:e.target.value}))}>{categories.map(c=><option key={c} value={c}>{c}</option>)}</select></label>
-            <label>Venue name<input required minLength={2} maxLength={200} value={form.venueName} onChange={e=>setForm(v=>({...v,venueName:e.target.value}))}/></label>
-            <label className={styles.formWide}>Venue address<input maxLength={300} value={form.venueAddress} onChange={e=>setForm(v=>({...v,venueAddress:e.target.value}))}/></label>
-            <label>First event date<input required type="date" value={form.startDate} onChange={e=>setForm(v=>({...v,startDate:e.target.value}))}/></label>
-            <label>Last event date<input required type="date" min={form.startDate||undefined} value={form.endDate} onChange={e=>setForm(v=>({...v,endDate:e.target.value}))}/></label>
-            <label>Estimated attendance<input type="number" min={0} max={100000000} placeholder="Optional" value={form.estimatedAttendance} onChange={e=>setForm(v=>({...v,estimatedAttendance:e.target.value}))}/></label>
-            <div className={styles.formWide}><p className={styles.disclaimer}>Submitting an application does not grant endorsement, approval or any statutory permit. Additional documents and assessments will be required where applicable.</p>
-            <button type="submit" disabled={saving} className={styles.primaryButton}>{saving?"Submitting…":"Submit event application"}</button></div>
-          </form>
-        </section>}
-
-        {active==="Dashboard"&&<><div className={styles.hero}><div><span className={styles.heroKicker}>WCDA EVENTS COMMAND CENTRE</span><h2>Better oversight.<br/>Smarter event administration.</h2><p>Manage events, track assessment stages and keep one trusted administrative record.</p></div><div className={styles.heroOrb} aria-hidden="true">EMS</div></div>
-          <div className={styles.stats}>{summary.map(s=><div className={styles.stat} key={s.label}><div className={styles.statTop}><span>{s.label}</span><span>{s.symbol}</span></div><strong>{s.value}</strong><small>{loading?"Loading verified data":"From authorised event records"}</small></div>)}</div>
-        </>}
-
-        {tabsWithEventRegistry.includes(active)&&<section className={styles.glassPanel}>
-          <div className={styles.panelHeader}><div><h2>{actor.mode==="staff"?"Event Registry":"My Events"}</h2><p>Actual records returned from the secured EMS service. No example events are inserted.</p></div><button type="button" className={styles.secondaryButton} onClick={()=>void refresh()}>Refresh</button></div>
-          <div className={styles.tableActions}><input aria-label="Search events" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search reference, event, organiser or venue…"/><span>{filtered.length} record(s)</span></div>
-          {loading?<p className={styles.empty}>Loading event records…</p>:
-            filtered.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event / organiser</th><th>Venue</th><th>Date(s)</th><th>Status</th></tr></thead><tbody>{filtered.map(event=><tr key={event.id}><td className={styles.reference}>{event.reference}</td><td><strong>{event.name}</strong><small>{event.organiser_name}</small></td><td>{event.venue_name}</td><td>{dateZA(event.start_date)}{event.end_date!==event.start_date?" – "+dateZA(event.end_date):""}</td><td><span className={styles.status}>{titleCase(event.status)}</span></td></tr>)}</tbody></table></div>:
-            <div className={styles.empty}><strong>No event records to show</strong><p>{notice?"The records service must be configured before applications can be managed.":"Submitted applications will appear here when available."}</p></div>}
-        </section>}
-
-        {!tabsWithEventRegistry.includes(active)&&<section className={styles.glassPanel}>
-          <div className={styles.panelHeader}><div><h2>{active}</h2><p>This module is included in the approved EMS architecture but has not yet been activated. No simulated approvals, certificates, payments or messages are displayed.</p></div><span className={styles.planned}>Planned module</span></div>
-          <div className={styles.moduleDetails}><p>Core event registration and the official GovApps route are the first implementation milestone. This module will require its own secured records, review actions and audited permissions before production enablement.</p>
-            {(active.includes("Correspondence")||active.includes("Support")||active.includes("Certificates")||active.includes("Payments"))&&<div className={styles.mailGrid}>
-              <a href="mailto:finances@wcsports.co.za">Finance · finances@wcsports.co.za</a>
-              <a href="mailto:WCDA.Certificates@wcsports.co.za">Certificates · WCDA.Certificates@wcsports.co.za</a>
-              <a href="mailto:WCDAEms@govapps.wcsports.co.za">Notifications · WCDAEms@govapps.wcsports.co.za</a>
-              <a href="mailto:ServiceDesk@wcsports.co.za">Support · ServiceDesk@wcsports.co.za</a>
-            </div>}
+        {tab==="Dashboard"&&<>
+          <section className={styles.hero}><div className={styles.heroOverlay}><span className={styles.heroKicker}>WELCOME BACK</span><h1>{actor.name} <span aria-hidden="true">👋</span></h1><p>Your digital workspace for events, community safety and progress.</p>{canCreate&&<button type="button" className={styles.heroButton} onClick={()=>setShowForm(true)}>New event application <WorkHubIcon name="arrow" size={16}/></button>}</div><div className={styles.heroQuote}>Events.<br/>Safety.<br/>Progress.</div></section>
+          <section className={styles.stats} aria-label="EMS event summary">{metrics.map((m,i)=><div key={m.label} className={styles.stat}><span className={styles.metricIcon} data-tone={i}><WorkHubIcon name={m.icon} size={22}/></span><div className={styles.statDetail}><strong>{m.label}</strong><b>{m.value}</b><small>{m.subtitle}</small></div><span className={styles.metricGo}><WorkHubIcon name="chevron" size={16}/></span></div>)}</section>
+          <div className={styles.dashboardPanels}>
+            <section className={styles.glassPanel}><div className={styles.panelHeader}><h2><WorkHubIcon name="activity" size={17}/> Recent Activity</h2><span className={styles.panelHint}>Private event updates</span></div><div className={styles.panelBody}>{isStaffViewer?"Your EMS role is pending authorisation. Event records are restricted until your department assigns a role.":events.length?"Event records are available in the registry. Review your assigned cases and upcoming sessions.":"Activity will appear once authorised event records have been created."}</div></section>
+            <section className={styles.glassPanel}><div className={styles.panelHeader}><h2><WorkHubIcon name="calendar" size={17}/> Event Calendar</h2><span className={styles.panelHint}>Upcoming</span></div><div className={styles.panelBody}>{upcoming.length?upcoming.slice(0,3).map(e=><p key={e.id}><strong>{e.name}</strong><br/>{dateZA(e.start_date)} · {e.venue_name}</p>):"No event sessions loaded. Upcoming events will appear here when connected to authorised records."}</div></section>
+            <section className={styles.glassPanel}><div className={styles.panelHeader}><h2><WorkHubIcon name="megaphone" size={17}/> Announcements</h2><span className={styles.panelHint}>WCDA</span></div><div className={styles.panelBody}>Official departmental announcements will appear here when the messaging service is connected.</div></section>
           </div>
+        </>}
+        {showForm&&canCreate&&<section className={styles.formPanel} aria-label="Submit event application"><div className={styles.panelHeader}><h2>New event application</h2><span className={styles.panelHint}>Registry intake</span></div><p>Register an event for formal assessment. Submission does not constitute an endorsement or statutory permit.</p><form className={styles.eventForm} onSubmit={submit}>
+          <label>Organiser name<input required minLength={2} maxLength={200} value={form.organiserName} onChange={e=>setForm(v=>({...v,organiserName:e.target.value}))}/></label>
+          <label>Event name<input required minLength={3} maxLength={200} value={form.name} onChange={e=>setForm(v=>({...v,name:e.target.value}))}/></label>
+          <label>Event category<select value={form.category} onChange={e=>setForm(v=>({...v,category:e.target.value}))}>{categories.map(c=><option key={c}>{c}</option>)}</select></label>
+          <label>Venue name<input required minLength={2} maxLength={200} value={form.venueName} onChange={e=>setForm(v=>({...v,venueName:e.target.value}))}/></label>
+          <label className={styles.formWide}>Venue address<input maxLength={300} value={form.venueAddress} onChange={e=>setForm(v=>({...v,venueAddress:e.target.value}))}/></label>
+          <label>Start date<input type="date" required value={form.startDate} onChange={e=>setForm(v=>({...v,startDate:e.target.value}))}/></label>
+          <label>End date<input type="date" required min={form.startDate||undefined} value={form.endDate} onChange={e=>setForm(v=>({...v,endDate:e.target.value}))}/></label>
+          <label>Estimated attendance<input type="number" min={0} max={100000000} value={form.estimatedAttendance} onChange={e=>setForm(v=>({...v,estimatedAttendance:e.target.value}))}/></label>
+          <div className={styles.formWide}><button type="submit" className={styles.primaryButton} disabled={saving}>{saving?"Submitting…":"Submit application"}</button></div>
+        </form></section>}
+        {registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
+          <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>{actor.mode==="staff"?"Event Registry":"My Events"}</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
+          {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
+          <p className={styles.empty}>{isStaffViewer?"No records are displayed until your WCDA EMS role is approved.":notice?"The event service needs configuration before records can be shown.":"No matching event records have been registered."}</p>}
         </section>}
-
-        <footer className={styles.footer}>MyWCDA Events · Western Cape Development Authority · Official path /WCDA-Events <span>Access: {actor.email}</span></footer>
+        {!registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
+          <a href="mailto:finances@wcsports.co.za">Finance · finances@wcsports.co.za</a>
+          <a href="mailto:WCDA.Certificates@wcsports.co.za">Certificates · WCDA.Certificates@wcsports.co.za</a>
+          <a href="mailto:WCDAEms@govapps.wcsports.co.za">System · WCDAEms@govapps.wcsports.co.za</a>
+          <a href="mailto:ServiceDesk@wcsports.co.za">Support · ServiceDesk@wcsports.co.za</a>
+        </div>}</section>}
+        <footer className={styles.footer}>© MyWCDA Events · Western Cape Development Authority <Link href={actor.mode==="staff"?"/my-apps":"/"}>Back to GovApps ↗</Link></footer>
       </main>
     </div>
   </div>;
