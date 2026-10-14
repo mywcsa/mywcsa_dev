@@ -87,3 +87,7 @@
 @media(max-width:1060px){.persal-dashboard-features{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:590px){.persal-hero{background-position:center;background-image:linear-gradient(90deg,rgba(0,16,95,.96),rgba(0,20,132,.80)),url("https://images.unsplash.com/photo-1669238658622-49ca0506cfb1?auto=format&fit=crop&w=950&q=74")}.persal-dashboard-features{grid-template-columns:1fr}.persal-module-header{padding:24px 20px}}
 @media(prefers-reduced-motion:reduce){.persal-feature-card,.persal-kpi{transition:none}}
+
+.persal-photo-credit{position:absolute;right:22px;bottom:10px;margin:0!important;text-align:right;z-index:1}
+.persal-hero>div:first-child{position:relative;z-index:1}
+@media(max-width:640px){.persal-photo-credit{right:12px;bottom:8px;font-size:8px!important}}
