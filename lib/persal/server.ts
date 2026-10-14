@@ -38,7 +38,7 @@ async function count(table: string, filter?: Record<string,string>): Promise<num
 export async function getPersalOfficial(): Promise<Official | null> {
   try {
     const session=await auth();
-    const user=session?.user as (typeof session.user & {id?: string;authProvider?:string}) | undefined;
+    const user=session?.user as ({id?:string;authProvider?:string}|undefined);
     const issuer=process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER;
     if(!user?.id || user.authProvider!=="microsoft-entra-id" || !issuer) return null;
     const matches=await rows<AccessRow>("persal_access_register",{
