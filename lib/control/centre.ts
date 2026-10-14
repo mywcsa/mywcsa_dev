@@ -67,7 +67,7 @@ async function activeOperator(email: string): Promise<ControlOperator | null> {
 }
 export async function requireControlOperator(): Promise<ControlOperator> {
   const session = await auth();
-  const user = session?.user as (typeof session.user & { authProvider?: string }) | undefined;
+  const user = session?.user as ({ email?: string | null; authProvider?: string } | undefined);
   const email = user?.email?.toLowerCase().trim();
   // Staff must have completed Microsoft Entra sign-in, not Business Partner credentials.
   if (!email || user?.authProvider !== "microsoft-entra-id" || !email.endsWith("@wcsports.co.za")) {
