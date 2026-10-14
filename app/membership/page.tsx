@@ -130,8 +130,8 @@ export default async function MembershipLanding() {
 
       <section className={styles.info} aria-label="Membership process">
         <div><span className={styles.processIcon}>01</span><div><strong>Apply online</strong><p>Choose your initiative and provide the required details through the application wizard.</p></div></div>
-        <div><span className={styles.processIcon}>02</span><div><strong>Registry review</strong><p>Your submitted record is checked through MyWCSA membership services.</p></div></div>
-        <div><span className={styles.processIcon}>03</span><div><strong>Payment and activation</strong><p>Pay only a verified invoice; certificates and services depend on approval and status.</p></div></div>
+        <div><span className={styles.processIcon}>02</span><div><strong>Registry review</strong><p>Your application is recorded with a reference and status in MyWCSA Registry.</p></div></div>
+        <div><span className={styles.processIcon}>03</span><div><strong>Payment and activation</strong><p>Pay only an issued Registry invoice; certificates and services depend on verified activation.</p></div></div>
       </section>
     </main>
 
