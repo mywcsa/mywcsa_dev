@@ -91,7 +91,7 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
     <header className={styles.header}>
       <div className={styles.brand}>
         <button type="button" className={styles.menuButton} onClick={() => setDrawer(!drawer)} aria-expanded={drawer} aria-controls="launcher-navigation" aria-label="Toggle navigation"><Glyph name={drawer ? "close" : "menu"}/></button>
-        <Link href="/my-apps" aria-label="MyWCSA GovApps Home" className={styles.brandLogo}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/></Link>
+        <Link href="/my-apps" aria-label="MyWCSA GovApps Home" className={styles.brandLogo}><img src="/wcg-logo-transparent.svg" alt="MyWCSA GovApps"/></Link>
         <div className={styles.brandTitle}><strong>MyWCSA <span>GovApps</span></strong><small>YOUR DIGITAL WORKSPACE</small></div>
       </div>
       <div className={styles.headerSearch}><Glyph name="search" size={20}/><input ref={searchRef} aria-label="Search applications" type="search" placeholder="Search apps and services..." value={query} onChange={e => setQuery(e.target.value)}/><kbd>/</kbd></div>
