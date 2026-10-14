@@ -83,7 +83,7 @@ export default async function MembershipLanding() {
         <span className={styles.brandTitle}><strong>MyWCSA Membership</strong><small>Members · Services · Progress</small></span>
       </Link>
       <div className={styles.accountActions}>
-        <Link href="/membership/support">Help & Support</Link>
+        <a href="mailto:ServiceDesk@wcsports.co.za">Help & Support</a>
         {session?.user ? <Link className={styles.accountButton} href="/membership/apply">Start application ↗</Link> :
           <><Link className={styles.signin} href="/membership/login?returnTo=/membership">Sign in</Link>
           <Link className={styles.accountButton} href="/membership/login?returnTo=/membership/apply">Get started ↗</Link></>}
