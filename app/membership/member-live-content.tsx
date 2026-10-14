@@ -29,6 +29,14 @@ function date(value?: string) {
   return Number.isNaN(timestamp.valueOf()) ? "Not recorded" : timestamp.toLocaleDateString("en-ZA");
 }
 
+function safeDocumentPath(value: string) {
+  try {
+    const url = new URL(value, "https://govapps.wcsports.co.za");
+    if (url.origin !== "https://govapps.wcsports.co.za" || !url.pathname.startsWith("/api/membership/documents/")) return null;
+    return url.pathname;
+  } catch { return null; }
+}
+
 function Row({ label, value }: { label: string; value?: string | null }) {
   return <div><dt>{label}</dt><dd>{value || "Not recorded"}</dd></div>;
 }
@@ -168,8 +176,8 @@ export default function LiveMemberContent({
   if (section === "documents") return <>
     <PageHeading kicker="MEMBERSHIP · OFFICIAL RECORDS" title="Membership Documents" detail="Documents listed here have been recorded by the Registry." />
     <section className={s.panel}><div className={s.panelHeading}><h2>Issued documents</h2><StatusPill value={status}/></div>
-      {docs.length ? <div className={s.tableWrap}><table><thead><tr><th>Document</th><th>Reference</th><th>Issued</th></tr></thead><tbody>
-        {docs.map((document, index) => <tr key={document.number + index}><td>{document.type}</td><td>{document.number}</td><td>{date(document.issuedAt)}</td></tr>)}
+      {docs.length ? <div className={s.tableWrap}><table><thead><tr><th>Document</th><th>Reference</th><th>Issued</th><th>Download</th></tr></thead><tbody>
+        {docs.map((document, index) => <tr key={document.number + index}><td>{document.type}</td><td>{document.number}</td><td>{date(document.issuedAt)}</td><td>{safeDocumentPath(document.path) ? <a className={s.secondary} href={safeDocumentPath(document.path)!}>Download PDF</a> : "Contact Registry"}</td></tr>)}
       </tbody></table></div> : <p className={s.muted}>No issued documents have been recorded yet. Documents appear after the required Registry steps are completed.</p>}
       {active && <Link className={s.primary} href="/membership/certificates">View certificates ↗</Link>}
     </section>
