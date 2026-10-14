@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:payments": "node --test tests/payments.test.cjs tests/membership-database.test.cjs tests/supabase-api.test.cjs"
+    "test:payments": "node --test tests/payments.test.cjs tests/membership-database.test.cjs tests/supabase-api.test.cjs",
+    "test:mail": "node --test tests/mail.test.cjs"
   },
   "dependencies": {
     "jspdf": "^4.2.1",
