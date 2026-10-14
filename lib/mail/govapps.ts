@@ -129,11 +129,17 @@ export async function sendGovAppsNotice(notice: GovAppsNotice): Promise<MailResu
 }
 
 /** Email delivery must never roll back a successfully committed account or invoice. */
-export async function notifyAfterCommit(notice: GovAppsNotice) {
-  const outcome = await sendGovAppsNotice(notice);
-  if (outcome !== "accepted") {
-    // Avoid logging recipient addresses, message bodies or Graph bearer tokens.
-    console.warn(`[govapps-mail] ${notice.kind}: ${outcome}`);
+export async function notifyAfterCommit(notice: GovAppsNotice): Promise<MailResult> {
+  try {
+    const outcome = await sendGovAppsNotice(notice);
+    if (outcome !== "accepted") {
+      // Avoid logging recipient addresses, message bodies or Graph bearer tokens.
+      console.warn(`[govapps-mail] ${notice.kind}: ${outcome}`);
+    }
+    return outcome;
+  } catch {
+    // Notifications must never turn a committed account/invoice into an API failure.
+    console.warn(`[govapps-mail] ${notice.kind}: failed`);
+    return "failed";
   }
-  return outcome;
 }
