@@ -1,1 +1,143 @@
-import Link from "next/link";import {auth} from "@/auth";import styles from "./landing.module.css";const memberships=[{name:"School",fee:"R350 / year",description:"For primary and secondary schools.",image:"https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=900&q=80"},{name:"Club",fee:"R300 / year",description:"For sports clubs and community teams.",image:"https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=900&q=80"},{name:"Association",fee:"R450 / year",description:"For sporting associations.",image:"https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=900&q=80"},{name:"Community Organisation",fee:"R400 / year",description:"For community sport and development organisations.",image:"https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=900&q=80"},{name:"Provincial / Umbrella Body",fee:"R800 / year",description:"For organisations coordinating affiliated bodies.",image:"https://images.unsplash.com/photo-1556761175-b413da4baf72e?auto=format&fit=crop&w=900&q=80"}];const hero="https://imagetourl.cloud/tmntlzt63c28.png";export default async function MembershipLanding(){const session=await auth();return <div className={styles.page}><header className={styles.header}><div className={styles.identity}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/><span/><div><strong>MyWCSA Membership Portal</strong><small>Western Cape Sports Association NPC</small></div></div><div className={styles.accountActions}><a href="mailto:ServiceDesk@govapps.wcsports.co.za">Help &amp; Support</a>{session?.user?<Link className={styles.accountButton} href="/membership/apply">My membership</Link>:<><Link className={styles.signin} href="/membership/login?returnTo=/membership">Sign in</Link><Link className={styles.accountButton} href="/membership/login?returnTo=/membership">Create account</Link></>}</div></header><nav className={styles.nav}><Link className={styles.active} href="/membership">Home</Link><a href="#memberships">Membership</a>{session?.user?<><Link href="/membership/apply">Application</Link><Link href="/membership/support">Help &amp; Support</Link></>:<a href="mailto:ServiceDesk@govapps.wcsports.co.za">Help &amp; Support</a>}</nav><section className={styles.hero} style={{backgroundImage:`linear-gradient(90deg,rgba(0,32,91,.91),rgba(0,55,125,.58) 48%,rgba(0,25,72,.12)),url("${hero}")`}}><div><small>WESTERN CAPE SPORTS ASSOCIATION NPC</small><i/><h1>{session?.user?"Complete your 2027 membership":"Membership for 2027"}</h1><p>{session?.user?"Finish and submit your application before member services are unlocked.":"Choose your membership and start your application."}</p>{session?.user&&<Link className={styles.accountButton} href="/membership/apply">Continue membership application</Link>}</div></section><main className={styles.main} id="memberships"><div className={styles.crumb}><Link href="/membership">Home</Link><span>/</span>Membership</div><h2>Choose your membership</h2><p className={styles.lead}>Schools, clubs, associations and affiliated organisations use Business Partner accounts. Individual participants use External User accounts.</p><div className={styles.switcher}><button>Organisation memberships</button><Link href="/membership/login?accountType=external-user">Individual memberships</Link></div><div className={styles.grid}>{memberships.map((item,index)=><article key={item.name} className={index>2?styles.wide:""}><img src={item.image} alt=""/><div className={styles.cardBody}><h3>{item.name}</h3><strong>{item.fee}</strong><p>{item.description}</p><Link href={session?.user?`/membership/apply?category=${encodeURIComponent(item.name)}`:`/membership/login?accountType=business-partner&returnTo=${encodeURIComponent(`/membership/apply?category=${item.name}`)}`}>Apply or renew</Link></div></article>)}</div><section className={styles.info}><div><b>i</b><p><strong>Application first.</strong><span>Renewals, invoices, certificates, documents and Registry services unlock according to membership status.</span></p></div><div><b>✓</b><p><strong>Payment follows approval.</strong><span>Approved membership payments are processed securely through Paystack.</span></p></div></section></main><footer className={styles.footer}><span>Western Cape Sports Association NPC</span><nav><a href="mailto:ServiceDesk@govapps.wcsports.co.za">Service Desk</a><a href="mailto:e-innovation@wcsports.co.za">e-Innovation</a></nav></footer></div>}
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Poppins } from "next/font/google";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { rpc, supabaseConfig } from "@/lib/ams/supabase";
+import styles from "./landing.module.css";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-membership-poppins",
+  fallback: ["Arial", "sans-serif"],
+});
+
+export const metadata: Metadata = {
+  title: "Membership Portal | MyWCSA GovApps",
+  description: "Membership registration, renewals and services for Western Cape Sports Association NPC initiatives.",
+};
+
+type Fee = { initiative: string; category: string; year: string; amount: number; currency: string };
+const memberships = [
+  { name: "School", initiative: "WCSSA", note: "Schools and school-based programmes", icon: "school" },
+  { name: "Club", initiative: "WCSA", note: "Clubs, teams and community activities", icon: "users" },
+  { name: "Association", initiative: "WCSA", note: "Recognised associations and regional bodies", icon: "network" },
+  { name: "Development Organisation", initiative: "WCDA", note: "Development and community programmes", icon: "spark" },
+  { name: "Cultural Organisation", initiative: "IKM", note: "Arts, heritage and cultural initiatives", icon: "music" },
+  { name: "Umbrella Body", initiative: "WCOB", note: "Organisations supporting affiliated bodies", icon: "building" },
+] as const;
+
+function CardIcon({ kind }: { kind: string }) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {kind === "school" ? <><path d="m3 10 9-7 9 7v11H3Z"/><path d="M9 21v-7h6v7M7 11h1m8 0h1"/></> :
+      kind === "users" ? <><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 4 5v2"/></> :
+      kind === "network" ? <><circle cx="12" cy="4" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="m11 6-5 11m7-11 5 11M7 19h10"/></> :
+      kind === "spark" ? <><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/></> :
+      kind === "music" ? <><path d="M9 19V5l12-3v14"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="16" r="3"/></> :
+      <><path d="M3 21h18M5 21V8l7-5 7 5v13M9 12h6M9 16h6"/></>}
+  </svg>;
+}
+
+async function fees(): Promise<Fee[]> {
+  try {
+    const config = supabaseConfig();
+    const response = await fetch(
+      config.origin + "/rest/v1/wcsa_membership_fee_schedule?year=eq.2027&select=initiative,category,year,amount,currency",
+      { headers: { apikey: config.secret, Authorization: "Bearer " + config.secret }, cache: "no-store", signal: AbortSignal.timeout(8000) },
+    );
+    if (!response.ok) return [];
+    const data: unknown = await response.json();
+    return Array.isArray(data) ? data as Fee[] : [];
+  } catch { return []; }
+}
+
+export default async function MembershipLanding() {
+  const session = await auth();
+  if (session?.user?.email) {
+    // Active and submitted members belong in the real Registry dashboard.
+    try {
+      const state = await rpc<{ hasApplication?: boolean }>("wcsa_member_portal", {
+        p_email: session.user.email.toLowerCase(),
+      });
+      if (state?.hasApplication) redirect("/membership/dashboard");
+    } catch (error) {
+      // Never hide a Next.js redirect.
+      if (error && typeof error === "object" && "digest" in error && String(error.digest).startsWith("NEXT_REDIRECT")) throw error;
+      // Fail safely to the public entry if Registry is temporarily unavailable.
+    }
+  }
+
+  const publishedFees = await fees();
+  const price = (initiative: string, category: string) => {
+    const entry = publishedFees.find(f => f.initiative === initiative && f.category === category && f.year === "2027");
+    if (!entry || entry.currency !== "ZAR") return "Fee confirmed during application";
+    return entry.amount === 0 ? "No annual fee" : new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", maximumFractionDigits: 0 }).format(entry.amount / 100) + " / year";
+  };
+
+  return <div className={[styles.page, poppins.variable].join(" ")}>
+    <header className={styles.header}>
+      <Link className={styles.identity} href="/membership">
+        <span className={styles.logoPlate}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps" /></span>
+        <span className={styles.brandTitle}><strong>MyWCSA Membership</strong><small>Members · Services · Progress</small></span>
+      </Link>
+      <div className={styles.accountActions}>
+        <a href="mailto:ServiceDesk@wcsports.co.za">Help & Support</a>
+        {session?.user ? <Link className={styles.accountButton} href="/membership/apply">Start application ↗</Link> :
+          <><Link className={styles.signin} href="/membership/login?returnTo=/membership">Sign in</Link>
+          <Link className={styles.accountButton} href="/membership/login?returnTo=/membership/apply">Get started ↗</Link></>}
+      </div>
+    </header>
+
+    <main className={styles.main}>
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <span className={styles.eyebrow}><span className={styles.dot} aria-hidden="true"/> MYWCSA GOVAPPS · MEMBERSHIP</span>
+          <h1>Membership made <span>simple.</span></h1>
+          <p>One connected place to apply, renew and access your organisation's membership services across WCSA initiatives.</p>
+          <div className={styles.heroActions}>
+            <Link className={styles.accountButton} href={session?.user ? "/membership/apply" : "/membership/login?returnTo=/membership/apply"}>Start membership application <span aria-hidden="true">↗</span></Link>
+            <a className={styles.ghostButton} href="#memberships">Explore memberships ↓</a>
+          </div>
+          <div className={styles.heroNote}><span className={styles.dot} aria-hidden="true"/> Registry-managed membership and verified payments</div>
+        </div>
+        <div className={styles.heroArtwork} aria-hidden="true">
+          <div className={styles.orbitOne}/><div className={styles.orbitTwo}/>
+          <div className={styles.artGlass}><span>MyWCSA</span><strong>Membership Portal</strong><div><i/><i/><i/></div></div>
+        </div>
+      </section>
+
+      <div className={styles.crumb}><Link href="/">GovApps</Link><span>/</span><strong>Membership</strong></div>
+
+      <section id="memberships" className={styles.memberSection}>
+        <div className={styles.sectionHeading}>
+          <div><span className={styles.sectionKicker}>FIND YOUR MEMBERSHIP</span><h2>Choose your membership</h2><p>Schools, associations, clubs, culture, development and community organisations.</p></div>
+          <Link className={styles.individualLink} href="/membership/login?accountType=external-user&returnTo=/membership/apply">Individual access ↗</Link>
+        </div>
+        <div className={styles.grid}>
+          {memberships.map(item => <article key={item.initiative + item.name}>
+            <div className={styles.cardTop}><div className={styles.cardIcon}><CardIcon kind={item.icon} /></div><span>{item.initiative}</span></div>
+            <div className={styles.cardBody}>
+              <h3>{item.name}</h3>
+              <p>{item.note}</p>
+              <strong>{price(item.initiative, item.name)}</strong>
+              <Link href={session?.user ? "/membership/apply" : "/membership/login?accountType=business-partner&returnTo=%2Fmembership%2Fapply"}>Apply or renew <span aria-hidden="true">↗</span></Link>
+            </div>
+          </article>)}
+        </div>
+      </section>
+
+      <section className={styles.info} aria-label="Membership process">
+        <div><span className={styles.processIcon}>01</span><div><strong>Apply online</strong><p>Choose your initiative and provide the required details through the application wizard.</p></div></div>
+        <div><span className={styles.processIcon}>02</span><div><strong>Registry review</strong><p>Your application is recorded with a reference and status in MyWCSA Registry.</p></div></div>
+        <div><span className={styles.processIcon}>03</span><div><strong>Payment and activation</strong><p>Pay only an issued Registry invoice; certificates and services depend on verified activation.</p></div></div>
+      </section>
+    </main>
+
+    <footer className={styles.footer}>
+      <span>© {new Date().getFullYear()} Western Cape Sports Association NPC · MyWCSA GovApps</span>
+      <nav><a href="mailto:ServiceDesk@wcsports.co.za">ServiceDesk</a><a href="mailto:Finances@wcsports.co.za">Finance</a><Link href="/">GovApps</Link></nav>
+    </footer>
+  </div>;
+}

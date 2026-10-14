@@ -86,7 +86,7 @@ export default function ApplicationWizard() {
           <div className={s.initiativeGrid}>{initiatives.map(item => <label key={item.id} className={`${s.initiativeCard} ${draft.initiative === item.id ? s.selectedChoice : ""}`}><input type="radio" name="initiative" value={item.id} checked={draft.initiative === item.id} onChange={() => setDraft(d => ({ ...d, initiative: item.id, category: item.categories[0], codes: [], estimates: {}, sample: false, organisation: { ...emptyOrganisation } }))} /><strong>{item.id === "IKM" ? "iKM" : item.id}</strong><span>{item.name}</span></label>)}</div>
           <div className={s.formGrid}>
             <Field label="Membership type"><select value={draft.category} onChange={e => setDraft(d => ({ ...d, category: e.target.value }))}>{selectedInitiative.categories.map(type => <option key={type}>{type}</option>)}</select></Field>
-            <Field label="Membership year"><select value={draft.year} onChange={e => setDraft(d => ({ ...d, year: e.target.value }))}><option>2027</option><option>2028</option></select></Field>
+            <Field label="Membership year"><select value={draft.year} onChange={e => setDraft(d => ({ ...d, year: e.target.value }))}><option>2027</option></select></Field>
             <Field label="Application type"><select value={draft.application} onChange={e => setDraft(d => ({ ...d, application: e.target.value as "New Application" | "Renewal" }))}><option>New Application</option><option>Renewal</option></select></Field>
           </div>
           <div className={s.feeSummary}><strong>{draft.category}</strong><span>{feeLabel(draft.category)}</span></div>
