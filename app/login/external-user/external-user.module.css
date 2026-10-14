@@ -1,0 +1,104 @@
+/* External User auth screens: shared WCG #001489 / Poppins glass language. */
+.fieldHint {
+  color: #536d98;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: -10px 0 21px;
+}
+.registerFrame {
+  width: min(1020px,100%);
+  min-height: 680px;
+  grid-template-columns: minmax(0,.76fr) minmax(0,1fr);
+}
+.registerPanel {
+  justify-content: center;
+  padding: clamp(26px,3.5vw,42px);
+}
+.group {
+  min-width: 0;
+  margin: 0;
+}
+.group > label > span {
+  color: #2155ad;
+}
+.group > div {
+  margin-bottom: 15px;
+}
+.group :global(input) {
+  font-family: inherit;
+  padding-right: 58px;
+}
+.group :global(input[type="date"]) {
+  color-scheme: light;
+  padding-right: 13px;
+}
+.help {
+  margin: -7px 0 17px;
+  color: #566e98;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.validation {
+  min-height: 18px;
+  font-size: 11px;
+  color: #a02c45;
+  margin: -3px 0 10px;
+}
+.switchPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 20px;
+  margin-top: 24px;
+  border-top: 1px solid rgba(97,145,208,.25);
+  text-align: center;
+  font-size: 11px;
+  color: #587099;
+}
+.switchPrompt a {
+  color: #0643a4;
+  font-weight: 700;
+  text-decoration: none;
+}
+.switchPrompt a:hover { text-decoration: underline; }
+.noteBox {
+  max-width: 300px;
+  margin-top: 28px;
+  padding: 16px;
+  border-radius: 15px;
+  background: rgba(229,243,255,.10);
+  border: 1px solid rgba(255,255,255,.27);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.noteBox strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+.noteBox p {
+  color: #dbeafe;
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 0;
+}
+.noteBox a { color: white; font-weight: 700; }
+.noticeSmall {
+  color: #58739b;
+  font-size: 11px;
+  margin: 16px 0 0;
+  text-align: center;
+  line-height: 1.6;
+}
+@media(max-width:730px) {
+  .registerFrame { grid-template-columns:1fr; min-height:0; }
+  .registerPanel { padding:29px 23px; }
+  .noteBox { max-width:100%; margin-top:20px; }
+}
+@media(max-width:380px) {
+  .registerPanel { padding:25px 18px; }
+}
