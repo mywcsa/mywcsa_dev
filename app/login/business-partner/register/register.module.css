@@ -10,9 +10,9 @@
 }
 .registerForm { gap: 0; }
 .registerForm .group { min-width: 0; }
-.registerForm .group .inputWrap { margin-bottom: 14px; }
-.registerForm .group .label span { color: #1c55b5; }
-.registerForm .group input { font-family: inherit; }
+.registerForm .group > div { margin-bottom: 14px; }
+.registerForm .group > label span { color: #1c55b5; }
+.registerForm .group input { font-family: inherit; padding-right: 61px; }
 .help {
   margin: -5px 0 15px;
   font-size: 11px;
