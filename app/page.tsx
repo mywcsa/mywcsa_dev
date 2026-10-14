@@ -12,21 +12,17 @@ const poppins = Poppins({
 });
 
 type Role = "staff" | "business-partner" | "external-user";
-type IconName = "arrow" | "briefcase" | "people" | "person" | "grid" | "layers" | "shield" | "play" | "calendar" | "external";
+type IconName = "arrow" | "briefcase" | "people" | "person" | "shield" | "play";
 
 function Icon({ name, size = 19 }: { name: IconName; size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       {name === "arrow" && <><path d="M4 12h16"/><path d="m14 6 6 6-6 6"/></>}
-      {name === "external" && <><path d="M14 4h6v6"/><path d="m20 4-9 9"/><path d="M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></>}
       {name === "briefcase" && <><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13c5 3 13 3 18 0"/></>}
       {name === "people" && <><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/></>}
       {name === "person" && <><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></>}
-      {name === "grid" && <><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></>}
-      {name === "layers" && <><path d="m12 2 9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></>}
       {name === "shield" && <><path d="m12 2 9 4v6c0 6-4 9-9 10-5-1-9-4-9-10V6l9-4z"/><path d="m9 12 2 2 4-4"/></>}
       {name === "play" && <><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></>}
-      {name === "calendar" && <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v5M17 3v5M3 10h18"/></>}
     </svg>
   );
 }
@@ -76,13 +72,6 @@ const roles: {
   },
 ];
 
-const shortcuts: { title: string; subtitle: string; href: string; icon: IconName; external?: boolean }[] = [
-  { title: "My Apps", subtitle: "Your application directory", href: "/my-apps", icon: "grid" },
-  { title: "WorkHub", subtitle: "Employee workspace", href: "/workhub", icon: "briefcase" },
-  { title: "Membership", subtitle: "Registrations and renewals", href: "/membership", icon: "people" },
-  { title: "Microsoft 365", subtitle: "Productivity and collaboration", href: "https://m365.cloud.microsoft/apps", icon: "layers", external: true },
-];
-
 export default function Home() {
   const [guide, setGuide] = useState<Role | null>(null);
   const [failedVideos, setFailedVideos] = useState<Role[]>([]);
@@ -100,9 +89,7 @@ export default function Home() {
             </span>
           </a>
           <nav className={styles.headerLinks} aria-label="Main navigation">
-            <a href="/membership">Membership</a>
             <a href="mailto:ServiceDesk@wcsports.co.za">Help &amp; Support</a>
-            <a className={styles.headerButton} href="/my-apps">My Apps <Icon name="external" size={16}/></a>
           </nav>
         </div>
       </header>
@@ -113,10 +100,6 @@ export default function Home() {
             <span className={styles.eyebrow}><span className={styles.eyebrowDot} aria-hidden="true" /> WELCOME TO MYWCSA GOVAPPS</span>
             <h1 id="govapps-welcome">One gateway.<br/><span>More possibilities.</span></h1>
             <p>Access your services, connect with opportunities and manage your work in one secure, connected digital space.</p>
-            <div className={styles.heroActions}>
-              <a href="#choose-access" className={styles.heroPrimary}>Get started <Icon name="arrow" size={18}/></a>
-              <a href="/my-apps" className={styles.heroSecondary}>Explore My Apps <Icon name="grid" size={17}/></a>
-            </div>
           </div>
           <div className={styles.heroSignature}>People.<br/>Services.<br/>Progress.</div>
         </section>
@@ -172,25 +155,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.quickSection} aria-label="Popular destinations">
-          <h2 className={styles.quickTitle}>Quick access</h2>
-          <div className={styles.quickGrid}>
-            {shortcuts.map((shortcut) =>
-              <a
-                key={shortcut.href}
-                href={shortcut.href}
-                className={styles.quickLink}
-                target={shortcut.external ? "_blank" : undefined}
-                rel={shortcut.external ? "noopener noreferrer" : undefined}
-                aria-label={shortcut.external ? shortcut.title + " (opens in a new tab)" : shortcut.title}
-              >
-                <span className={styles.quickIcon}><Icon name={shortcut.icon} size={18}/></span>
-                <span className={styles.quickCopy}><strong>{shortcut.title}</strong><small>{shortcut.subtitle}</small></span>
-                <span className={styles.quickArrow}><Icon name={shortcut.external ? "external" : "arrow"} size={16}/></span>
-              </a>
-            )}
-          </div>
-        </section>
       </main>
 
       <footer className={styles.footer}>
