@@ -1,0 +1,251 @@
+.page {
+  --wcg-blue: #001484;
+  --wcg-ink: #10254c;
+  --wcg-muted: #617592;
+  min-height: 100vh;
+  color: var(--wcg-ink);
+  font-family: "Poppins", Arial, sans-serif;
+  background:
+    radial-gradient(ellipse at 94% 17%, rgba(114, 166, 246, .36), transparent 42%),
+    radial-gradient(ellipse at 6% 76%, rgba(102, 174, 248, .25), transparent 45%),
+    linear-gradient(148deg, #edf4ff 0%, #dceafd 55%, #eaf1fd 100%);
+  overflow-x: hidden;
+  isolation: isolate;
+}
+.page *, .page *::before, .page *::after { box-sizing: border-box; }
+.page a { text-decoration: none; }
+.page button { font: inherit; cursor: pointer; }
+.page a:focus-visible, .page button:focus-visible { outline: 3px solid #4fa6ff; outline-offset: 4px; }
+.header {
+  position: relative;
+  z-index: 5;
+  background: linear-gradient(105deg, #001484 0%, #001484 62%, #082c97 100%);
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,.23);
+  box-shadow: 0 6px 26px rgba(0,20,91,.16);
+}
+.headerInner {
+  max-width: 1510px;
+  min-height: 91px;
+  margin: auto;
+  padding: 13px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+}
+.brand { display: flex; align-items: center; gap: 19px; min-width: 0; color: #fff; }
+.brand img {
+  display: block;
+  flex: 0 0 auto;
+  width: 200px;
+  height: 63px;
+  max-width: 37vw;
+  object-fit: contain;
+  object-position: left center;
+}
+.brandDivider { display: block; height: 40px; width: 1px; background: rgba(255,255,255,.32); }
+.brandText { display: flex; flex-direction: column; gap: 2px; line-height: 1.32; white-space: nowrap; }
+.brandText strong { font-size: 20px; font-weight: 700; letter-spacing: -.55px; }
+.brandText small { color: #c4d8ff; font-size: 10px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; }
+.headerLinks { display: flex; gap: 24px; align-items: center; justify-content: flex-end; }
+.headerLinks a { color: #e3edff; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.headerLinks a:hover { color: #fff; }
+.headerLinks .headerButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 12px;
+  background: rgba(255,255,255,.17);
+  backdrop-filter: blur(18px);
+  color: #fff;
+  font-weight: 650;
+}
+.main { max-width: 1510px; padding: 25px 32px 40px; margin: 0 auto; }
+.hero {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 316px;
+  border: 1px solid rgba(255,255,255,.88);
+  border-radius: 25px;
+  padding: 42px clamp(28px, 4vw, 62px);
+  overflow: hidden;
+  background: #b4cde9;
+  box-shadow: 0 16px 42px rgba(44,85,134,.13), inset 0 1px 0 rgba(255,255,255,.94);
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(241,248,255,.98) 0%, rgba(233,243,255,.88) 30%, rgba(198,218,238,.30) 63%, rgba(11,37,75,.40) 100%),
+    url("/cape-town-header.png") center 54% / cover no-repeat;
+  filter: saturate(.83);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.17), transparent 65%);
+  pointer-events: none;
+}
+.heroContent { position: relative; z-index: 1; max-width: 690px; }
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #234d91;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 2.1px;
+  text-transform: uppercase;
+}
+.eyebrowDot { width: 8px; height: 8px; border-radius: 50%; background: #1066dd; box-shadow: 0 0 0 5px rgba(50,130,229,.14); }
+.hero h1 { margin: 15px 0 15px; color: #0a224b; font-size: clamp(32px,3.7vw,54px); letter-spacing: -2px; line-height: 1.16; font-weight: 700; }
+.hero h1 span { color: var(--wcg-blue); }
+.hero p { max-width: 505px; font-size: 13px; line-height: 1.9; margin: 0 0 25px; color: #405876; }
+.heroActions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.heroPrimary, .heroSecondary {
+  min-height: 43px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 11px 19px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.heroPrimary {
+  color: white;
+  background: linear-gradient(110deg,#001484,#246de2);
+  box-shadow: 0 10px 22px rgba(0,20,132,.20);
+}
+.heroPrimary:hover { transform: translateY(-2px); box-shadow: 0 14px 24px rgba(0,20,132,.26); }
+.heroSecondary { border: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.52); color: #123c7d; backdrop-filter: blur(15px); }
+.heroSecondary:hover { background: rgba(255,255,255,.8); }
+.heroSignature { z-index: 1; align-self: flex-end; position: relative; margin-bottom: 6px; text-align: right; font-size: clamp(22px,2.1vw,32px); color: #fff; font-weight: 700; line-height: 1.43; letter-spacing: -.7px; text-shadow: 0 3px 12px rgba(0,20,68,.60); white-space: nowrap; padding-left: 20px; }
+.accessSection { margin-top: 32px; scroll-margin-top: 24px; }
+.sectionHeading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin: 0 2px 18px; }
+.sectionKicker { display: block; color: #315ca2; font-size: 10px; font-weight: 700; letter-spacing: 1.55px; margin-bottom: 5px; }
+.sectionHeading h2 { font-size: 25px; letter-spacing: -.7px; margin: 0 0 4px; font-weight: 700; color: #0b2855; }
+.sectionHeading p { margin: 0; font-size: 12px; color: #637893; line-height: 1.6; }
+.secureNote { display: inline-flex; align-items: center; gap: 8px; color: #53709b; white-space: nowrap; font-size: 11px; font-weight: 600; padding-bottom: 4px; }
+.secureNote svg { width: 18px; height: 18px; color: #1c62b5; }
+.accessGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; align-items: start; }
+.accessCard {
+  position: relative;
+  min-width: 0;
+  min-height: 277px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 25px 22px;
+  border-radius: 21px;
+  border: 1px solid rgba(255,255,255,.93);
+  background: linear-gradient(145deg, rgba(255,255,255,.78), rgba(246,250,255,.52));
+  backdrop-filter: blur(26px) saturate(135%);
+  -webkit-backdrop-filter: blur(26px) saturate(135%);
+  box-shadow: 0 12px 33px rgba(48,91,148,.09), inset 0 1px 0 rgba(255,255,255,.9);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.accessCard:hover { transform: translateY(-3px); box-shadow: 0 18px 38px rgba(44,89,147,.15); }
+.cardTop { display: flex; justify-content: space-between; align-items: flex-start; }
+.cardIcon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: #1859bf; background: linear-gradient(135deg,#e0eeff,#c1daff); }
+.accessCard[data-tone="business"] .cardIcon { color: #087b74; background: linear-gradient(135deg,#ddf9f3,#b9e9dd); }
+.accessCard[data-tone="external"] .cardIcon { color: #6c45c4; background: linear-gradient(135deg,#f0eaff,#dcd1ff); }
+.cardIcon svg { width: 27px; height: 27px; }
+.cardLabel { padding: 7px 9px; border-radius: 8px; font-size: 9px; font-weight: 700; color: #416a9e; background: rgba(215,230,251,.60); letter-spacing: .25px; }
+.accessCard h3 { font-size: 19px; font-weight: 700; letter-spacing: -.48px; margin: 18px 0 8px; color: #0d2a53; }
+.accessCard p { font-size: 11.5px; color: var(--wcg-muted); margin: 0 0 21px; line-height: 1.85; flex: 1; }
+.cardActions { display: flex; flex-wrap: wrap; gap: 9px 13px; align-items: center; }
+.signInLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 11px;
+  background: #001484;
+  color: #fff;
+  padding: 11px 17px;
+  font-size: 11px;
+  font-weight: 700;
+  min-height: 39px;
+}
+.signInLink:hover { background: #124ac1; }
+.registerLink { font-size: 11px; color: #1b59ba; font-weight: 700; padding: 9px 1px; }
+.registerLink:hover { text-decoration: underline; }
+.guideToggle { display: flex; align-items: center; gap: 6px; margin-top: 17px; border: 0; background: transparent; color: #6682a8; font-size: 10px !important; font-weight: 600; padding: 0; width: max-content; }
+.guideToggle:hover { color: #001484; }
+.guideToggle svg { width: 15px; height: 15px; }
+.guidePanel { margin-top: 14px; padding: 11px; border: 1px solid rgba(199,219,246,.8); border-radius: 13px; background: rgba(255,255,255,.60); }
+.guidePanel strong { display: block; color: #183b70; font-size: 11px; margin-bottom: 8px; }
+.guidePanel video { display: block; width: 100%; border-radius: 8px; background: #10254c; }
+.guidePanel p { font-size: 11px; margin: 0; }
+.quickSection { margin-top: 27px; }
+.quickTitle { font-size: 13px; font-weight: 700; color: #21406e; margin: 0 0 12px 2px; }
+.quickGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; }
+.quickLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 13px 15px;
+  background: rgba(255,255,255,.47);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 13px;
+  backdrop-filter: blur(15px);
+  color: #20436e;
+  box-shadow: 0 7px 17px rgba(55,100,157,.05);
+}
+.quickLink:hover { background: rgba(255,255,255,.83); }
+.quickIcon { display: grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; border-radius: 11px; color: #1455b6; background: #dceaff; }
+.quickIcon svg { width: 18px; height: 18px; }
+.quickCopy { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.quickCopy strong { font-size: 10.5px; line-height: 1.4; }
+.quickCopy small { color: #7185a1; font-size: 9px; margin-top: 3px; line-height: 1.35; }
+.quickArrow { color: #2f66b5; flex: 0 0 auto; }
+.footer { max-width: 1510px; margin: 0 auto; padding: 15px 32px 24px; border-top: 1px solid rgba(90,132,192,.15); display: flex; justify-content: space-between; gap: 20px; color: #6d829f; font-size: 10px; }
+.footer a { color: #315ca2; font-weight: 600; }
+.footer a:hover { text-decoration: underline; }
+@media(max-width: 1120px) {
+  .headerLinks { gap: 13px; } .brand img { width: 175px; } .brandText strong { font-size: 17px; }
+  .heroSignature { display: none; }
+  .accessGrid { gap: 13px; } .accessCard { padding: 21px 18px; }
+}
+@media(max-width: 850px) {
+  .headerInner { padding: 13px 20px; } .headerLinks a:not(.headerButton) { display: none; }
+  .main { padding: 20px 20px 30px; }
+  .hero { min-height: 288px; padding: 32px; }
+  .accessGrid { grid-template-columns: 1fr 1fr; }
+  .quickGrid { grid-template-columns: 1fr 1fr; }
+}
+@media(max-width: 600px) {
+  .headerInner { min-height: 75px; padding: 9px 15px; gap: 10px; }
+  .brand { gap: 10px; } .brand img { width: 115px; height: 49px; max-width: 31vw; }
+  .brandDivider { height: 30px; } .brandText strong { font-size: 15px; } .brandText small { display: none; }
+  .headerLinks .headerButton { padding: 9px 11px; font-size: 10px; }
+  .headerLinks .headerButton svg { display: none; }
+  .main { padding: 14px 12px 28px; }
+  .hero { min-height: 335px; padding: 28px 23px; border-radius: 19px; align-items: flex-start; }
+  .hero::before { background: linear-gradient(90deg,rgba(239,248,255,.97),rgba(223,235,250,.79)),url("/cape-town-header.png") center / cover no-repeat; }
+  .hero h1 { font-size: 34px; letter-spacing: -1.3px; }
+  .hero p { font-size: 11.5px; line-height: 1.8; }
+  .heroActions { gap: 8px; } .heroPrimary, .heroSecondary { font-size: 10.5px; padding: 10px 12px; }
+  .accessSection { margin-top: 26px; }
+  .sectionHeading { display: block; }
+  .sectionHeading h2 { font-size: 23px; }
+  .secureNote { margin-top: 13px; }
+  .accessGrid { grid-template-columns: 1fr; gap: 12px; }
+  .accessCard { min-height: auto; padding: 19px; }
+  .accessCard h3 { margin-top: 13px; }
+  .accessCard p { margin-bottom: 15px; }
+  .quickGrid { gap: 9px; }
+  .quickLink { padding: 10px; gap: 7px; } .quickIcon { width: 31px; height: 31px; }
+  .quickCopy strong { font-size: 9px; } .quickCopy small { font-size: 8px; } .quickArrow { display: none; }
+  .footer { display: block; text-align: center; line-height: 2; padding: 15px 12px 20px; }
+}
+@media(prefers-reduced-motion: reduce) { .page *, .page *::before, .page *::after { transition: none !important; scroll-behavior: auto !important; } }
