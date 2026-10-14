@@ -51,3 +51,39 @@
 .persal-mobile-nav{display:none}
 @media(max-width:1140px){.persal-app{grid-template-columns:220px 1fr}.persal-header{gap:14px;padding:15px}.persal-content{padding:19px}.persal-columns{grid-template-columns:1fr}.persal-hero-art{display:none}}
 @media(max-width:760px){.persal-app{display:block}.persal-sidebar{display:none}.persal-mobile-nav{display:flex;overflow:auto;gap:7px;padding:10px 15px}.persal-mobile-nav a{white-space:nowrap;color:#001484;background:#ffffffc9;border-radius:8px;padding:9px 11px;font-size:11px;text-decoration:none}.persal-header{gap:12px}.persal-header-label{width:100%}.persal-workspace-switch{margin-left:0}.persal-content{padding:13px}.persal-hero{padding:27px 23px}.persal-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.persal-kpi{padding:15px}.persal-kpi strong{font-size:25px}.persal-section-heading{align-items:flex-start;gap:10px}.persal-user{max-width:100%}}
+
+
+/* Licensed architectural photography: Joshua Kettle, Cape Town City Hall (Unsplash);
+   Fabian Kleiser, glass office architecture (Unsplash).
+   https://unsplash.com/license */
+.persal-hero{
+  position:relative;
+  background-image:linear-gradient(90deg,rgba(0,16,95,.99) 0%,rgba(0,20,132,.95) 43%,rgba(1,24,94,.48) 100%),url("https://images.unsplash.com/photo-1669238658622-49ca0506cfb1?auto=format&fit=crop&w=1800&q=84");
+  background-size:cover;background-position:center 49%;
+  border:1px solid rgba(255,255,255,.62);min-height:264px
+}
+.persal-hero-art{font-size:116px;opacity:.20;text-shadow:0 0 34px #8eb4ff}
+.persal-photo-credit{font-size:9px!important;color:#e6edffb5!important;margin:16px 0 0!important;letter-spacing:.02em}
+.persal-photo-credit a{background:none!important;border:0!important;padding:0!important;text-decoration:underline!important;font-size:inherit!important}
+.persal-module-header{
+ position:relative;border-radius:20px;padding:30px 32px;margin:2px 0 18px;
+ background-image:linear-gradient(105deg,rgba(0,20,132,.96) 0%,rgba(0,20,132,.91) 45%,rgba(0,20,132,.40) 100%),
+ url("https://images.unsplash.com/photo-1745015446589-7ee6f702d8c1?auto=format&fit=crop&w=1700&q=78");
+ background-size:cover;background-position:center;
+ border:1px solid #bfcff3;color:#fff;box-shadow:0 13px 34px #00148422
+}
+.persal-module-header .persal-eyebrow{color:#cbd8ff}
+.persal-module-header h1{font-size:clamp(23px,2.6vw,32px);margin:9px 0 4px;color:#fff}
+.persal-module-header p{color:#e0e8ff;max-width:620px;font-size:11px;line-height:1.8}
+.persal-module-credit{font-size:9px;color:#d1ddffaa}
+.persal-module-credit a{color:#fff;text-decoration:underline}
+.persal-dashboard-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.persal-feature-card{display:flex;align-items:center;gap:15px;text-decoration:none;background:rgba(255,255,255,.73);backdrop-filter:blur(16px);border:1px solid white;color:#15295f;border-radius:16px;padding:16px;transition:transform .17s,box-shadow .17s;box-shadow:0 5px 18px #263e7312}
+.persal-feature-card:hover{transform:translateY(-2px);box-shadow:0 9px 24px #173c8630}
+.persal-feature-icon{font-size:21px;display:grid;place-items:center;width:41px;height:41px;flex:none;border-radius:13px;color:#001484;background:#e8eeff}
+.persal-feature-card strong{display:block;font-size:10.5px}
+.persal-feature-card small{display:block;font-size:9px;color:#6b7691;line-height:1.5;margin-top:5px}
+.persal-feature-go{margin-left:auto;color:#001484}
+@media(max-width:1060px){.persal-dashboard-features{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:590px){.persal-hero{background-position:center;background-image:linear-gradient(90deg,rgba(0,16,95,.96),rgba(0,20,132,.80)),url("https://images.unsplash.com/photo-1669238658622-49ca0506cfb1?auto=format&fit=crop&w=950&q=74")}.persal-dashboard-features{grid-template-columns:1fr}.persal-module-header{padding:24px 20px}}
+@media(prefers-reduced-motion:reduce){.persal-feature-card,.persal-kpi{transition:none}}
