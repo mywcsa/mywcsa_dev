@@ -27,10 +27,6 @@ export default async function Page({
   const state = await rpc<LiveState>("wcsa_member_portal", { p_email: email });
 
   if (!state?.hasApplication && !["support"].includes(section)) redirect("/membership/apply");
-  if (section === "renewals" && state?.membershipStatus !== "active")
-    redirect("/membership/dashboard?notice=complete-membership");
-  if (section === "documents" && state?.membershipStatus !== "active")
-    redirect("/membership/dashboard?notice=complete-membership");
-
+  
   return <LiveMemberContent section={section} state={state || { hasApplication: false }} />;
 }
