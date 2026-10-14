@@ -1,0 +1,69 @@
+/* Registration-specific refinements over the shared WCG-blue GovApps glass shell. */
+.registrationFrame {
+  width: min(1020px,100%);
+  min-height: 720px;
+  grid-template-columns: minmax(0,.76fr) minmax(0,1fr);
+}
+.registrationPanel {
+  justify-content: flex-start;
+  padding: clamp(26px,3.5vw,42px);
+}
+.registerForm { gap: 0; }
+.registerForm .group { min-width: 0; }
+.registerForm .group > div { margin-bottom: 14px; }
+.registerForm .group > label span { color: #1c55b5; }
+.registerForm .group input { font-family: inherit; padding-right: 61px; }
+.help {
+  margin: -5px 0 15px;
+  font-size: 11px;
+  color: #57709b;
+  line-height: 1.55;
+}
+.validation {
+  min-height: 18px;
+  font-size: 11px;
+  color: #a22a43;
+  margin-top: -6px;
+  margin-bottom: 6px;
+}
+.signInPrompt {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid rgba(97,145,208,.25);
+  margin-top: 24px;
+  padding-top: 18px;
+  font-size: 11px;
+  text-align: center;
+  color: #546991;
+}
+.signInPrompt a {
+  color: #0a49af;
+  font-weight: 700;
+  text-decoration: none;
+}
+.signInPrompt a:hover { text-decoration: underline; }
+.idHelp {
+  max-width: 300px;
+  margin-top: 26px;
+  padding: 15px 16px;
+  border-radius: 14px;
+  background: rgba(226,243,255,.09);
+  border: 1px solid rgba(255,255,255,.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.idHelp strong { display:block; margin-bottom: 7px; font-size: 12px; color: #fff; font-weight: 600; }
+.idHelp p { margin: 0; font-size: 11px; line-height: 1.6; color: #d9eaff; }
+.idHelp a { color: #fff; font-weight: 700; text-underline-offset: 3px; }
+.securityNotice { margin: 17px 0 0; text-align: center; font-size: 11px; color: #58719a; }
+.registrationPanel :global(input) { outline-offset: 3px; }
+@media(max-width: 730px) {
+  .registrationFrame { grid-template-columns: 1fr; min-height: 0; }
+  .registrationPanel { padding: 29px 23px; }
+  .idHelp { max-width: 100%; margin-top: 18px; }
+}
+@media(max-width: 380px) {
+  .registrationPanel { padding: 25px 18px; }
+}
