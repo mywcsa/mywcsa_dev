@@ -1,36 +1,58 @@
-import Link from "next/link";
-import styles from "./launcher.module.css";
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import { supabaseConfig, usesSupabase } from "@/lib/ams/supabase";
+import LauncherDashboard, { type LauncherItem } from "./LauncherDashboard";
+
+const fallbackApps: LauncherItem[] = [
+  { slug: "workhub", title: "MyWCSA WorkHub", description: "Your digital workplace for teams, tasks, leave and employee services.", href: "/workhub", category: "People", icon: "users", status: "available", featured: true, sort_order: 1 },
+  { slug: "ams", title: "MyWCSA AMS", description: "Administration, school management, programmes and organisational records.", href: "/apps/ams", category: "Operations", icon: "grid", status: "available", featured: true, sort_order: 2 },
+  { slug: "wcda-events", title: "MyWCDA Events", description: "Event cases, assignments, compliance reviews and approvals.", href: "/WCDA-Events", category: "Operations", icon: "calendar", status: "available", featured: true, sort_order: 3 },
+  { slug: "membership", title: "MyWCSA Membership", description: "Organisation membership, registration, renewals and payments.", href: "/membership/dashboard", category: "Services", icon: "badge", status: "preview", featured: false, sort_order: 4 },
+  { slug: "applications", title: "MyWCSA Applications", description: "Application processing, submissions and verification workflows.", href: "/apps/applications", category: "Administration", icon: "file", status: "preview", featured: false, sort_order: 5 },
+  { slug: "csd", title: "MyWCSA CSD", description: "Suppliers, procurement and asset administration.", href: "/apps/csd", category: "Administration", icon: "briefcase", status: "preview", featured: false, sort_order: 6 },
+  { slug: "persal", title: "MyWCSA PERSAL", description: "Restricted personnel administration and employee records.", href: "/persal", category: "People", icon: "shield", status: "restricted", featured: false, sort_order: 7 },
+  { slug: "msuite", title: "MyWCSA MSuite", description: "Microsoft productivity, collaboration and workplace services.", href: "/apps/msuite", category: "Services", icon: "layers", status: "preview", featured: false, sort_order: 8 },
+];
+
+/** The catalog is public metadata read server-side only; permissions are NEVER inferred from a tile. */
+async function getLauncherApps(): Promise<LauncherItem[]> {
+  if (!usesSupabase()) return fallbackApps;
+  try {
+    const config = supabaseConfig();
+    const response = await fetch(
+      `${config.origin}/rest/v1/govapps_launcher_apps?select=slug,title,description,href,category,icon,status,featured,sort_order&is_active=eq.true&order=sort_order.asc`,
+      { headers: { apikey: config.secret, Authorization: `Bearer ${config.secret}` }, cache: "no-store", signal: AbortSignal.timeout(6000) },
+    );
+    if (!response.ok) return fallbackApps;
+    const rows: unknown = await response.json();
+    if (!Array.isArray(rows)) return fallbackApps;
+    const approved = new Map(fallbackApps.map(a => [a.slug, a]));
+    const items = rows.flatMap((row): LauncherItem[] => {
+      if (typeof row !== "object" || row === null) return [];
+      const r = row as Record<string, unknown>;
+      const base = typeof r.slug === "string" ? approved.get(r.slug) : undefined;
+      if (!base) return []; // No arbitrary/unreviewed destination can be injected from the database.
+      return [{ ...base,
+        title: typeof r.title === "string" ? r.title.slice(0, 70) : base.title,
+        description: typeof r.description === "string" ? r.description.slice(0, 180) : base.description,
+        featured: typeof r.featured === "boolean" ? r.featured : base.featured,
+        sort_order: typeof r.sort_order === "number" ? r.sort_order : base.sort_order,
+      }];
+    });
+    return items.length ? items : fallbackApps;
+  } catch { return fallbackApps; }
+}
 
 export default async function MyAppsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/login/staff");
-  const staffName = session.user.name || session.user.email || "WCSA Staff Member";
-
-  return <main style={{minHeight:"100vh",background:"#f4f6f8",fontFamily:"Poppins, Arial, Helvetica, sans-serif"}}>
-    <header style={{minHeight:72,padding:"15px 30px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:20,background:"#fff",borderBottom:"1px solid #ddd"}}>
-      <img src="/mywcsa-logo.png" alt="MyWCSA GovApps" style={{display:"block",width:"auto",height:48,maxWidth:220,objectFit:"contain"}} />
-      <form action={async()=>{"use server";await signOut({redirectTo:"/"});}}><button type="submit" style={{padding:"9px 18px",border:"1px solid #001489",borderRadius:4,background:"#fff",color:"#001489",fontFamily:"Poppins, Arial, Helvetica, sans-serif",cursor:"pointer"}}>Sign Out</button></form>
-    </header>
-    <section style={{width:"100%",maxWidth:1200,margin:"0 auto",padding:"45px 30px"}}>
-      <p style={{margin:"0 0 5px",color:"#555",fontSize:14}}>MyWCSA GovApps</p>
-      <h1 style={{margin:0,color:"#171717",fontSize:30,fontWeight:600}}>My Apps</h1>
-      <p style={{margin:"10px 0 35px",color:"#555",fontSize:15}}>Welcome, {staffName}</p>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(210px, 1fr))",gap:20}}>
-        <AppCard title="MyWCDA Events" href="/WCDA-Events" description="WCDA employee event cases, assigned tasks, reviews and tracking" />
-        <AppCard title="MyWCSA WorkHub" href="/workhub" description="Employee workplace, services and collaboration" />
-        <AppCard title="MyWCSA AMS" href="/apps/ams" description="Administration and management" />
-        <AppCard title="MyWCSA Applications" href="/apps/applications" description="Applications and workflows" />
-        <AppCard title="MyWCSA CSD" href="/apps/csd" description="Suppliers, procurement and assets" />
-        <AppCard title="MyWCSA PERSAL" href="/persal" description="Personnel administration, HR and employee services" />
-        <AppCard title="MyWCSA Membership" href="/membership/dashboard" description="Membership, organisation applications and renewals" />
-        <AppCard title="MyWCSA MSuite" href="/apps/msuite" description="Microsoft services" />
-      </div>
-    </section>
-  </main>;
-}
-
-function AppCard({title,description,href}:{title:string;description:string;href:string}) {
-  return <Link href={href} className={styles.card} style={{minHeight:150,padding:24,background:"#fff",border:"1px solid #e1e1e1",borderRadius:7,boxShadow:"0 2px 8px rgba(0,0,0,.05)"}}><h2 style={{margin:"0 0 10px",color:"#001489",fontSize:18,fontWeight:600}}>{title}</h2><p style={{margin:0,color:"#666",fontSize:14,lineHeight:1.5}}>{description}</p></Link>;
+  if (!session?.user) redirect("/login/staff?returnTo=%2Fmy-apps");
+  const provider = (session.user as typeof session.user & { authProvider?: string }).authProvider;
+  if (provider && provider !== "microsoft-entra-id") redirect("/");
+  const name = session.user.name || session.user.email?.split("@")[0] || "WCSA Employee";
+  return <LauncherDashboard
+    name={name}
+    email={session.user.email || ""}
+    apps={await getLauncherApps()}
+    signOutControl={<form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}><button type="submit">Sign out</button></form>}
+  />;
 }
