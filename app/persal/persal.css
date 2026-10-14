@@ -1,0 +1,93 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+.persal-app{--navy:#001484;--ink:#12233e;--muted:#5e6d83;min-height:100vh;font-family:Poppins,Arial,sans-serif;color:var(--ink);background:radial-gradient(ellipse at 86% 0,#d1dcf5 0,transparent 40%),linear-gradient(130deg,#ecf0f7,#eef3f8 65%,#e2e9f7);display:grid;grid-template-columns:262px minmax(0,1fr)}
+.persal-app *{box-sizing:border-box}
+.persal-sidebar{position:sticky;top:0;height:100vh;padding:26px 14px;display:flex;flex-direction:column;gap:3px;background:linear-gradient(165deg,#071762,#001484 64%,#080d3e);box-shadow:5px 0 34px #13285a1e;color:#fff}
+.persal-brand{display:flex;gap:11px;align-items:center;padding:4px 12px 22px;text-decoration:none;color:#fff}
+.persal-brandmark{display:grid;place-items:center;min-width:46px;height:46px;border:1px solid #ffffff70;border-radius:14px;background:#ffffff18;font-size:25px;font-weight:800}
+.persal-brand strong{display:block;font-size:15px;letter-spacing:-.04em}.persal-brand small{display:block;font-size:10px;color:#cfdaff;margin-top:4px}
+.persal-navcaption{font-size:9px;letter-spacing:.16em;color:#b2c8ff;margin:20px 12px 8px}
+.persal-navlink{display:flex;align-items:center;gap:10px;color:#e8eeff;text-decoration:none;padding:12px 13px;border-radius:13px;font-weight:500;font-size:11.5px;line-height:1.5;transition:background .15s}
+.persal-navlink span{font-size:18px;min-width:20px}
+.persal-navlink:hover,.persal-navlink.is-active{background:#ffffff23;color:#fff;box-shadow:inset 0 1px #ffffff38}
+.persal-sidefoot{margin-top:auto;padding:20px 14px;border-top:1px solid #ffffff35;font-size:10px;line-height:1.6;font-weight:600}.persal-sidefoot small{display:block;color:#b8c6ed;font-weight:400}
+.persal-body{min-width:0}
+.persal-header{height:auto;min-height:95px;display:flex;flex-wrap:wrap;gap:22px;align-items:center;padding:18px 30px;background:#ffffffa6;backdrop-filter:blur(22px);border-bottom:1px solid #ffffff;box-shadow:0 5px 26px #26395b0d}
+.persal-header-label{display:flex;flex-direction:column;gap:4px}.persal-header-label strong{font-size:17px}.persal-eyebrow{font-size:10px;letter-spacing:.10em;color:#516aa4;font-weight:700}
+.persal-workspace-switch{display:flex;flex-direction:column;gap:5px;margin-left:auto}.persal-workspace-switch label{font-size:9px;color:#6f7b92}.persal-workspace-switch select{font:600 11px Poppins,Arial;border:1px solid #cdd5e4;color:#0b246e;background:#f8faff;border-radius:11px;padding:10px 12px;max-width:230px}
+.persal-user{display:flex;align-items:center;gap:9px;max-width:260px}.persal-user>span:last-child{display:flex;flex-direction:column}.persal-user strong{font-size:11px}.persal-user small{font-size:9px;color:#64748b}.persal-avatar{width:40px;height:40px;border-radius:13px;background:#d4deff;color:#001484;display:grid;place-items:center;font-weight:800}
+.persal-launcher{font-size:11px;font-weight:700;color:#001484;text-decoration:none}.persal-content{padding:25px 30px 65px;max-width:1500px;margin:0 auto}
+.persal-global-search{display:flex;align-items:center;gap:12px;padding:8px 12px;background:#ffffffb3;border:1px solid #ffffff;border-radius:15px;box-shadow:0 6px 18px #293c5912}
+.persal-global-search span{font-size:26px;color:#3c5091}.persal-global-search input{font:400 12px Poppins,Arial;background:transparent;border:0;outline:0;flex:1;min-width:0;padding:6px}
+.persal-global-search button{background:var(--navy);border:0;color:white;border-radius:9px;padding:10px 18px;font:600 11px Poppins;cursor:pointer}
+.persal-search-results{background:white;border:1px solid #d8e1ec;padding:16px;margin-top:8px;border-radius:16px;box-shadow:0 8px 24px #21325a21}
+.persal-search-results>strong{display:block;font-size:12px;margin-bottom:8px}.persal-search-results>div{padding:9px;border-bottom:1px solid #e4e9f2;font-size:12px;display:flex;justify-content:space-between;gap:8px}.persal-search-results small{color:#68758b}
+.persal-search-results p{font-size:11px;color:#718098}.persal-page{padding-top:20px}.persal-hero{padding:38px 40px;border:1px solid #ffffff8a;background:linear-gradient(120deg,#03136d,#001484 55%,#123cb0);color:white;border-radius:23px;display:flex;justify-content:space-between;gap:20px;box-shadow:0 16px 32px #0014842d;overflow:hidden}
+.persal-hero .persal-eyebrow{color:#b9ccff}.persal-hero h1{font-size:clamp(22px,3vw,36px);margin:11px 0;font-weight:700;letter-spacing:-.045em}.persal-hero p{font-size:12px;color:#dae2ff;max-width:580px;line-height:1.9;margin:0 0 23px}
+.persal-hero a{display:inline-block;color:white;text-decoration:none;padding:10px 15px;border:1px solid #ffffff6b;border-radius:12px;font-size:11px;font-weight:600;background:#ffffff21}
+.persal-hero-art{font-size:110px;line-height:1;opacity:.18;transform:rotate(-8deg)}
+.persal-section-heading{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px}.persal-section-heading h2{font-size:18px;margin:0}.persal-section-heading span{color:var(--muted);font-size:10px}
+.persal-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.persal-kpi{background:#ffffffc7;backdrop-filter:blur(15px);text-align:left;border:1px solid #fff;border-radius:17px;padding:20px 22px;cursor:pointer;box-shadow:0 6px 20px #2a3a5911;transition:transform .2s,box-shadow .2s}
+.persal-kpi:hover{transform:translateY(-3px);box-shadow:0 12px 28px #22376622}.persal-kpi small{display:block;color:#66738b;font:500 10px Poppins}.persal-kpi strong{display:block;font-size:30px;letter-spacing:-.04em;color:#001484;margin:7px 0}.persal-kpi span{color:#5269b4;font-size:10px;font-weight:600}
+.persal-critical{display:flex;justify-content:space-between;gap:10px;background:#e8edfacc;border:1px solid #becdf5;border-radius:14px;padding:16px 22px;margin-top:17px}
+.persal-critical strong{font-size:12px;color:#001484}.persal-critical p{font-size:10px;line-height:1.7;color:#405579;margin:5px 0 0}
+.persal-columns{display:grid;grid-template-columns:1.35fr 1fr;gap:17px;margin-top:17px}
+.persal-panel{background:#ffffffb9;backdrop-filter:blur(22px);border:1px solid #fff;border-radius:20px;padding:22px;box-shadow:0 7px 30px #25395b12}
+.persal-panelhead{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.persal-panelhead h2{font-size:15px;margin:0}.persal-panelhead p{font-size:10px;margin:5px 0 0;color:#66758b}.persal-panelhead a{font-size:10px;font-weight:700;color:#001484;text-decoration:none;white-space:nowrap}
+.persal-toggle{display:flex;gap:5px;background:#edf0f8;border-radius:11px;padding:4px;width:fit-content;margin-bottom:15px}
+.persal-toggle button{font:600 10px Poppins;padding:7px 12px;border:0;border-radius:8px;color:#71809b;background:transparent;cursor:pointer}
+.persal-toggle button.on{background:#fff;color:#001484;box-shadow:0 2px 6px #172a4e14}
+.persal-task{padding:13px 0;border-bottom:1px solid #e7eaf0;display:flex;align-items:center;justify-content:space-between;gap:10px}.persal-task:last-child{border-bottom:0}
+.persal-task strong{display:block;font-size:11px}.persal-task small{display:block;color:#7b8797;font-size:9px;margin-top:6px}
+.persal-priority{padding:5px 8px;border-radius:20px;background:#edf2f9;color:#5f6d84;font-size:9px;text-transform:capitalize}.persal-priority.critical{background:#ffe4e6;color:#ad243b}.persal-priority.high{background:#fff0cc;color:#8b5900}
+.persal-empty{padding:35px;text-align:center;color:#6b788e;background:#f2f5fa;border:1px dashed #cad5e6;border-radius:13px;font-size:11px;line-height:1.8}
+.persal-empty h3{color:#233b68;margin-top:0}.persal-preferences{display:flex;flex-direction:column;gap:12px}.persal-preferences label{display:flex;gap:10px;align-items:center;font-size:11px}.persal-preferences input{accent-color:#001484}
+.persal-preferences button{align-self:flex-start;background:transparent;border:0;color:#001484;text-decoration:underline;font:600 10px Poppins;cursor:pointer}.persal-shortcuts{display:grid;gap:8px;margin:16px 0}
+.persal-shortcuts a{padding:11px 13px;border:1px solid #dce3f0;border-radius:10px;color:#1a3a8b;background:#f7faff;text-decoration:none;font-size:10px;font-weight:600}.persal-smallprint{font-size:10px;color:#8090a4;line-height:1.8}
+.persal-overlay{position:fixed;inset:0;background:#0917339e;display:grid;place-items:center;padding:20px;z-index:70}.persal-detail{background:#fff;border-radius:24px;max-width:460px;width:100%;padding:36px;box-shadow:0 20px 70px #061b4e55}.persal-detail h2{font-size:22px;margin:14px 0}.persal-detail strong{font-size:38px;color:#001484}.persal-detail p{font-size:12px;color:#5d708b;line-height:1.8}.persal-detail a{display:inline-block;background:#001484;color:#fff;border-radius:12px;padding:12px 18px;text-decoration:none;font-size:11px;font-weight:600}.persal-close{float:right;border:0;background:#eef2fa;border-radius:10px;padding:9px;cursor:pointer}
+.persal-module-header{padding:22px 4px}.persal-module-header h1{font-size:28px;margin:7px 0}.persal-module-header p{font-size:12px;color:#6f7d90}
+.persal-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:17px}.persal-tabs a{background:#fff9;padding:10px 12px;text-decoration:none;border-radius:10px;border:1px solid #d6deee;font-size:10px;font-weight:600;color:#536682}
+.persal-tabs a.active{background:#001484;color:#fff;border-color:#001484}.persal-module-panel{min-height:350px}.persal-table-wrap{overflow-x:auto}.persal-table-wrap table{width:100%;border-collapse:collapse;font-size:11px}.persal-table-wrap th{text-align:left;color:#5f7398;font-size:10px;background:#eef2fa}.persal-table-wrap th,.persal-table-wrap td{padding:13px;border-bottom:1px solid #e6e9f2}
+.persal-mobile-nav{display:none}
+@media(max-width:1140px){.persal-app{grid-template-columns:220px 1fr}.persal-header{gap:14px;padding:15px}.persal-content{padding:19px}.persal-columns{grid-template-columns:1fr}.persal-hero-art{display:none}}
+@media(max-width:760px){.persal-app{display:block}.persal-sidebar{display:none}.persal-mobile-nav{display:flex;overflow:auto;gap:7px;padding:10px 15px}.persal-mobile-nav a{white-space:nowrap;color:#001484;background:#ffffffc9;border-radius:8px;padding:9px 11px;font-size:11px;text-decoration:none}.persal-header{gap:12px}.persal-header-label{width:100%}.persal-workspace-switch{margin-left:0}.persal-content{padding:13px}.persal-hero{padding:27px 23px}.persal-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.persal-kpi{padding:15px}.persal-kpi strong{font-size:25px}.persal-section-heading{align-items:flex-start;gap:10px}.persal-user{max-width:100%}}
+
+
+/* Licensed architectural photography: Joshua Kettle, Cape Town City Hall (Unsplash);
+   Fabian Kleiser, glass office architecture (Unsplash).
+   https://unsplash.com/license */
+.persal-hero{
+  position:relative;
+  background-image:linear-gradient(90deg,rgba(0,16,95,.99) 0%,rgba(0,20,132,.95) 43%,rgba(1,24,94,.48) 100%),url("https://images.unsplash.com/photo-1669238658622-49ca0506cfb1?auto=format&fit=crop&w=1800&q=84");
+  background-size:cover;background-position:center 49%;
+  border:1px solid rgba(255,255,255,.62);min-height:264px
+}
+.persal-hero-art{font-size:116px;opacity:.20;text-shadow:0 0 34px #8eb4ff}
+.persal-photo-credit{font-size:9px!important;color:#e6edffb5!important;margin:16px 0 0!important;letter-spacing:.02em}
+.persal-photo-credit a{background:none!important;border:0!important;padding:0!important;text-decoration:underline!important;font-size:inherit!important}
+.persal-module-header{
+ position:relative;border-radius:20px;padding:30px 32px;margin:2px 0 18px;
+ background-image:linear-gradient(105deg,rgba(0,20,132,.96) 0%,rgba(0,20,132,.91) 45%,rgba(0,20,132,.40) 100%),
+ url("https://images.unsplash.com/photo-1745015446589-7ee6f702d8c1?auto=format&fit=crop&w=1700&q=78");
+ background-size:cover;background-position:center;
+ border:1px solid #bfcff3;color:#fff;box-shadow:0 13px 34px #00148422
+}
+.persal-module-header .persal-eyebrow{color:#cbd8ff}
+.persal-module-header h1{font-size:clamp(23px,2.6vw,32px);margin:9px 0 4px;color:#fff}
+.persal-module-header p{color:#e0e8ff;max-width:620px;font-size:11px;line-height:1.8}
+.persal-module-credit{font-size:9px;color:#d1ddffaa}
+.persal-module-credit a{color:#fff;text-decoration:underline}
+.persal-dashboard-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.persal-feature-card{display:flex;align-items:center;gap:15px;text-decoration:none;background:rgba(255,255,255,.73);backdrop-filter:blur(16px);border:1px solid white;color:#15295f;border-radius:16px;padding:16px;transition:transform .17s,box-shadow .17s;box-shadow:0 5px 18px #263e7312}
+.persal-feature-card:hover{transform:translateY(-2px);box-shadow:0 9px 24px #173c8630}
+.persal-feature-icon{font-size:21px;display:grid;place-items:center;width:41px;height:41px;flex:none;border-radius:13px;color:#001484;background:#e8eeff}
+.persal-feature-card strong{display:block;font-size:10.5px}
+.persal-feature-card small{display:block;font-size:9px;color:#6b7691;line-height:1.5;margin-top:5px}
+.persal-feature-go{margin-left:auto;color:#001484}
+@media(max-width:1060px){.persal-dashboard-features{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:590px){.persal-hero{background-position:center;background-image:linear-gradient(90deg,rgba(0,16,95,.96),rgba(0,20,132,.80)),url("https://images.unsplash.com/photo-1669238658622-49ca0506cfb1?auto=format&fit=crop&w=950&q=74")}.persal-dashboard-features{grid-template-columns:1fr}.persal-module-header{padding:24px 20px}}
+@media(prefers-reduced-motion:reduce){.persal-feature-card,.persal-kpi{transition:none}}
+
+.persal-photo-credit{position:absolute;right:22px;bottom:10px;margin:0!important;text-align:right;z-index:1}
+.persal-hero>div:first-child{position:relative;z-index:1}
+@media(max-width:640px){.persal-photo-credit{right:12px;bottom:8px;font-size:8px!important}}
