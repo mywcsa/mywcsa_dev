@@ -1,10 +1,12 @@
 "use client";
-import { useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Official, EmployeeSummary, Workspace } from "@/lib/persal/server";
 import { persalModules, workspaceNames } from "./modules";
 
+const WorkspaceContext=createContext<Workspace>("personnel");
+export function useActiveWorkspace(){return useContext(WorkspaceContext);}
 export default function PortalShell({official,children}:{official:Official;children:ReactNode}){
   const pathname=usePathname();
   const [workspace,setWorkspace]=useState<Workspace>(official.primary);
@@ -30,7 +32,7 @@ export default function PortalShell({official,children}:{official:Official;child
       setResults(Array.isArray(body.results)?body.results:[]);
     }catch{setResults([]);}
   }
-  return <div className="persal-app">
+  return <WorkspaceContext.Provider value={workspace}><div className="persal-app">
     <aside className="persal-sidebar" aria-label="PERSAL main navigation">
       <Link href="/persal" className="persal-brand"><span className="persal-brandmark">W</span><span><strong>MyWCSA PERSAL</strong><small>GovApps · Restricted</small></span></Link>
       <div className="persal-navcaption">COMMAND CENTRE</div>
@@ -55,5 +57,5 @@ export default function PortalShell({official,children}:{official:Official;child
         {children}
       </main>
     </div>
-  </div>;
+  </div></WorkspaceContext.Provider>;
 }
