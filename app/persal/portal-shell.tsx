@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode, type FormEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Official, EmployeeSummary, Workspace } from "@/lib/persal/server";
@@ -22,7 +22,7 @@ export default function PortalShell({official,children}:{official:Official;child
     setWorkspace(next);
     window.localStorage.setItem("persal-workspace-"+official.id,next);
   }
-  async function findEmployee(e:React.FormEvent<HTMLFormElement>) {
+  async function findEmployee(e:FormEvent<HTMLFormElement>) {
     e.preventDefault();setSearched(true);
     if(query.trim().length<2){setResults([]);return;}
     try {
