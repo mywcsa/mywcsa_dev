@@ -164,7 +164,7 @@ export default function LiveMemberContent({
   }
 
   if (section === "renewals") return <>
-    <PageHeading kicker="MEMBERSHIP · RENEWAL" title="Renewals" detail="Renewals are submitted as new applications and reviewed by the Registry." />
+    <PageHeading kicker="MEMBERSHIP · RENEWAL" title="Renewals" detail="Renewals are submitted for processing through the Registry." />
     <section className={s.panel}>
       <h2>Your existing membership</h2>
       <dl className={s.details}><Row label="WCSA ID" value={application.wcsaId}/><Row label="Membership year" value={application.year}/><Row label="Membership status" value={status}/></dl>
