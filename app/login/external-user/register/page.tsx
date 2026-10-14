@@ -1,3 +1,197 @@
-import {redirect} from "next/navigation";import {supabaseConfig} from "@/lib/ams/supabase";import styles from "../../account-login.module.css";
-async function create(form:FormData){"use server";const c=supabaseConfig();const returnTo=String(form.get("returnTo")||"/membership");const r=await fetch(`${c.origin}/rest/v1/rpc/govapps_create_account`,{method:"POST",headers:{apikey:c.secret,Authorization:`Bearer ${c.secret}`,"Content-Type":"application/json"},body:JSON.stringify({p_account_type:"external_user",p_email:String(form.get("email")||""),p_username:String(form.get("username")||""),p_password:String(form.get("password")||""),p_wcsa_id:null,p_date_of_birth:String(form.get("dob")||"")}),cache:"no-store"});if(!r.ok)redirect(`/login/external-user/register?error=1&returnTo=${encodeURIComponent(returnTo)}`);redirect(`/login/external-user?created=1&returnTo=${encodeURIComponent(returnTo)}`)}
-export default async function Page({searchParams}:{searchParams:Promise<{returnTo?:string;error?:string}>}){const q=await searchParams;const dest=q.returnTo?.startsWith("/")&&!q.returnTo.startsWith("//")?q.returnTo:"/membership";return <div className={styles.page}><header className={styles.header}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/></header><main className={styles.main}><h1>Create External User account</h1><p>Create one GovApps account for individual access.</p>{q.error&&<div className={styles.error}>We could not create the account. Check that the email and username are not already registered and use a password of at least 8 characters.</div>}<form className={styles.form} action={create}><input type="hidden" name="returnTo" value={dest}/><label>Email address<input name="email" type="email" required/></label><label>Username<input name="username" minLength={4} required/></label><label>Date of birth<input name="dob" type="date" required/></label><label>Password<input name="password" type="password" minLength={8} required/></label><button type="submit">Create account</button></form></main></div>}
+import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { supabaseConfig } from "@/lib/ams/supabase";
+import ExternalUserRegistrationForm from "./external-user-registration-form";
+import shared from "../../business-partner/business-partner-login.module.css";
+import external from "../external-user.module.css";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  fallback: ["Arial", "sans-serif"],
+});
+
+export const metadata: Metadata = {
+  title: "Register External User | MyWCSA GovApps",
+  description: "Register a personal account for MyWCSA GovApps.",
+};
+
+type Query = { returnTo?: string; error?: string };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function safeDestination(value?: string) {
+  return value && /^\/(?!\/|\\)[^\\\r\n]*$/.test(value) ? value : "/membership";
+}
+
+function validBirthDate(iso: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || iso < "1900-01-01") return false;
+  const date = new Date(iso + "T00:00:00.000Z");
+  return !Number.isNaN(date.valueOf())
+    && date.toISOString().slice(0, 10) === iso
+    && iso <= new Date().toISOString().slice(0, 10);
+}
+
+export default async function ExternalUserRegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<Query>;
+}) {
+  const query = await searchParams;
+  const destination = safeDestination(query.returnTo);
+  const signInUrl = "/login/external-user?returnTo=" + encodeURIComponent(destination);
+
+  const session = await auth();
+  if (session?.user) redirect(destination);
+
+  async function registerExternalUser(form: FormData): Promise<void> {
+    "use server";
+    const target = safeDestination(String(form.get("returnTo") || ""));
+    const registerPath = "/login/external-user/register?returnTo=" + encodeURIComponent(target);
+    const loginPath = "/login/external-user?returnTo=" + encodeURIComponent(target);
+    const email = String(form.get("email") || "").trim().toLowerCase();
+    const username = String(form.get("username") || "").trim();
+    const dateOfBirth = String(form.get("dob") || "");
+    const password = String(form.get("password") || "");
+    const confirmation = String(form.get("confirmPassword") || "");
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
+      username.length < 4 || username.length > 64 ||
+      !validBirthDate(dateOfBirth) ||
+      password.length < 8 || Buffer.byteLength(password, "utf8") > 72 ||
+      password !== confirmation
+    ) {
+      redirect(registerPath + "&error=invalid");
+    }
+
+    let response: Response;
+    try {
+      const config = supabaseConfig();
+      response = await fetch(config.origin + "/rest/v1/rpc/govapps_create_account", {
+        method: "POST",
+        headers: {
+          apikey: config.secret,
+          Authorization: "Bearer " + config.secret,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          p_account_type: "external_user",
+          p_email: email,
+          p_username: username,
+          p_password: password,
+          p_wcsa_id: null,
+          p_date_of_birth: dateOfBirth,
+        }),
+        cache: "no-store",
+        redirect: "error",
+        signal: AbortSignal.timeout(12000),
+      });
+    } catch {
+      redirect(registerPath + "&error=unavailable");
+    }
+
+    if (!response.ok) {
+      // Do not expose raw database errors or user-existence information.
+      redirect(registerPath + "&error=registration");
+    }
+
+    const accountId: unknown = await response.json().catch(() => null);
+    if (typeof accountId !== "string" || !UUID.test(accountId)) {
+      redirect(registerPath + "&error=unavailable");
+    }
+
+    redirect(loginPath + "&created=1");
+  }
+
+  return (
+    <div className={[shared.page, poppins.className].join(" ")}>
+      <div className={shared.ambientOne} aria-hidden="true" />
+      <div className={shared.ambientTwo} aria-hidden="true" />
+      <div className={shared.ambientThree} aria-hidden="true" />
+
+      <div className={shared.shell}>
+        <header className={shared.topBar}>
+          <a href="/" className={shared.topBrand} aria-label="Return to MyWCSA GovApps">
+            <span className={shared.brandMark} aria-hidden="true">M</span>
+            <span>MyWCSA <b>GovApps</b></span>
+          </a>
+          <a className={shared.backLink} href={signInUrl}>
+            <span aria-hidden="true">←</span> Back to sign in
+          </a>
+        </header>
+
+        <main className={shared.main}>
+          <div className={[shared.glassFrame, external.registerFrame].join(" ")}>
+            <aside className={shared.identity}>
+              <div className={shared.identityTop}>
+                <div className={shared.logoPlate}>
+                  <img src="/mywcsa-logo.png" alt="MyWCSA GovApps" />
+                </div>
+                <div className={shared.identityDivider} />
+                <p className={shared.identityEyebrow}>MyWCSA GovApps</p>
+                <h1>External User<br />Registration</h1>
+                <p className={shared.identityDescription}>
+                  Create your personal GovApps account to access authorised services.
+                </p>
+
+                <div className={external.noteBox}>
+                  <strong>Who can register?</strong>
+                  <p>Learners, athletes, participants, volunteers and other individual users. Your date of birth can also be used for sign-in in YYYYDDMM format.</p>
+                </div>
+              </div>
+              <div className={shared.identityBottom}>
+                <span className={shared.secureLight} aria-hidden="true" />
+                <span>Personal account registration</span>
+              </div>
+            </aside>
+
+            <section className={[shared.loginPanel, external.registerPanel].join(" ")} aria-labelledby="external-register-title">
+              <div className={shared.loginHead}>
+                <span className={shared.overline}>EXTERNAL USERS</span>
+                <span className={shared.lockIcon} aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <rect x="5" y="10" width="14" height="11" rx="2" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                  </svg>
+                </span>
+              </div>
+              <h2 id="external-register-title">Create your account</h2>
+              <p className={shared.intro}>Enter your personal details below to register.</p>
+
+              {query.error && (
+                <div className={shared.notice} role="alert">
+                  {query.error === "unavailable"
+                    ? "Registration is temporarily unavailable. Try again later or contact the ServiceDesk."
+                    : query.error === "invalid"
+                      ? "Check the required fields, date of birth and password confirmation."
+                      : "We couldn't create the account. Please check your details or contact the ServiceDesk."}
+                </div>
+              )}
+
+              <ExternalUserRegistrationForm
+                action={registerExternalUser}
+                returnTo={destination}
+                signInUrl={signInUrl}
+              />
+
+              <p className={external.noticeSmall}>
+                Your registration is stored securely in the MyWCSA account database.
+              </p>
+              <div className={shared.support}>
+                Need help? <a href="mailto:ServiceDesk@wcsports.co.za">ServiceDesk@wcsports.co.za</a>
+              </div>
+            </section>
+          </div>
+        </main>
+
+        <footer className={shared.footer}>
+          <span>© {new Date().getFullYear()} Western Cape Sports Association NPC</span>
+          <span>MyWCSA GovApps · External User Registration</span>
+        </footer>
+      </div>
+    </div>
+  );
+}
