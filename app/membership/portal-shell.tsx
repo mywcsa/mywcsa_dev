@@ -42,11 +42,11 @@ const nav: Array<{ id: string; label: string; href: string; icon: WorkHubIconNam
   { id: "dashboard", label: "Dashboard", href: "/membership/dashboard", icon: "house", requiresApplication: true },
   { id: "apply", label: "Applications", href: "/membership/apply", icon: "clipboard" },
   { id: "membership", label: "My Membership", href: "/membership/membership", icon: "id", requiresApplication: true },
-  { id: "renewals", label: "Renewals", href: "/membership/renewals", icon: "calendar", activeOnly: true },
+  { id: "renewals", label: "Renewals", href: "/membership/renewals", icon: "calendar", requiresApplication: true },
   { id: "payments", label: "Payments & Invoices", href: "/membership/payments", icon: "briefcase", requiresApplication: true },
   { id: "certificates", label: "Certificates", href: "/membership/certificates", icon: "check", activeOnly: true },
   { id: "profile", label: "Member Profile", href: "/membership/profile", icon: "users", requiresApplication: true },
-  { id: "documents", label: "Documents", href: "/membership/documents", icon: "file", activeOnly: true },
+  { id: "documents", label: "Documents", href: "/membership/documents", icon: "file", requiresApplication: true },
   { id: "messages", label: "Correspondence", href: "/membership/messages", icon: "mail", requiresApplication: true },
   { id: "support", label: "Help & Support", href: "/membership/support", icon: "ticket" },
 ];
