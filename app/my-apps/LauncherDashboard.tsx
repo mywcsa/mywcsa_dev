@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import styles from "./launcher.module.css";
 
 export type LauncherItem = {
@@ -48,6 +48,7 @@ const categories = ["All apps", "People", "Operations", "Administration", "Servi
 type Category = (typeof categories)[number] | "Saved";
 
 export default function LauncherDashboard({ name, email, apps, signOutControl }: { name: string; email: string; apps: LauncherItem[]; signOutControl: ReactNode }) {
+  const searchRef = useRef<HTMLInputElement>(null);
   const [category, setCategory] = useState<Category>("All apps");
   const [query, setQuery] = useState("");
   const [saved, setSaved] = useState<string[]>([]);
@@ -59,6 +60,18 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
       if (Array.isArray(value)) setSaved(value.filter(v => typeof v === "string"));
     } catch { /* private browsing may disable storage */ }
   }, []);
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+      const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || (target instanceof HTMLElement && target.isContentEditable);
+      if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
   const toggleSaved = (slug: string) => setSaved(previous => {
     const next = previous.includes(slug) ? previous.filter(id => id !== slug) : [...previous, slug];
     try { window.localStorage.setItem("mywcsa-launcher-favourites-v1", JSON.stringify(next)); } catch {}
@@ -69,7 +82,6 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
     [app.title, app.description, app.category].join(" ").toLowerCase().includes(query.trim().toLowerCase())
   ), [apps, category, saved, query]);
   const available = apps.filter(app => app.status === "available").length;
-  const activeApps = apps.filter(app => app.status !== "restricted").length;
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0].toUpperCase()).join("");
   const firstName = name.trim().split(/\s+/)[0] || "there";
 
@@ -82,7 +94,7 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
         <Link href="/my-apps" aria-label="MyWCSA GovApps Home" className={styles.brandLogo}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/></Link>
         <div className={styles.brandTitle}><strong>MyWCSA <span>GovApps</span></strong><small>YOUR DIGITAL WORKSPACE</small></div>
       </div>
-      <div className={styles.headerSearch}><Glyph name="search" size={20}/><input aria-label="Search applications" type="search" placeholder="Search apps and services..." value={query} onChange={e => setQuery(e.target.value)}/><kbd>/</kbd></div>
+      <div className={styles.headerSearch}><Glyph name="search" size={20}/><input ref={searchRef} aria-label="Search applications" type="search" placeholder="Search apps and services..." value={query} onChange={e => setQuery(e.target.value)}/><kbd>/</kbd></div>
       <div className={styles.headerActions}>
         <a href="mailto:ServiceDesk@wcsports.co.za" className={styles.supportLink}><Glyph name="help" size={19}/><span>Help & Support</span></a>
         <button type="button" className={styles.profileButton} aria-expanded={profileOpen} onClick={() => setProfileOpen(value => !value)}>
@@ -115,7 +127,7 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
           <div className={styles.stat}><span className={styles.statIcon} data-tone="lavender"><Glyph name="star" size={25}/></span><span><strong>{saved.length}</strong><small>Saved favourites</small></span></div>
         </section>
         <section className={styles.appSection} id="applications" aria-label="My applications">
-          <div className={styles.sectionHead}><div><span className={styles.sectionEyebrow}>YOUR APPLICATIONS</span><h2>{category === "All apps" ? "Explore GovApps" : category === "Saved" ? "Saved applications" : category}</h2><p>Choose an application to continue to its workspace.</p></div><span className={styles.resultCount}>{visible.length} of {activeApps} accessible or preview apps{category === "All apps" ? " · restricted items shown" : ""}</span></div>
+          <div className={styles.sectionHead}><div><span className={styles.sectionEyebrow}>YOUR APPLICATIONS</span><h2>{category === "All apps" ? "Explore GovApps" : category === "Saved" ? "Saved applications" : category}</h2><p>Choose an application to continue to its workspace.</p></div><span className={styles.resultCount}>Showing {visible.length} of {apps.length} apps</span></div>
           <div className={styles.filters}>{categories.map(item => <button key={item} type="button" onClick={() => choose(item)} aria-pressed={category === item} className={category === item ? styles.filterActive : ""}>{item}</button>)}</div>
           {visible.length ? <div className={styles.appGrid}>{visible.map(app => <article className={styles.appCard} key={app.slug}>
             <div className={styles.appTop}><span className={styles.appIcon} data-icon={app.icon}><Glyph name={app.icon} size={26}/></span><button type="button" className={`${styles.favourite} ${saved.includes(app.slug) ? styles.favourited : ""}`} onClick={() => toggleSaved(app.slug)} aria-label={saved.includes(app.slug) ? `Remove ${app.title} from favourites` : `Save ${app.title} to favourites`} aria-pressed={saved.includes(app.slug)}><Glyph name="star" size={19}/></button></div>
