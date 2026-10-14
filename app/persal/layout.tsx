@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { requirePersalOfficial } from "@/lib/persal/server";
 import PortalShell from "./portal-shell";
 import "./persal.css";
-export const metadata:Metadata={ title:"MyWCSA GovApps | PERSAL",robots:{index:false,follow:false} };
+export const metadata:Metadata={ title:"MyWCSA GovApps | PERSAL",robots:{index:false,follow:false},referrer:"no-referrer" };
 export default async function PersalLayout({children}:{children:React.ReactNode}) {
   const session=await auth();
   if(!session?.user) redirect("/login/staff?returnTo=%2Fpersal");
