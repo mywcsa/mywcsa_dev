@@ -24,7 +24,7 @@ export type StaffAppSlug =
 const staffBaseline: StaffAppSlug[] = ["workhub", "msuite"];
 
 export function isMicrosoftStaff(user: { email?: string | null; authProvider?: string } | undefined): boolean {
-  return user?.authProvider === "microsoft-entra-id" &&
+  return (user?.authProvider === "microsoft-entra-id" || user?.authProvider === "staff-password") &&
     /^[^@\s]+@wcsports\.co\.za$/i.test(user.email?.trim() || "");
 }
 
@@ -69,7 +69,8 @@ export async function authorisedStaffApps(user: {email?:string|null;authProvider
   if (command.length) allowed.add("control");
   if (registry.length) allowed.add("ams");
   if (wcda.length) allowed.add("wcda-events");
-  if (persal) allowed.add("persal");
+  // PERSAL stays Entra-bound even for users with a separate password login.
+  if (user?.authProvider === "microsoft-entra-id" && persal) allowed.add("persal");
   for (const entry of special) {
     if (["applications","csd","membership"].includes(entry.app_slug)) allowed.add(entry.app_slug);
   }
