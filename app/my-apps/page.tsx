@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseConfig, usesSupabase } from "@/lib/ams/supabase";
 import LauncherDashboard, { type LauncherItem } from "./LauncherDashboard";
 import { authorisedStaffApps, isMicrosoftStaff } from "@/lib/govapps/staff-app-access";
+import { hasSeenNotices, noticeBoardEnabled } from "@/lib/govapps/staff-operations";
 
 const fallbackApps: LauncherItem[] = [
   { slug: "workhub", title: "MyWCSA WorkHub", description: "Your digital workplace for teams, tasks, leave and employee services.", href: "/workhub", category: "People", icon: "users", status: "available", featured: true, sort_order: 1 },
@@ -52,6 +53,11 @@ export default async function MyAppsPage() {
   // Send non-staff/stale sessions to a recoverable Microsoft login screen,
   // rather than bouncing between Home, staff login and the launcher.
   if (!isMicrosoftStaff(user)) redirect("/login/staff?returnTo=%2Fmy-apps");
+  const staff = user as typeof user & { staffMustChange?: boolean; staffLoginNonce?: string };
+  if(staff.authProvider==="staff-password"&&staff.staffMustChange)redirect("/staff/password");
+  // Every fresh sign-in gets its own signed notice acknowledgement cookie.
+  // Do not let an old local favourite or direct /my-apps request skip this board.
+  if(await noticeBoardEnabled() && !(await hasSeenNotices(staff))) redirect("/my-apps/notices");
   const name = session.user.name || session.user.email?.split("@")[0] || "WCSA Employee";
   // Never send unauthorised app metadata to the browser: all visibility checks run server-side.
   const allowed = await authorisedStaffApps(user);
