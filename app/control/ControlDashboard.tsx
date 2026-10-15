@@ -146,7 +146,8 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
       <Link href="/my-apps" className={s.brand}><span className={s.logoWrap}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/></span>
         <span><strong>MyWCSA <b>Command Centre</b></strong><small>SERVICEDESK · E-INNOVATION · BIT · ICT</small></span></Link>
       <div className={s.headerRight}>
-        <div className={s.authStatus}><span className={s.greenDot}/><strong>Authorised operator</strong><small>{roleNames[role]}</small></div>
+        <div className={s.authStatus}><span className={s.greenDot}/><strong>Authorised operator</strong><small>{data.operator.display_name||roleNames[role]}</small></div>
+        {["director","einnovation"].includes(role)&&<Link href="/control/administration" className={s.headerButton}><Glyph name="shield" size={17}/> System administration</Link>}
         <button className={s.headerButton} onClick={reload} disabled={refreshing}><Glyph name="activity" size={17}/>{refreshing?"Refreshing…":"Refresh"}</button>
         <Link href="/my-apps" className={s.headerButton}><Glyph name="external" size={17}/> GovApps</Link>
       </div>
@@ -174,7 +175,8 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
           <h1>{tab==="overview"?"One command. Every service.":nav.find(n=>n.id===tab)?.label}</h1>
           <p>{tab==="overview"?"Route requests, coordinate technical teams, manage onboarding and maintain controlled allocations from one secure workspace.":"Authorised operational records, staff coordination and accountable service delivery."}</p>
           <div className={s.heroButtons}>{canWrite&&<button onClick={()=>openRequest()}><Glyph name="ticket" size={17}/> New service request</button>}
-            {canAlloc&&<button onClick={()=>setModal({action:"create_allocation"})}><Glyph name="briefcase" size={17}/> Record allocation</button>}</div>
+            {canAlloc&&<button onClick={()=>setModal({action:"create_allocation"})}><Glyph name="briefcase" size={17}/> Record allocation</button>}
+            {["director","einnovation"].includes(role)&&<Link href="/control/administration" style={{display:"inline-flex",alignItems:"center",gap:8,border:"1px solid #ffffff66",borderRadius:11,padding:"10px 14px",background:"#ffffff29",color:"#fff",fontSize:11,fontWeight:650}}>Manage accounts & apps →</Link>}</div>
         </div><div className={s.heroOrbits} aria-hidden="true"><span><Glyph name="shield" size={37}/></span></div></section>
 
         {notice&&<div className={notice.type==="success"?s.successNotice:s.errorNotice} role="status"><span>{notice.text}</span><button onClick={()=>setNotice(null)} aria-label="Dismiss message">×</button></div>}
