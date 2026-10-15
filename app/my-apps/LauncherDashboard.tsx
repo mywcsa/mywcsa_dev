@@ -77,10 +77,12 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
     try { window.localStorage.setItem("mywcsa-launcher-favourites-v1", JSON.stringify(next)); } catch {}
     return next;
   });
+  // Old local favourites never reintroduce an app that the server has removed.
+  const permittedSaved = useMemo(() => saved.filter(slug => apps.some(app => app.slug === slug)), [saved, apps]);
   const visible = useMemo(() => apps.filter(app =>
-    (category === "All apps" || (category === "Saved" ? saved.includes(app.slug) : app.category === category)) &&
+    (category === "All apps" || (category === "Saved" ? permittedSaved.includes(app.slug) : app.category === category)) &&
     [app.title, app.description, app.category].join(" ").toLowerCase().includes(query.trim().toLowerCase())
-  ), [apps, category, saved, query]);
+  ), [apps, category, permittedSaved, query]);
   const available = apps.filter(app => app.status === "available").length;
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(word => word[0].toUpperCase()).join("");
   const firstName = name.trim().split(/\s+/)[0] || "there";
@@ -107,7 +109,7 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
       <aside id="launcher-navigation" className={`${styles.sidebar} ${drawer ? styles.sidebarOpen : ""}`}>
         <div className={styles.sideEyebrow}>YOUR WORKSPACE</div>
         <button className={`${styles.navItem} ${category === "All apps" ? styles.navActive : ""}`} onClick={() => choose("All apps")}><Glyph name="home" size={19}/> <span>Overview</span></button>
-        <button className={`${styles.navItem} ${category === "Saved" ? styles.navActive : ""}`} onClick={() => choose("Saved")}><Glyph name="star" size={19}/><span>Saved Apps</span><span className={styles.navCount}>{saved.length}</span></button>
+        <button className={`${styles.navItem} ${category === "Saved" ? styles.navActive : ""}`} onClick={() => choose("Saved")}><Glyph name="star" size={19}/><span>Saved Apps</span><span className={styles.navCount}>{permittedSaved.length}</span></button>
         <div className={styles.navRule}/>
         <div className={styles.sideEyebrow}>BROWSE CATEGORIES</div>
         {categories.slice(1).map(item => <button key={item} className={`${styles.navItem} ${category === item ? styles.navActive : ""}`} onClick={() => choose(item)}><Glyph name={item === "People" ? "users" : item === "Operations" ? "grid" : item === "Administration" ? "briefcase" : "layers"} size={19}/><span>{item}</span></button>)}
@@ -124,7 +126,7 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
         <section className={styles.stats} aria-label="Application overview">
           <div className={styles.stat}><span className={styles.statIcon} data-tone="blue"><Glyph name="grid" size={25}/></span><span><strong>{apps.length}</strong><small>Apps in your directory</small></span></div>
           <div className={styles.stat}><span className={styles.statIcon} data-tone="mint"><Glyph name="check" size={25}/></span><span><strong>{available}</strong><small>Active destinations</small></span></div>
-          <div className={styles.stat}><span className={styles.statIcon} data-tone="lavender"><Glyph name="star" size={25}/></span><span><strong>{saved.length}</strong><small>Saved favourites</small></span></div>
+          <div className={styles.stat}><span className={styles.statIcon} data-tone="lavender"><Glyph name="star" size={25}/></span><span><strong>{permittedSaved.length}</strong><small>Saved favourites</small></span></div>
         </section>
         <section className={styles.appSection} id="applications" aria-label="My applications">
           <div className={styles.sectionHead}><div><span className={styles.sectionEyebrow}>YOUR APPLICATIONS</span><h2>{category === "All apps" ? "Explore GovApps" : category === "Saved" ? "Saved applications" : category}</h2><p>Choose an application to continue to its workspace.</p></div><span className={styles.resultCount}>Showing {visible.length} of {apps.length} apps</span></div>
