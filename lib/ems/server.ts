@@ -101,10 +101,7 @@ export async function getEmsActor(): Promise<EmsActor | null> {
   if (user.authProvider === "business-partner" || user.authProvider === "external-user") {
     return {id,email,name:str(user.name)||email,mode:"organiser"};
   }
-  // Existing pre-EMS sessions carry no provider marker. Permit only an empty,
-  // read-only shell for organisational email accounts until they reauthenticate.
-  if (!user.authProvider && email.endsWith("@wcsports.co.za"))
-    return {id,email,name:str(user.name)||email,mode:"staff",role:"viewer"};
+  // Sessions without an explicit recognised provider receive no EMS staff privileges.
   return null;
 }
 
