@@ -40,7 +40,7 @@ export default async function StaffLoginPage({
   const { returnTo, error } = await searchParams;
   const destination = safeDestination(returnTo);
   const session = await auth();
-  const currentUser = session?.user as ({email?:string|null;authProvider?:string}|undefined);
+  const currentUser = session?.user as ({email?:string|null;authProvider?:string;staffMustChange?:boolean}|undefined);
   // Only an actual WCSA Microsoft staff session may skip the sign-in screen.
   // A Business Partner or legacy/unidentified JWT must never bounce back into
   // the staff launcher before the user has a chance to switch accounts.
