@@ -10,7 +10,7 @@ import { WorkHubIcon, type WorkHubIconName } from "../workhub/WorkHubIcon";
 import s from "./control.module.css";
 
 type Data = ControlData & { operator: ControlOperator };
-type Tab = "overview"|"requests"|"allocations"|"accounts"|"audit"|"permissions";
+type Tab = "overview"|"requests"|"allocations"|"accounts"|"directory"|"audit"|"permissions";
 type Action = "create_request"|"update_request"|"create_allocation"|"update_allocation"|"set_operator";
 type Modal = { action: Action; request?: ControlRequest; allocation?: ControlAllocation; operator?: ControlOperator };
 
@@ -19,6 +19,7 @@ const nav: { id: Tab; label: string; icon: WorkHubIconName }[] = [
   { id:"requests",label:"Service requests",icon:"ticket" },
   { id:"allocations",label:"Allocations & assets",icon:"briefcase" },
   { id:"accounts",label:"Accounts & onboarding",icon:"users" },
+  { id:"directory",label:"Staff directory",icon:"id" },
   { id:"audit",label:"Audit activity",icon:"activity" },
   { id:"permissions",label:"Operator permissions",icon:"shield" },
 ];
@@ -248,6 +249,18 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
             </Panel>
           </div>}
         </>}
+
+        {tab==="directory"&&<Panel title="Command Centre staff directory" subtitle="Approved WCSA operators · verified Microsoft work addresses · departmental details"
+          action={["director","einnovation"].includes(role)?<Link href="/control/administration" className={s.primarySmall}>Account administration →</Link>:null}>
+          {data.operators.length?<div className={s.tableScroll}><table className={s.table}>
+            <thead><tr><th>Display name</th><th>Full name</th><th>Microsoft email</th><th>Department</th><th>Designation</th><th>Access role</th></tr></thead>
+            <tbody>{data.operators.map(p=><tr key={p.email}>
+              <td><strong>{p.display_name||p.email}</strong></td><td>{p.full_name||"—"}</td><td>{p.email}</td>
+              <td>{p.department||"—"}</td><td>{p.designation||"—"}</td>
+              <td><span className={s.tag}>{p.department==="Communications"&&p.role==="viewer"?"Communications (read-only)":roleNames[p.role]||p.role}</span></td>
+            </tr>)}</tbody></table></div>:
+          <Empty text="No active Command Centre operators are registered."/>}
+        </Panel>}
 
         {tab==="audit"&&<Panel title="Audit activity" subtitle="Who performed an action, what changed and when it occurred">
           {data.audit.length?<div className={s.tableScroll}><table className={s.table}><thead><tr><th>Action</th><th>Operator</th><th>Reference</th><th>Date</th><th>Details</th></tr></thead><tbody>
