@@ -128,7 +128,7 @@ end $fn$;
 revoke all on function public.persal_case_create(uuid,text,text,text,text,jsonb) from public,anon,authenticated;
 revoke all on function public.persal_case_update(uuid,uuid,text,jsonb) from public,anon,authenticated;
 revoke all on function public.persal_case_transition(uuid,uuid,text,text) from public,anon,authenticated;
-grant execute on function public.persal_case_create(uuid,text,text,text,jsonb) to service_role;
+grant execute on function public.persal_case_create(uuid,text,text,text,text,jsonb) to service_role;
 grant execute on function public.persal_case_update(uuid,uuid,text,jsonb) to service_role;
 grant execute on function public.persal_case_transition(uuid,uuid,text,text) to service_role;
 commit;
