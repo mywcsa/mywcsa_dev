@@ -53,10 +53,16 @@ export async function authorisedStaffApps(user: {email?:string|null;authProvider
   // A disabled fallback account loses access immediately, even with an older JWT.
   // First-use passwords must be rotated before any application access.
   if(user?.authProvider==="staff-password"){
-    const fallback=await scopedRows<{email:string;must_change:boolean}>("govapps_staff_password_accounts",{
-      select:"email,must_change",email:"eq."+email,enabled:"eq.true",limit:"1"
-    }).catch(()=>[]);
-    if(!fallback.length||fallback[0].must_change)return new Set<StaffAppSlug>();
+    const [fallback,loginSetting]=await Promise.all([
+      scopedRows<{email:string;must_change:boolean}>("govapps_staff_password_accounts",{
+        select:"email,must_change",email:"eq."+email,enabled:"eq.true",limit:"1"
+      }).catch(()=>[]),
+      scopedRows<{enabled:boolean}>("govapps_control_settings",{
+        select:"enabled",key:"eq.staff_password_login_enabled",limit:"1"
+      }).catch(()=>[]),
+    ]);
+    if(!fallback.length||fallback[0].must_change||loginSetting[0]?.enabled!==true)
+      return new Set<StaffAppSlug>();
   }
 
   // Each protected app is independently resolved; a failure cannot grant access.
@@ -77,7 +83,8 @@ export async function authorisedStaffApps(user: {email?:string|null;authProvider
   ]);
   if (command.length) allowed.add("control");
   if (registry.length) allowed.add("ams");
-  if (wcda.length) allowed.add("wcda-events");
+  // WCDA currently uses Entra-only event actors. Do not advertise a fallback-incompatible app.
+  if (user?.authProvider==="microsoft-entra-id" && wcda.length) allowed.add("wcda-events");
   // PERSAL stays Entra-bound even for users with a separate password login.
   if (user?.authProvider === "microsoft-entra-id" && persal) allowed.add("persal");
   for (const entry of special) {
