@@ -50,6 +50,15 @@ export async function authorisedStaffApps(user: {email?:string|null;authProvider
   for (const slug of staffBaseline) allowed.add(slug);
   const email = user!.email!.trim().toLowerCase();
 
+  // A disabled fallback account loses access immediately, even with an older JWT.
+  // First-use passwords must be rotated before any application access.
+  if(user?.authProvider==="staff-password"){
+    const fallback=await scopedRows<{email:string;must_change:boolean}>("govapps_staff_password_accounts",{
+      select:"email,must_change",email:"eq."+email,enabled:"eq.true",limit:"1"
+    }).catch(()=>[]);
+    if(!fallback.length||fallback[0].must_change)return new Set<StaffAppSlug>();
+  }
+
   // Each protected app is independently resolved; a failure cannot grant access.
   const [command, registry, wcda, special, persal] = await Promise.all([
     scopedRows<{email:string}>("govapps_control_operators", {
