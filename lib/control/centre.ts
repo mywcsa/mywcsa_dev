@@ -75,10 +75,16 @@ export async function requireControlOperator(): Promise<ControlOperator> {
     throw new ControlAccessError(403, "Authorised WCSA staff sign-in is required.");
   }
   if(user?.authProvider==="staff-password"){
-    const enabled = await database<Array<{email:string;must_change:boolean}>>(
-      "govapps_staff_password_accounts?select=email,must_change&email=eq."+encodeURIComponent(email)+"&enabled=eq.true&limit=1"
-    );
-    if(!enabled.length||enabled[0].must_change)throw new ControlAccessError(403,"Your staff password account is disabled or requires a password change.");
+    const [enabled,setting] = await Promise.all([
+      database<Array<{email:string;must_change:boolean}>>(
+        "govapps_staff_password_accounts?select=email,must_change&email=eq."+encodeURIComponent(email)+"&enabled=eq.true&limit=1"
+      ),
+      database<Array<{enabled:boolean}>>(
+        "govapps_control_settings?select=enabled&key=eq.staff_password_login_enabled&limit=1"
+      ),
+    ]);
+    if(!enabled.length||enabled[0].must_change||setting[0]?.enabled!==true)
+      throw new ControlAccessError(403,"Staff password access has been disabled or requires a password change.");
   }
   const operator = await activeOperator(email);
   if (!operator) throw new ControlAccessError(403, "Command Centre access has not been granted to this staff account.");
