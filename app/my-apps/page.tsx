@@ -2,7 +2,7 @@ import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import { supabaseConfig, usesSupabase } from "@/lib/ams/supabase";
 import LauncherDashboard, { type LauncherItem } from "./LauncherDashboard";
-import { getPersalOfficial } from "@/lib/persal/server";
+import { authorisedStaffApps, isMicrosoftStaff } from "@/lib/govapps/staff-app-access";
 
 const fallbackApps: LauncherItem[] = [
   { slug: "workhub", title: "MyWCSA WorkHub", description: "Your digital workplace for teams, tasks, leave and employee services.", href: "/workhub", category: "People", icon: "users", status: "available", featured: true, sort_order: 1 },
@@ -48,14 +48,19 @@ async function getLauncherApps(): Promise<LauncherItem[]> {
 export default async function MyAppsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login/staff?returnTo=%2Fmy-apps");
-  const provider = (session.user as typeof session.user & { authProvider?: string }).authProvider;
-  if (provider && provider !== "microsoft-entra-id") redirect("/");
+  const user = session.user as typeof session.user & { authProvider?: string };
+  if (!isMicrosoftStaff(user)) redirect("/");
   const name = session.user.name || session.user.email?.split("@")[0] || "WCSA Employee";
-  const mayAccessPersal = Boolean(await getPersalOfficial());
+  // Never send unauthorised app metadata to the browser: all visibility checks run server-side.
+  const allowed = await authorisedStaffApps(user);
+  const catalogue = await getLauncherApps();
+  const apps = catalogue
+    .filter(app => allowed.has(app.slug as import("@/lib/govapps/staff-app-access").StaffAppSlug))
+    .map(app => app.slug === "persal" ? { ...app, status: "available" as const } : app);
   return <LauncherDashboard
     name={name}
     email={session.user.email || ""}
-    apps={(await getLauncherApps()).filter(app => app.slug !== "persal" || mayAccessPersal)}
+    apps={apps}
     signOutControl={<form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}><button type="submit">Sign out</button></form>}
   />;
 }

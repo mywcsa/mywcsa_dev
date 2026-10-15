@@ -86,26 +86,22 @@ export async function getEmsActor(): Promise<EmsActor | null> {
   const id = str(user.id);
   if (!email || !id) return null;
   if (user.authProvider === "microsoft-entra-id") {
-    // All authenticated Entra staff may see a non-sensitive EMS landing workspace.
-    // The role registry controls actual data access and write privileges separately.
-    let role = "intake";
+    // A Microsoft staff session alone NEVER grants EMS access.
+    // Require a current, active WCDA appointment; fail closed on lookup errors.
     try {
       const rows = await emsDatabase<Array<{role:string;active:boolean}>>(
-        "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&limit=1"
+        "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&active=eq.true&limit=1"
       );
-      if (rows.length) role = rows[0].active ? rows[0].role : "viewer";
-    } catch (error) {
-      if (!(error instanceof EmsError) || error.status !== 503) throw error;
+      if (!rows.length || !rows[0].active) return null;
+      return {id,email,name:str(user.name)||email,mode:"staff",role:rows[0].role};
+    } catch {
+      return null;
     }
-    return {id,email,name:str(user.name)||email,mode:"staff",role};
   }
   if (user.authProvider === "business-partner" || user.authProvider === "external-user") {
     return {id,email,name:str(user.name)||email,mode:"organiser"};
   }
-  // Existing pre-EMS sessions carry no provider marker. Permit only an empty,
-  // read-only shell for organisational email accounts until they reauthenticate.
-  if (!user.authProvider && email.endsWith("@wcsports.co.za"))
-    return {id,email,name:str(user.name)||email,mode:"staff",role:"viewer"};
+  // Sessions without an explicit recognised provider receive no EMS staff privileges.
   return null;
 }
 

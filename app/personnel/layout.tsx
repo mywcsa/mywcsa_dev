@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getPersalOfficial } from "@/lib/persal/server";
+import { requirePersalOfficial } from "@/lib/persal/server";
 import PersonnelShell from "./preview-shell";
 import "../persal/persal.css";
 import "./preview.css";
@@ -9,6 +9,7 @@ export const metadata: Metadata = {
  robots:{index:false,follow:false},referrer:"no-referrer"
 };
 export default async function PersonnelLayout({children}:{children:React.ReactNode}){
- const official=await getPersalOfficial();
+ // The legacy Personnel route must not expose PERSAL preview navigation to unapproved users.
+ const official=await requirePersalOfficial();
  return <PersonnelShell official={official}>{children}</PersonnelShell>;
 }
