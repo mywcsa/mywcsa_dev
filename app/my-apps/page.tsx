@@ -49,7 +49,9 @@ export default async function MyAppsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login/staff?returnTo=%2Fmy-apps");
   const user = session.user as typeof session.user & { authProvider?: string };
-  if (!isMicrosoftStaff(user)) redirect("/");
+  // Send non-staff/stale sessions to a recoverable Microsoft login screen,
+  // rather than bouncing between Home, staff login and the launcher.
+  if (!isMicrosoftStaff(user)) redirect("/login/staff?returnTo=%2Fmy-apps");
   const name = session.user.name || session.user.email?.split("@")[0] || "WCSA Employee";
   // Never send unauthorised app metadata to the browser: all visibility checks run server-side.
   const allowed = await authorisedStaffApps(user);

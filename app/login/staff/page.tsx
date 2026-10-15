@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import styles from "./staff-login.module.css";
+import { isMicrosoftStaff } from "@/lib/govapps/staff-app-access";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -38,7 +39,16 @@ export default async function StaffLoginPage({
   const { returnTo } = await searchParams;
   const destination = safeDestination(returnTo);
   const session = await auth();
-  if (session?.user) redirect(destination);
+  const currentUser = session?.user as ({email?:string|null;authProvider?:string}|undefined);
+  // Only an actual WCSA Microsoft staff session may skip the sign-in screen.
+  // A Business Partner or legacy/unidentified JWT must never bounce back into
+  // the staff launcher before the user has a chance to switch accounts.
+  if (isMicrosoftStaff(currentUser)) redirect(destination);
+
+  async function clearExistingSession() {
+    "use server";
+    await signOut({ redirectTo: "/login/staff?returnTo=" + encodeURIComponent(destination) });
+  }
 
   async function continueWithMicrosoft() {
     "use server";
@@ -91,6 +101,18 @@ export default async function StaffLoginPage({
 
           <p className={styles.ssoTitle}>Microsoft organisational sign-in</p>
           <p className={styles.ssoDetail}>Continue to your organisation&apos;s secure Microsoft sign-in page.</p>
+
+          {session?.user && (
+            <div role="status" style={{ margin: "0 0 17px", padding: "14px 15px", background: "rgba(217,235,255,.75)", border: "1px solid rgba(48,107,188,.24)", borderRadius: 12, color: "#143f84", fontSize: 12, lineHeight: 1.65 }}>
+              <strong>A different or older session is already signed in.</strong>
+              <p style={{ margin: "5px 0 11px" }}>To use the staff workspace, sign in with your WCSA Microsoft account. Your current session will not be treated as staff permission.</p>
+              <form action={clearExistingSession}>
+                <button type="submit" style={{ padding: "9px 13px", background: "#001484", color: "white", border: 0, borderRadius: 9, cursor: "pointer", fontWeight: 650 }}>
+                  Sign out of the old account
+                </button>
+              </form>
+            </div>
+          )}
 
           <form className={styles.msForm} action={continueWithMicrosoft}>
             <button type="submit" className={styles.msButton}>
