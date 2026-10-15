@@ -4,8 +4,8 @@ import PersonnelShell from "./preview-shell";
 import "../persal/persal.css";
 import "./preview.css";
 export const metadata: Metadata = {
- title:"MyWCSA PERSAL | Personnel Development",
- description:"MyWCSA Personnel Administration development workspace",
+ title:"MyWCSA PERSAL | Personnel Administration",
+ description:"MyWCSA Personnel Administration and payroll services",
  robots:{index:false,follow:false},referrer:"no-referrer"
 };
 export default async function PersonnelLayout({children}:{children:React.ReactNode}){
