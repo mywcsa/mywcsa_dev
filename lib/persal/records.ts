@@ -47,15 +47,29 @@ async function invoke<T>(name:string,args:Record<string,unknown>):Promise<T>{
  }
  return result as T;
 }
+async function reviewerCases(official:Official):Promise<string[]>{
+ const assigned=await requestRows<{case_id:string|null}>("persal_work_items",{select:"case_id",assigned_access_id:"eq."+official.id,type:"eq.approval",case_id:"not.is.null",limit:"100"});
+ return assigned.map(x=>x.case_id).filter((id):id is string=>Boolean(id));
+}
 export async function listCases(official:Official,module:string,tab?:string):Promise<CaseRow[]>{
  if(!canUseModule(official,module))throw new CaseError(403,"Insufficient permissions");
- const workspaces=official.workspaces.filter(w=>w===caseWorkspace(official,module)||w!==undefined&&canUseModule(official,module));
- const valid=workspaces.filter(w=>module==="utilities"||((module==="salary-administration")?w==="finance":module==="back-office"?["executive","personnel","ict_bit","innovation","communications"].includes(w):module==="personnel-administration"?["personnel","executive"].includes(w):module==="human-resource-planning"?["personnel","management","executive"].includes(w):module==="management-information"?["executive","management","personnel","finance"].includes(w):["executive","management","personnel"].includes(w)));
- if(!valid.length)return[];
- const params:Record<string,string>={select:"id,reference,module,tab,workspace,title,fields,status,created_by,decided_by,decision_note,created_at,updated_at,submitted_at,decided_at",module:"eq."+module,workspace:"in.("+valid.join(",")+")",order:"created_at.desc",limit:"75"};
+ const eligible=official.workspaces.filter(w=>(module==="utilities")||
+ (module==="salary-administration"?w==="finance":module==="back-office"?["executive","personnel","ict_bit","innovation","communications"].includes(w):
+ module==="personnel-administration"?["personnel","executive"].includes(w):
+ module==="human-resource-planning"?["personnel","management","executive"].includes(w):
+ module==="management-information"?["executive","management","personnel","finance"].includes(w):["executive","management","personnel"].includes(w)));
+ if(!eligible.length)return [];
+ const assigned=await reviewerCases(official);
+ const params:Record<string,string>={
+ select:"id,reference,module,tab,workspace,title,fields,status,created_by,decided_by,decision_note,created_at,updated_at,submitted_at,decided_at",
+ module:"eq."+module,workspace:"in.("+eligible.join(",")+")",order:"created_at.desc",limit:"75"
+ };
  if(tab)params.tab="eq."+tab;
- return await requestRows<CaseRow>("persal_cases",params);
+ if(assigned.length)params.or="(created_by.eq."+official.id+",id.in.("+assigned.join(",")+"))";
+ else params.created_by="eq."+official.id;
+ return requestRows<CaseRow>("persal_cases",params);
 }
+
 export async function createCase(official:Official,body:{module:string;tab:string;title:string;fields:unknown;workspace?:string}){
  if(!isModuleTab(body.module,body.tab)||!canUseModule(official,body.module))throw new CaseError(403,"Module access denied");
  const w=caseWorkspace(official,body.module);
@@ -69,6 +83,8 @@ export async function changeCase(official:Official,id:string,body:{action:string
  if(!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(id))throw new CaseError(400,"Invalid record ID");
  const records=await requestRows<CaseRow>("persal_cases",{select:"*",id:"eq."+id,limit:"1"});
  const rec=records[0];
+ const assigned=await reviewerCases(official);
+ if(rec&&rec.created_by!==official.id&&!assigned.includes(rec.id))throw new CaseError(404,"Record unavailable");
  if(!rec||!isModuleTab(rec.module,rec.tab)||!canUseModule(official,rec.module)||
  !official.workspaces.includes(rec.workspace as Official["primary"]))throw new CaseError(404,"Record unavailable");
  if(body.action==="save"){
