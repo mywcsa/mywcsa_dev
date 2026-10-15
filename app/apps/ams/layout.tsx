@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { requireStaffApp } from "@/lib/govapps/staff-app-access";
 import type { CSSProperties, ReactNode } from "react";
 
 const WCG_BLUE = "#001489";
@@ -69,6 +70,9 @@ export default async function AMSLayout({
   if (!session) {
     redirect("/login/staff");
   }
+  // The original AMS layout allowed every signed-in account into the staff UI.
+  // Require an explicit Registry staff appointment before rendering anything.
+  await requireStaffApp("ams");
 
   /*
    * The actual Microsoft / Entra account name is used first.
@@ -78,7 +82,7 @@ export default async function AMSLayout({
    */
   const staffName =
     session.user?.name?.trim() ||
-    "Christiaan De Villiers";
+    "WCSA employee";
 
   const staffEmail =
     session.user?.email?.trim() ||
@@ -90,7 +94,7 @@ export default async function AMSLayout({
    * Later this should come from the AMS permissions / staff
    * profile database rather than being hard-coded.
    */
-  const staffRole = "ICT HOD";
+  const staffRole = "Authorised AMS staff";
 
   return (
     <div style={styles.shell}>
