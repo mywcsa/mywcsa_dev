@@ -149,6 +149,7 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
       <div className={s.headerRight}>
         <div className={s.authStatus}><span className={s.greenDot}/><strong>Authorised operator</strong><small>{data.operator.display_name||roleNames[role]}</small></div>
         {["director","einnovation"].includes(role)&&<Link href="/control/administration" className={s.headerButton}><Glyph name="shield" size={17}/> System administration</Link>}
+        <Link href="/control/accounts" className={s.headerButton}><Glyph name="users" size={17}/> ＋ Add Accounts</Link>
         <Link href="/control/operations" className={s.headerButton}><Glyph name="grid" size={17}/> Operations & Control</Link>
         <button className={s.headerButton} onClick={reload} disabled={refreshing}><Glyph name="activity" size={17}/>{refreshing?"Refreshing…":"Refresh"}</button>
         <Link href="/my-apps" className={s.headerButton}><Glyph name="external" size={17}/> GovApps</Link>
@@ -178,6 +179,7 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
           <p>{tab==="overview"?"Route requests, coordinate technical teams, manage onboarding and maintain controlled allocations from one secure workspace.":"Authorised operational records, staff coordination and accountable service delivery."}</p>
           <div className={s.heroButtons}>{canWrite&&<button onClick={()=>openRequest()}><Glyph name="ticket" size={17}/> New service request</button>}
             {canAlloc&&<button onClick={()=>setModal({action:"create_allocation"})}><Glyph name="briefcase" size={17}/> Record allocation</button>}
+            <Link href="/control/accounts" style={{display:"inline-flex",alignItems:"center",gap:8,border:"1px solid #ffffff66",borderRadius:11,padding:"10px 14px",background:"white",color:"#001484",fontSize:12,fontWeight:800}}>＋ Add Accounts · Staff / External / Partner →</Link>
             <Link href="/control/operations" style={{display:"inline-flex",alignItems:"center",gap:8,border:"1px solid #ffffff77",borderRadius:11,padding:"10px 15px",color:"white",background:"#ffffff25",fontSize:11,fontWeight:700}}>Open all operations, bookings, equipment & monitoring →</Link>
             {["director","einnovation"].includes(role)&&<Link href="/control/administration" style={{display:"inline-flex",alignItems:"center",gap:8,border:"1px solid #ffffff66",borderRadius:11,padding:"10px 14px",background:"#ffffff29",color:"#fff",fontSize:11,fontWeight:650}}>Manage accounts & apps →</Link>}</div>
         </div><div className={s.heroOrbits} aria-hidden="true"><span><Glyph name="shield" size={37}/></span></div></section>
