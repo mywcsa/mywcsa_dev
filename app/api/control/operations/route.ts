@@ -92,6 +92,7 @@ export async function POST(request:NextRequest){
    requireRole(support(operator.role));const record=id(p.id),status=value(p,"status");
    if(!record||!["open","served","referred","cancelled"].includes(status))wrong("Invalid visitor status.");
    result=await opsPatch("govapps_control_visits",{id:"eq."+record},{status});
+   if(!Array.isArray(result)||!result.length)wrong("Visitor record no longer exists.");
    await opsAudit(actor,"walkin_updated",{visit_id:record,status});
   }else if(action==="ticket_note"||action==="solve_ticket"){
    const ticket=id(p.ticket_id),content=value(p,"content");
@@ -122,6 +123,7 @@ export async function POST(request:NextRequest){
    const previous=await opsRead<RecordObject>("govapps_control_bookings",{select:"id,status",id:"eq."+record,limit:"1"});
    if(!previous.length||!["booked","arrived"].includes(String(previous[0].status)))wrong("Appointment is no longer active.");
    result=await opsPatch("govapps_control_bookings",{id:"eq."+record,status:"in.(booked,arrived)"},{status,updated_by:actor});
+   if(!Array.isArray(result)||!result.length)wrong("Booking was already changed.");
    await opsAudit(actor,"appointment_status",{booking_id:record,status});
   }else if(action==="equipment_add"){
    requireRole(["director","einnovation","ict"].includes(operator.role));
@@ -141,6 +143,7 @@ export async function POST(request:NextRequest){
     (custodian&&!validEmail(custodian))||(status==="allocated"&&!custodian))wrong("An allocated device must have a valid custodian.");
    result=await opsPatch("govapps_control_equipment",{id:"eq."+record},
     {status,condition,custodian_email:custodian||null,updated_by:actor,updated_at:new Date().toISOString()});
+   if(!Array.isArray(result)||!result.length)wrong("Equipment record no longer exists.");
    await opsAudit(actor,"equipment_status_changed",{equipment_id:record,status,condition});
   }else if(action==="partner_app"){
    requireRole(manager(operator.role));const account=value(p,"account_id"),decision=value(p,"decision");
@@ -170,6 +173,7 @@ export async function POST(request:NextRequest){
    requireRole(support(operator.role));const record=id(p.id),status=value(p,"status");
    if(!record||!["open","investigating","resolved"].includes(status))wrong("Invalid incident status.");
    result=await opsPatch("govapps_control_incidents",{id:"eq."+record},{status,updated_by:actor});
+   if(!Array.isArray(result)||!result.length)wrong("Incident record no longer exists.");
    await opsAudit(actor,"incident_status_changed",{incident_id:record,status});
   }else{
    wrong("Unknown command.");
