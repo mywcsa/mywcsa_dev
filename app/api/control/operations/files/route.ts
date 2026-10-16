@@ -16,7 +16,7 @@ function validMagic(buffer:Buffer,type:string){
 }
 async function permitted(){
  const op=await requireControlOperator();
- if(!support(op.role))throw new ControlAccessError(403,"Document handling is restricted to ServiceDesk and authorised managers.");
+ // Any active C&C operator can access the Command Centre document module.
  return op;
 }
 export async function POST(request:NextRequest){

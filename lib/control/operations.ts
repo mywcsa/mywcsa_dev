@@ -3,9 +3,9 @@ import { supabaseConfig } from "@/lib/ams/supabase";
 export type OperatorRole="director"|"einnovation"|"servicedesk"|"bit"|"ict"|"viewer";
 export type Operator={email:string;role:OperatorRole;display_name?:string};
 export type RecordObject=Record<string,unknown>;
-export const manager=(role:string)=>["director","einnovation"].includes(role);
-export const support=(role:string)=>["director","einnovation","servicedesk"].includes(role);
-export const writer=(role:string)=>role!=="viewer";
+export const manager=(_role:string)=>true; // Called only after requireControlOperator()
+export const support=(_role:string)=>true; // All active C&C operators can work operations
+export const writer=(_role:string)=>true;
 export async function opsDb<T=unknown>(path:string,init:RequestInit={}):Promise<T>{
  const c=supabaseConfig();
  const res=await fetch(c.origin+"/rest/v1/"+path,{...init,
@@ -34,7 +34,7 @@ export async function opsPatch<T=unknown>(table:string,filters:Record<string,str
  return opsDb<T>(query(table,{...filters,select:"*"}),{method:"PATCH",headers:{Prefer:"return=representation"},body:JSON.stringify(data)});
 }
 export async function opsRpc<T>(name:string,args:RecordObject):Promise<T>{
- if(!["govapps_create_account","govapps_control_book_appointment","govapps_control_resolve_ticket",
+ if(!["govapps_create_account","govapps_control_create_request","govapps_control_book_appointment","govapps_control_resolve_ticket",
  "govapps_control_partner_app_decision","govapps_staff_create_password_account",
  "govapps_control_set_app_grant","govapps_external_request_app"].includes(name))
   throw new Error("Unsupported operation.");
@@ -51,7 +51,7 @@ export async function opsIncident(action:string):Promise<void>{
  });}catch{/* avoid failures during diagnostic logging */}
 }
 export async function opsSnapshot(role:string){
- const all=manager(role)||role==="servicedesk";
+ const all=true; // Presence in the live Command Centre register is the operations entitlement.
  const p=Promise.resolve([] as RecordObject[]);
  const [tickets,notes,visits,bookings,equipment,incidents,documents,accounts,partnerGrants,operators]=await Promise.all([
   opsRead<RecordObject>("govapps_control_requests",{select:"id,kind,title,team,priority,status,assignee,requested_by,created_at,updated_at,description,target_email,external_reference",order:"created_at.desc",limit:"150"}),
@@ -67,11 +67,11 @@ export async function opsSnapshot(role:string){
  ]);
  // Prevent cross-team data exposure for departmental operators.
  const teamOnly=["bit","ict"].includes(role);
- const scopedTickets=role==="viewer"?[]:teamOnly?tickets.filter(t=>t.team===role):tickets;
+ const scopedTickets=tickets;
  const ticketIds=new Set(scopedTickets.map(t=>t.id));
  return {tickets:scopedTickets,notes:notes.filter(n=>ticketIds.has(n.request_id)),
-  visits,bookings,equipment:role==="viewer"?[]:teamOnly?equipment.filter(e=>role==="ict"||e.equipment_type==="other"):equipment,
-  incidents:role==="viewer"?[]:incidents,documents,accounts,partnerGrants,operators,serverCheckedAt:new Date().toISOString(),
+  visits,bookings,equipment,
+  incidents,documents,accounts,partnerGrants,operators,serverCheckedAt:new Date().toISOString(),
   monitoringLabel:"Database operational records. No Vercel live log integration."};
 }
 export function safeCsv(data:RecordObject[],cols:string[]):string {
