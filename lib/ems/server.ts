@@ -109,8 +109,19 @@ export async function getEmsActor(): Promise<EmsActor | null> {
     } catch {return null;}
   }
   if (user.authProvider === "business-partner") {
-    // Business Partner access continues under the existing organiser workflow.
-    return {id,email,name:str(user.name)||email,mode:"organiser"};
+    // App allocation is mandatory; neither possession of a partner account nor a
+    // registered WCSA ID automatically permits direct WCDA Event operations.
+    try {
+      const partners=await emsDatabase<Array<{id:string;email:string}>>(
+        "govapps_accounts?select=id,email&id=eq."+encodeURIComponent(id)+"&account_type=eq.business_partner&status=eq.active&limit=1"
+      );
+      if(!partners.length||partners[0].email.toLowerCase()!==email)return null;
+      const grants=await emsDatabase<Array<{account_id:string}>>(
+        "govapps_control_partner_app_grants?select=account_id&account_id=eq."+encodeURIComponent(id)+"&app_slug=eq.wcda-events&status=eq.approved&limit=1"
+      );
+      if(!grants.length)return null;
+      return {id,email,name:str(user.name)||email,mode:"organiser"};
+    }catch{return null;}
   }
   // Sessions without an explicit recognised provider receive no EMS staff privileges.
   return null;
