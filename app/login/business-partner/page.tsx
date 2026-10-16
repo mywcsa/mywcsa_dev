@@ -22,7 +22,7 @@ type Query = { returnTo?: string; mode?: string; error?: string; created?: strin
 
 // Only allow destinations within this GovApps installation.
 function safeDestination(value?: string) {
-  return value && /^\/(?!\/|\\)[^\\\r\n]*$/.test(value) ? value : "/membership";
+  return value && /^\/(?!\/|\\)[^\\\r\n]*$/.test(value) ? value : "/partner";
 }
 
 export default async function Page({
