@@ -158,7 +158,7 @@ export default function StaffConsole({actor,section,onChange}:{actor:EmsActor;se
     </>:<p className={styles.empty}>Select or create an event to manage its assigned work, review notes and status.</p>}
    </section>
   </div>}
-  {event&&<GovernanceDesk key={event.id+"-"+section} actor={actor} eventId={event.id} reference={event.reference} section={section} onChange={onChange}/>}
+  {event&&<GovernanceDesk key={event.id+"-"+section} actor={actor} eventId={event.id} event={event} reference={event.reference} section={section} onChange={onChange}/>}
   {category&&<p className={styles.disclaimer}>This section currently tracks real {categories.find(c=>c[0]===category)?.[1].toLowerCase()} work items and related event cases. Specialist {section.toLowerCase()} features, formal financial records and external authorisations are not represented as live until implemented and verified.</p>}
  </div>;
 }
