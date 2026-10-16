@@ -1,6 +1,7 @@
 import "server-only";
 import { auth } from "@/auth";
 import { supabaseConfig } from "@/lib/ams/supabase";
+import { externalAppApproved, externalSession } from "@/lib/external/access";
 
 export const EMS_ROOT = "/WCDA-Events" as const;
 export const EMS_PRODUCTION_URL = "https://GovApps.wcsports.co.za/WCDA-Events" as const;
@@ -98,7 +99,17 @@ export async function getEmsActor(): Promise<EmsActor | null> {
       return null;
     }
   }
-  if (user.authProvider === "business-partner" || user.authProvider === "external-user") {
+  if (user.authProvider === "external-user") {
+    // External users require an approved WCDA Events app allocation,
+    // independently from their basic GovApps account.
+    try {
+      const account=await externalSession();
+      if(!account||account.id!==id||!(await externalAppApproved(id,"wcda-events")))return null;
+      return {id,email,name:str(user.name)||email,mode:"organiser"};
+    } catch {return null;}
+  }
+  if (user.authProvider === "business-partner") {
+    // Business Partner access continues under the existing organiser workflow.
     return {id,email,name:str(user.name)||email,mode:"organiser"};
   }
   // Sessions without an explicit recognised provider receive no EMS staff privileges.

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import { auth } from "@/auth";
+import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import { supabaseConfig } from "@/lib/ams/supabase";
 import ExternalUserRegistrationForm from "./external-user-registration-form";
@@ -23,7 +23,7 @@ type Query = { returnTo?: string; error?: string };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function safeDestination(value?: string) {
-  return value && /^\/(?!\/|\\)[^\\\r\n]*$/.test(value) ? value : "/membership";
+  return value && /^\/external(?:\/[^\\\r\n?#]*)?(?:\?[^\\\r\n#]*)?$/.test(value) ? value : "/external";
 }
 
 function validBirthDate(iso: string) {
@@ -44,7 +44,12 @@ export default async function ExternalUserRegisterPage({
   const signInUrl = "/login/external-user?returnTo=" + encodeURIComponent(destination);
 
   const session = await auth();
-  if (session?.user) redirect(destination);
+  const provider = (session?.user as ({authProvider?:string}|undefined))?.authProvider;
+  if (session?.user && provider === "external-user") redirect(destination);
+  async function switchToExternal() {
+    "use server";
+    await signOut({redirectTo:"/login/external-user?returnTo=%2Fexternal"});
+  }
 
   async function registerExternalUser(form: FormData): Promise<void> {
     "use server";
@@ -94,8 +99,10 @@ export default async function ExternalUserRegisterPage({
     }
 
     if (!response.ok) {
-      // Do not expose raw database errors or user-existence information.
-      redirect(registerPath + "&error=registration");
+      // Duplicate email/username is not a server outage. Never expose which field
+      // or whether an exact email exists to an unauthenticated visitor.
+      const problem = await response.json().catch(() => null) as {code?:string}|null;
+      redirect(registerPath + (problem?.code==="23505"?"&error=existing":"&error=registration"));
     }
 
     const accountId: unknown = await response.json().catch(() => null);
@@ -161,15 +168,27 @@ export default async function ExternalUserRegisterPage({
               <h2 id="external-register-title">Create your account</h2>
               <p className={shared.intro}>Enter your personal details below to register.</p>
 
+              {session?.user && provider !== "external-user" && (
+                <div className={shared.notice} role="status">
+                  A different account type is signed in.
+                  <form action={switchToExternal} style={{marginTop:9}}>
+                    <button type="submit" style={{background:"#001484",color:"white",border:0,borderRadius:9,padding:"9px 12px",cursor:"pointer"}}>Switch to External User account</button>
+                  </form>
+                </div>
+              )}
               {query.error && (
                 <div className={shared.notice} role="alert">
                   {query.error === "unavailable"
                     ? "Registration is temporarily unavailable. Try again later or contact the ServiceDesk."
                     : query.error === "invalid"
                       ? "Check the required fields, date of birth and password confirmation."
-                      : "We couldn't create the account. Please check your details or contact the ServiceDesk."}
+                      : query.error === "existing"
+                        ? "These details may already be registered. Sign in to your existing account instead."
+                        : "We couldn't create the account. Please check your details or contact the ServiceDesk."}
                 </div>
               )}
+
+              {query.error && <p style={{fontSize:12,margin:"10px 0"}}><a href={signInUrl} style={{color:"#001484",fontWeight:750}}>Already registered? Sign in to your account →</a></p>}
 
               <ExternalUserRegistrationForm
                 action={registerExternalUser}
