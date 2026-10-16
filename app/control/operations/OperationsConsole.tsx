@@ -43,7 +43,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
  const [targetType,setTargetType]=useState("staff");
  const [targetApp,setTargetApp]=useState("csd");
  const [targetDecision,setTargetDecision]=useState("approved");
- const [preview,setPreview]=useState("");
+ 
  const role=payload?.operator.role||initialRole;
  const mgr=["director","einnovation"].includes(role);
  const support=["director","einnovation","servicedesk"].includes(role);
@@ -122,7 +122,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
      </div>
      <div className={s.dual}>
       <Box title="Operations queue" subtitle="Recent tickets — view details and resolve them">
-       {tickets.slice(0,8).length? <div className={s.tableWrap}><table><thead><tr><th>Ref</th><th>Issue</th><th>Team</th><th>Status</th></tr></thead><tbody>{tickets.slice(0,8).map(r=><tr key={String(r.id)}><td>CC-{r.id}</td><td>{str(r,"title")}</td><td>{str(r,"team")}</td><td><Badge text={str(r,"status")}/></td></tr>)}</tbody></table></div>:<Blank text="No recorded tickets yet."/>}
+       {tickets.slice(0,8).length? <div className={s.tableWrap}><table><thead><tr><th>Ref</th><th>Issue</th><th>Team</th><th>Status</th></tr></thead><tbody>{tickets.slice(0,8).map(r=><tr key={String(r.id)}><td>CC-{String(r.id)}</td><td>{str(r,"title")}</td><td>{str(r,"team")}</td><td><Badge text={str(r,"status")}/></td></tr>)}</tbody></table></div>:<Blank text="No recorded tickets yet."/>}
        <button className={s.textButton} onClick={()=>setTab("tickets")}>Manage tickets →</button>
       </Box>
       <Box title="Quick ServiceDesk actions" subtitle="Start the workflow you need">
@@ -208,7 +208,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
     {data&&tab==="tickets"&&<>
      <Box title="Ticket monitoring & resolution" subtitle="Case status and ticket worklog, with audited solution records">
       {tickets.length?<div className={s.tableWrap}><table><thead><tr><th>Case</th><th>Issue</th><th>Team</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody>{tickets.map(r=><tr key={String(r.id)}>
-       <td>CC-{r.id}</td><td><strong>{str(r,"title")}</strong><small>{str(r,"kind")} · {str(r,"priority")}</small></td><td>{str(r,"team")}</td><td><Badge text={str(r,"status")}/></td><td>{stamp(r.updated_at)}</td>
+       <td>CC-{String(r.id)}</td><td><strong>{str(r,"title")}</strong><small>{str(r,"kind")} · {str(r,"priority")}</small></td><td>{str(r,"team")}</td><td><Badge text={str(r,"status")}/></td><td>{stamp(r.updated_at)}</td>
        <td><button className={s.textButton} onClick={()=>setSelectedTicket(Number(r.id))}>Open ticket →</button></td>
       </tr>)}</tbody></table></div>:<Blank text="No service tickets have been recorded."/>}
      </Box>
