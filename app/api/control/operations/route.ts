@@ -61,6 +61,8 @@ export async function POST(request:NextRequest){
    let accountId:string|null=null;
    if(type==="staff"){
     if(!validStaff(email))wrong("A valid @wcsports.co.za address is required for the staff fallback login.");
+    const operatorAccounts=await opsRead<RecordObject>("govapps_control_operators",{select:"email",email:"eq."+email,limit:"1"});
+    if(operatorAccounts.length)wrong("This is an existing Command Centre operator. Use a separately verified account-recovery procedure; a walk-in account must not impersonate another operator.");
     await opsRpc("govapps_staff_create_password_account",{p_actor:actor,p_email:email,
       p_display_name:name,p_temporary_password:temporaryPassword});
    }else{
@@ -119,6 +121,8 @@ export async function POST(request:NextRequest){
     temporaryPassword=randomBytes(24).toString("base64url");
     if(type==="staff"){
      if(!validStaff(email))wrong("A WCSA work email is required for staff login creation.");
+     const operatorAccounts=await opsRead<RecordObject>("govapps_control_operators",{select:"email",email:"eq."+email,limit:"1"});
+     if(operatorAccounts.length)wrong("Existing Command Centre operator accounts require separate identity verification and recovery.");
      await opsRpc("govapps_staff_create_password_account",{p_actor:actor,p_email:email,p_display_name:name,p_temporary_password:temporaryPassword});
     }else{
      if(username.length<4||username.length>64)wrong("Enter a username of 4–64 characters.");
