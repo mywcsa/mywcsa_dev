@@ -1,7 +1,8 @@
 "use client";
 
 import {useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
-import type {EmsActor} from "@/lib/ems/types";
+import type {EmsActor,EmsEvent} from "@/lib/ems/types";
+import {jsPDF} from "jspdf";
 import styles from "./governance-desk.module.css";
 
 type Work={id:string;module:string;title:string;description:string;status:string;created_by_email:string;created_at:string};
@@ -50,8 +51,8 @@ const formatDate=(value:string)=>new Date(value).toLocaleDateString("en-ZA",{day
 const initial:Dataset={work:[],drafts:[],reviews:[],activeSigner:false};
 function errorText(error:unknown){return error instanceof Error?error.message:"The request could not be completed.";}
 
-export default function GovernanceDesk({actor,eventId,reference,section,onChange}:{
- actor:EmsActor;eventId:string;reference:string;section:string;onChange?:()=>void
+export default function GovernanceDesk({actor,eventId,reference,section,event,onChange}:{
+ actor:EmsActor;eventId:string;reference:string;event:EmsEvent;section:string;onChange?:()=>void
 }){
  const module=moduleBySection[section];
  const documents=documentTabs.has(section);
@@ -117,6 +118,76 @@ export default function GovernanceDesk({actor,eventId,reference,section,onChange
   if(await save("decide_endorsement",{reviewId:id,decision,reason:decisionReasons[id]||""}))
    setDecisionReasons(state=>({...state,[id]:""}));
  }
+ function makeTemplate(){
+  const heading=kind==="certificate"?"DRAFT CERTIFICATE OF ENDORSEMENT & APPROVAL":
+   kind==="memorandum"?"INTERNAL EVENTS MEMORANDUM":
+   kind==="endorsement_letter"?"DRAFT LETTER OF ENDORSEMENT AND APPROVAL":
+   "DRAFT OFFICIAL CORRESPONDENCE";
+  setDraftTitle(heading+" — "+event.name);
+  setDraftBody([
+   "WESTERN CAPE DEVELOPMENT AUTHORITY",
+   "EVENTS & SAFETY DEPARTMENT",
+   heading,
+   "Event reference: "+reference,
+   "Event: "+event.name,
+   "Organiser: "+event.organiser_name,
+   "Location: "+event.venue_name,
+   "Event dates: "+event.start_date+" to "+event.end_date,
+   "",
+   "TO WHOM IT MAY CONCERN",
+   "",
+   "This document is prepared for internal assessment and verification of the event described above.",
+   "Any WCDA endorsement must be authorised through the recorded assessment and delegated signatory process. This draft does not indicate that the event has been approved.",
+   "Any eventual endorsement remains subject to applicable legislation, local municipal requirements, venue authorisation, health and safety conditions and permits or licences of the competent authorities.",
+   "",
+   "Assessment findings / conditions: [Insert verified findings and applicable conditions]",
+   "",
+   "Authorised signatory: [Not yet verified]",
+   "Issue date: [Not issued]",
+   "",
+   "DRAFT — NOT ISSUED. This is not an event permit or official certificate."
+  ].join("\n"));
+ }
+ function exportDraft(d:Draft){
+  const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  const pageWidth=210;
+  const contentWidth=172;
+  const paragraphs=d.body.split("\n");
+  let y=60;
+  let page=1;
+  const header=()=>{
+   pdf.setDrawColor(0,20,132);pdf.setLineWidth(1.2);pdf.line(19,18,191,18);
+   pdf.setTextColor(0,20,132);pdf.setFont("helvetica","bold");pdf.setFontSize(13);
+   pdf.text("WESTERN CAPE DEVELOPMENT AUTHORITY",19,27);
+   pdf.setFontSize(9);pdf.text("EVENTS & SAFETY DEPARTMENT",19,34);
+   pdf.setTextColor(45,66,101);pdf.setFontSize(9);
+   pdf.text("INTERNAL DOCUMENT DRAFT  |  "+reference,19,43);
+   pdf.setDrawColor(195,210,232);pdf.line(19,48,191,48);
+  };
+  const footer=()=>{
+   pdf.setTextColor(165,60,60);pdf.setFont("helvetica","bold");pdf.setFontSize(18);
+   pdf.text("DRAFT - NOT ISSUED",pageWidth/2,277,{align:"center"});
+   pdf.setFontSize(8);pdf.setTextColor(88,99,120);
+   pdf.text("Not an issued certificate, signed endorsement or statutory permit.  Page "+page,19,287);
+  };
+  header();
+  pdf.setFont("helvetica","bold");pdf.setTextColor(17,39,90);pdf.setFontSize(13);
+  for(const line of pdf.splitTextToSize(d.title,contentWidth) as string[]){
+   pdf.text(line,19,y);y+=6.5;
+  }
+  y+=5;
+  pdf.setFont("helvetica","normal");pdf.setFontSize(10);pdf.setTextColor(38,54,77);
+  for(const paragraph of paragraphs){
+   const lines=pdf.splitTextToSize(paragraph||" ",contentWidth) as string[];
+   for(const line of lines){
+    if(y>254){footer();pdf.addPage();page++;header();y=60;}
+    pdf.text(line,19,y);y+=5.5;
+   }
+   y+=2;
+  }
+  footer();
+  pdf.save("WCDA-"+reference.replaceAll(" ","-").replaceAll("/","-")+"-DRAFT.pdf");
+ }
  function copyDraft(d:Draft){
   void navigator.clipboard.writeText("DRAFT — NOT ISSUED\n"+reference+"\n"+d.title+"\n\n"+d.body+"\n\nNOT A PERMIT, SIGNED ENDORSEMENT OR ISSUED CERTIFICATE.");
   setNotice("Draft text copied with its non-issued notice.");
@@ -155,10 +226,10 @@ export default function GovernanceDesk({actor,eventId,reference,section,onChange
      <div className={styles.records}>{data.drafts.map(d=><article key={d.id} className={styles.record}>
       <div><strong>{d.title}</strong><small>{nice(d.kind)} · {d.created_by_email} · {formatDate(d.created_at)}</small><span className={styles.status}>DRAFT · NOT ISSUED</span></div>
       <button className={styles.smallButton} type="button" onClick={()=>setOpenDraft(openDraft===d.id?null:d.id)}>{openDraft===d.id?"Hide":"Preview"}</button>
-      {openDraft===d.id&&<div className={styles.draftPreview}><b>DRAFT — NOT ISSUED</b><p><strong>{d.title}</strong></p><pre>{d.body}</pre><p>This document has not been signed or issued and is not evidence of legal approval.</p><button type="button" className={styles.smallButton} onClick={()=>copyDraft(d)}>Copy draft text</button></div>}
+      {openDraft===d.id&&<div className={styles.draftPreview}><b>DRAFT — NOT ISSUED</b><p><strong>{d.title}</strong></p><pre>{d.body}</pre><p>This document has not been signed or issued and is not evidence of legal approval.</p><div className={styles.actions}><button type="button" className={styles.smallButton} onClick={()=>copyDraft(d)}>Copy draft text</button><button type="button" className={styles.smallButton} onClick={()=>exportDraft(d)}>Download watermarked PDF</button></div></div>}
      </article>)}{!data.drafts.length&&<p className={styles.empty}>No document drafts have been prepared for this event.</p>}</div>
      {canDraft&&<form className={styles.form} onSubmit={createDraft}>
-       <h4>Prepare internal draft</h4>
+       <h4>Prepare internal draft</h4><button className={styles.smallButton} type="button" onClick={makeTemplate}>Use WCDA event template</button>
        <label>Document type<select value={kind} onChange={e=>setKind(e.target.value)}>{formats.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
        <label>Document title<input required minLength={3} maxLength={180} value={draftTitle} onChange={e=>setDraftTitle(e.target.value)}/></label>
        <label>Draft body<textarea required minLength={10} maxLength={10000} rows={6} value={draftBody} onChange={e=>setDraftBody(e.target.value)} placeholder="Enter verified facts and approved wording. Do not include a signature."/></label>
