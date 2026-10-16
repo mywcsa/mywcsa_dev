@@ -284,7 +284,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
      </Box>}
     </>}
     {data&&tab==="equipment"&&<>
-     {["director","einnovation","ict"].includes(role)&&<Box title="Register ICT equipment" subtitle="Permanent asset tag, category, serial, location and condition">
+     {canWrite&&<Box title="Register ICT equipment" subtitle="Permanent asset tag, category, serial, location and condition">
       <form className={s.form} onSubmit={e=>form(e,"equipment_add")}>
        <div className={s.grid2}>
         <Label name="Asset tag"><input name="asset_tag" style={field} required minLength={3} maxLength={100} placeholder="WCSA-ICT-0001"/></Label>
@@ -299,10 +299,10 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
      <Box title="Equipment and custody register" subtitle="Actual equipment records, not a sample inventory">
       {data.equipment.length?<div className={s.tableWrap}><table><thead><tr><th>Asset tag</th><th>Device</th><th>Type</th><th>Condition</th><th>Custodian</th><th>Status</th><th>Action</th></tr></thead><tbody>{data.equipment.map(r=><tr key={String(r.id)}>
        <td><strong>{str(r,"asset_tag")}</strong><small>{str(r,"serial_number")}</small></td><td>{str(r,"item_name")}</td><td>{str(r,"equipment_type")}</td><td>{str(r,"condition")}</td><td>{str(r,"custodian_email")||"Unallocated"}</td><td><Badge text={str(r,"status")}/></td>
-       <td>{["director","einnovation","ict"].includes(role)?<button className={s.textButton} onClick={()=>setSelectedEquipment(Number(r.id))}>Update →</button>:null}</td>
+       <td>{canWrite?<button className={s.textButton} onClick={()=>setSelectedEquipment(Number(r.id))}>Update →</button>:null}</td>
       </tr>)}</tbody></table></div>:<Blank text="No equipment registered yet."/>}
      </Box>
-     {selectedEquipment!==null&&["director","einnovation","ict"].includes(role)&&<Box title={"Update asset #"+selectedEquipment} subtitle="Assign, return, repair or retire equipment">
+     {selectedEquipment!==null&&canWrite&&<Box title={"Update asset #"+selectedEquipment} subtitle="Assign, return, repair or retire equipment">
       <form className={s.form} onSubmit={e=>form(e,"equipment_update",{id:selectedEquipment})}>
        <div className={s.grid2}>
         <Label name="Asset status"><select name="status" style={field} defaultValue="available">{["available","allocated","repair","retired"].map(v=><option value={v} key={v}>{v}</option>)}</select></Label>
