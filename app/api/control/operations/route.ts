@@ -72,7 +72,7 @@ export async function POST(request:NextRequest){
      if(type==="external_user"){
       const birth=new Date(dob+"T00:00:00Z");
       if(!/^\d{4}-\d{2}-\d{2}$/.test(dob)||Number.isNaN(birth.valueOf())||
-       birth.toISOString().slice(0,10)!==dob||dob>"2026-10-16"||dob<"1900-01-01")wrong("Enter a valid date of birth.");
+       birth.toISOString().slice(0,10)!==dob||dob>new Date().toISOString().slice(0,10)||dob<"1900-01-01")wrong("Enter a valid date of birth.");
       const minor=(Date.now()-birth.valueOf())<18*365.2425*86400000;
       if(minor&&p.guardian_confirmed!==true)wrong("Confirm the minor's required parent/guardian authorisation before proceeding.");
      }
@@ -115,7 +115,7 @@ export async function POST(request:NextRequest){
     Number.isNaN(Date.parse(start))||![15,30,45,60,90,120].includes(minutes)||
     value(p,"notes").length>900)wrong("Review appointment details and selected duration.");
    result=await opsRpc("govapps_control_book_appointment",{p_actor:actor,p_name:name,p_email:email,
-    p_service:service,p_assignee:assignee,p_team:team,p_start:start,p_minutes:minutes,p_notes:value(p,"notes")});
+    p_service:service,p_assignee:assignee,p_team:team,p_start:new Date(start).toISOString(),p_minutes:minutes,p_notes:value(p,"notes")});
   }else if(action==="booking_status"){
    requireRole(support(operator.role));const record=id(p.id),status=value(p,"status");
    if(!record||!["arrived","completed","cancelled","no_show"].includes(status))wrong("Invalid appointment state.");
