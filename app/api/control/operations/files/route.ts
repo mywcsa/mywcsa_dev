@@ -48,7 +48,7 @@ export async function POST(request:NextRequest){
     content_type:file.type,size_bytes:file.size,uploaded_by:actor.email
    });
    await opsAudit(actor.email,"document_uploaded",{document_id:result[0].id,category,size_bytes:file.size});
-   return NextResponse.json({ok:true,id:result[0].id},{headers});
+   return NextResponse.json({ok:true,id:result[0].id},{headers:h});
   }catch(error){
    await fetch(c.origin+"/storage/v1/object/"+bucket+"/"+path,{method:"DELETE",
     headers:{apikey:c.secret,Authorization:"Bearer "+c.secret},cache:"no-store"}).catch(()=>{});
