@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AuthError } from "next-auth";
 import { Poppins } from "next/font/google";
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import ExternalUserLoginForm from "./external-user-login-form";
 import shared from "../business-partner/business-partner-login.module.css";
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 type Query = { returnTo?: string; mode?: string; error?: string; created?: string };
 function safeDestination(value?: string) {
-  return value && /^\/(?!\/|\\)[^\\\r\n]*$/.test(value) ? value : "/membership";
+  return value && /^\/external(?:\/[^\\\r\n?#]*)?(?:\?[^\\\r\n#]*)?$/.test(value) ? value : "/external";
 }
 
 // The existing Supabase RPC accepts ISO dates. Also accept the agreed
@@ -45,7 +45,12 @@ export default async function ExternalUserLoginPage({
   const destination = safeDestination(q.returnTo);
   const registrationUrl = "/login/external-user/register?returnTo=" + encodeURIComponent(destination);
   const session = await auth();
-  if (session?.user) redirect(destination);
+  const provider = (session?.user as ({authProvider?:string}|undefined))?.authProvider;
+  if (session?.user && provider === "external-user") redirect(destination);
+  async function switchToExternal() {
+    "use server";
+    await signOut({redirectTo:"/login/external-user?returnTo=%2Fexternal"});
+  }
   if (q.mode === "register") redirect(registrationUrl);
 
   async function signInExternalUser(form: FormData): Promise<void> {
@@ -123,6 +128,14 @@ export default async function ExternalUserLoginPage({
               <h2 id="external-login-title">Sign in</h2>
               <p className={shared.intro}>Enter your personal GovApps account details.</p>
 
+              {session?.user && provider !== "external-user" && (
+                <div className={shared.notice} role="status">
+                  A different account type is signed in.
+                  <form action={switchToExternal} style={{marginTop:9}}>
+                    <button type="submit" style={{background:"#001484",color:"white",border:0,borderRadius:9,padding:"9px 12px",cursor:"pointer"}}>Switch to External User account</button>
+                  </form>
+                </div>
+              )}
               {q.created === "1" && (
                 <div className={shared.success} role="status">
                   Your account was created. You can now sign in.
@@ -130,7 +143,7 @@ export default async function ExternalUserLoginPage({
               )}
               {q.error && (
                 <div className={shared.notice} role="alert">
-                  Sign-in failed. Check your details and try again.
+                  Sign-in failed. Check your existing account details. If you need a password reset, contact ServiceDesk.
                 </div>
               )}
 
