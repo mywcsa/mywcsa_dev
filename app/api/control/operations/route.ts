@@ -85,9 +85,15 @@ export async function POST(request:NextRequest){
    result={accountCreated:true,accountId,accountType:type,
     login:type==="staff"?"/login/staff":type==="business_partner"?"/login/business-partner":"/login/external-user",
     note:type==="staff"?"GovApps fallback credential created; this is NOT a Microsoft Entra account.":"GovApps account created under existing registration rules."};
-   await opsAudit(actor,"assisted_account_created",{
-    account_type:type,account_id:accountId,email,provisioning:type==="staff"?"fallback_only":"govapps_registry"
-   });
+   try {
+    await opsAudit(actor,"assisted_account_created",{
+      account_type:type,account_id:accountId,email,provisioning:type==="staff"?"fallback_only":"govapps_registry"
+    });
+   } catch {
+    // Creation already committed. Never suppress the one-time password or imply
+    // registration failed: surface an explicit audit follow-up to the operator.
+    result={...(result as Record<string,unknown>),note:"Account created. Audit recording needs follow-up with e-Innovation."};
+   }
   }else if(action==="email_ticket"){
    const subject=value(p,"subject"),description=value(p,"description"),
     sender=value(p,"sender_email").toLowerCase(),kind=value(p,"kind")||"support",
