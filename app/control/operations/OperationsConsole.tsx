@@ -45,9 +45,9 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
  const [targetDecision,setTargetDecision]=useState("approved");
  
  const role=payload?.operator.role||initialRole;
- const mgr=["director","einnovation"].includes(role);
- const support=["director","einnovation","servicedesk"].includes(role);
- const canWrite=role!=="viewer";
+ const mgr=true; // Authenticated active Command Centre operators are authorised.
+ const support=true;
+ const canWrite=true;
  const data=payload?.data;
  const load=useCallback(async(silent=false)=>{
   if(!silent)setRefreshing(true);
@@ -95,7 +95,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
    <aside className={s.sidebar}><span className={s.sideEyebrow}>OPERATIONS & CONTROL</span>
     {tabs.map(t=><button key={t.id} onClick={()=>{setTab(t.id);setError("");setMessage("");}}
      className={tab===t.id?s.selected:""}><span className={s.navIcon}>{t.icon}</span>{t.label}<span className={s.arr}>›</span></button>)}
-    <div className={s.sidebarLinks}><Link href="/control/administration">System administration ↗</Link>
+    <div className={s.sidebarLinks}><Link href="/control/accounts">+ ADD ACCOUNTS ↗</Link><Link href="/control/administration">System administration ↗</Link>
      <Link href="/control/administration/external">External approvals ↗</Link>
      <a href="mailto:ServiceDesk@wcsports.co.za">Contact ServiceDesk ↗</a></div>
    </aside>
@@ -104,6 +104,10 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
     <section className={s.hero}><div><span>OPERATIONAL COMMAND · #001484</span>
      <h1>{tabs.find(t=>t.id===tab)?.label}</h1>
      <p>Manage real records, permitted access and accountable service delivery. Updates are recorded in Supabase and checked every 30 seconds.</p></div><div className={s.heroSymbol} aria-hidden="true">✦</div></section>
+    <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+      <Link href="/control/accounts" style={{display:"inline-flex",alignItems:"center",gap:9,padding:"12px 18px",borderRadius:11,background:"#001484",color:"white",fontWeight:800,fontSize:12,boxShadow:"0 8px 25px #00148425"}}>＋ Add Accounts · All user types →</Link>
+      <button type="button" onClick={()=>setTab("tickets")} className={s.lightButton}>✉ Email help → Create Ticket</button>
+    </div>
     <div className={s.statusLine}><span className={s.onlineDot}/> Database monitoring <strong>{lastPoll?"Last checked "+lastPoll:"Connecting…"}</strong>
      <span>30-second polling · not Vercel log streaming</span></div>
     {error&&<div className={s.error} role="alert">{error}<button onClick={()=>setError("")}>Dismiss ×</button></div>}
@@ -128,6 +132,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
       </Box>
       <Box title="Quick ServiceDesk actions" subtitle="Start the workflow you need">
        <div className={s.quick}>
+        <Link href="/control/accounts">✦ ADD ACCOUNTS · Staff, External & Business Partner <span>→</span></Link>
         <button onClick={()=>setTab("users")}>♙ Register a walk-in visitor <span>→</span></button>
         <button onClick={()=>setTab("apps")}>▦ Allocate / request an app <span>→</span></button>
         <button onClick={()=>setTab("appointments")}>▤ Book an appointment <span>→</span></button>
@@ -207,6 +212,25 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
      </Box>}
     </>}
     {data&&tab==="tickets"&&<>
+     <Box title="Create a ticket from an email" subtitle="Copy an incoming help email into a new ticket. Automatically routes to ServiceDesk, ICT or BiT.">
+      <form className={s.form} onSubmit={e=>form(e,"email_ticket")}>
+       <div className={s.grid2}>
+        <Label name="Sender's email"><input type="email" name="sender_email" style={field} required placeholder="requester@example.com"/></Label>
+        <Label name="Email subject"><input name="subject" style={field} minLength={5} maxLength={140} required placeholder="Cannot access GovApps"/></Label>
+        <Label name="Help request category"><select name="kind" style={field}>
+         <option value="support">General Helpdesk · ServiceDesk</option><option value="device">Equipment · ICT</option>
+         <option value="software">Software · BiT</option><option value="other">Other request · ServiceDesk</option>
+        </select></Label>
+        <Label name="Priority"><select name="priority" style={field}>
+         <option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="critical">Critical</option>
+        </select></Label>
+        <Label name="Original message ID / reference (optional)"><input name="message_ref" maxLength={180} style={field} placeholder="Subject ref or mail message ID"/></Label>
+       </div>
+       <Label name="Message or request details"><textarea name="description" required minLength={10} maxLength={3700} rows={4} style={field} placeholder="Paste the relevant help request details here. Exclude passwords or identity document numbers."/></Label>
+       <button className={s.primary} type="submit" disabled={busy}>{busy?"Creating…":"Create ServiceDesk ticket →"}</button>
+      </form>
+      <p className={s.note}>Email intake is manual. No Outlook mailbox is currently linked for automatic ticket import. Ticket creation returns a saved record in the existing Command Centre queue.</p>
+     </Box>
      <Box title="Ticket monitoring & resolution" subtitle="Case status and ticket worklog, with audited solution records">
       {tickets.length?<div className={s.tableWrap}><table><thead><tr><th>Case</th><th>Issue</th><th>Team</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody>{tickets.map(r=><tr key={String(r.id)}>
        <td>CC-{String(r.id)}</td><td><strong>{str(r,"title")}</strong><small>{str(r,"kind")} · {str(r,"priority")}</small></td><td>{str(r,"team")}</td><td><Badge text={str(r,"status")}/></td><td>{stamp(r.updated_at)}</td>
