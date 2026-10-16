@@ -77,6 +77,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
   const body:Record<string,unknown>={action,...extras};
   for(const [k,v] of formData.entries())if(typeof v==="string")body[k]=v;
   if(action==="walkin"){body.create_account=createAccount;body.account_type=accountType;body.guardian_confirmed=formData.get("guardian_confirmed")==="on";}
+  if(action==="book_appointment"&&typeof body.starts_at==="string"){const date=new Date(body.starts_at);if(!Number.isNaN(date.valueOf()))body.starts_at=date.toISOString();}
   void send(body,action==="walkin"?(createAccount?"Account created and walk-in recorded. Safeguard the one-time password.":"Walk-in registered for service."):"Command saved and audit updated.");
  }
  const active=data?.tickets.filter(openTicket).length||0;
