@@ -34,7 +34,7 @@ const statuses: Record<string,string> = {
 };
 const roleNames: Record<string,string> = {
   director:"Executive Director",einnovation:"e-Innovation",servicedesk:"ServiceDesk",
-  bit:"BiT",ict:"ICT",viewer:"Read-only",
+  bit:"BiT",ict:"ICT",viewer:"Operations Operator",
 };
 const date = (v?: string | null) => v ? new Date(v).toLocaleDateString("en-ZA",{year:"numeric",month:"short",day:"numeric"}) : "—";
 const ref = (id: number) => "CC-" + String(id).padStart(6,"0");
@@ -228,6 +228,9 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
         </Panel>}
 
         {tab==="accounts"&&<>
+          <Panel title="Create actual GovApps accounts" subtitle="Direct registration for existing WCSA staff, External Users and Business Partners" action={<Link href="/control/accounts" className={s.primarySmall}>＋ Open Add Accounts →</Link>}>
+            <p className={s.disclosure}>This creates real eligible GovApps logins with a generated temporary password. It is separate from Microsoft Entra provisioning. All active Command Centre operators may access Add Accounts.</p>
+          </Panel>
           <div className={s.twoCols}>
             <Panel title="Staff account requests" subtitle="Microsoft Entra ID · personnel verification · account allocation"
               action={canWrite?<button className={s.primarySmall} onClick={()=>openRequest("staff_account")}>+ Request staff account</button>:null}>
