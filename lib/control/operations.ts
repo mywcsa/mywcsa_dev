@@ -67,11 +67,11 @@ export async function opsSnapshot(role:string){
  ]);
  // Prevent cross-team data exposure for departmental operators.
  const teamOnly=["bit","ict"].includes(role);
- const scopedTickets=teamOnly?tickets.filter(t=>t.team===role):tickets;
+ const scopedTickets=role==="viewer"?[]:teamOnly?tickets.filter(t=>t.team===role):tickets;
  const ticketIds=new Set(scopedTickets.map(t=>t.id));
  return {tickets:scopedTickets,notes:notes.filter(n=>ticketIds.has(n.request_id)),
-  visits,bookings,equipment:teamOnly?equipment.filter(e=>role==="ict"||e.equipment_type==="other"):equipment,
-  incidents,documents,accounts,partnerGrants,operators,serverCheckedAt:new Date().toISOString(),
+  visits,bookings,equipment:role==="viewer"?[]:teamOnly?equipment.filter(e=>role==="ict"||e.equipment_type==="other"):equipment,
+  incidents:role==="viewer"?[]:incidents,documents,accounts,partnerGrants,operators,serverCheckedAt:new Date().toISOString(),
   monitoringLabel:"Database operational records. No Vercel live log integration."};
 }
 export function safeCsv(data:RecordObject[],cols:string[]):string {
