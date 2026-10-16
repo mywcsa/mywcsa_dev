@@ -182,7 +182,9 @@ export default async function ExternalUserRegisterPage({
                     ? "Registration is temporarily unavailable. Try again later or contact the ServiceDesk."
                     : query.error === "invalid"
                       ? "Check the required fields, date of birth and password confirmation."
-                      : "We couldn't create the account. Please check your details or contact the ServiceDesk."}
+                      : query.error === "existing"
+                        ? "These details may already be registered. Sign in to your existing account instead."
+                        : "We couldn't create the account. Please check your details or contact the ServiceDesk."}
                 </div>
               )}
 
