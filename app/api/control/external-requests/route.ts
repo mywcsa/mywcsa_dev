@@ -10,7 +10,7 @@ function err(error:unknown){
 }
 async function reviewer(){
  const op=await requireControlOperator();
- if(!["director","einnovation","servicedesk"].includes(op.role))throw new ControlAccessError(403,"Not authorised to view external requests.");
+ // All active Command Centre operators can review external app requests.
  return op;
 }
 export async function GET(){
@@ -26,7 +26,7 @@ export async function POST(request:NextRequest){
  try{
   if(request.headers.get("origin")!==request.nextUrl.origin)throw new ControlAccessError(403,"Official GovApps origin required.");
   const actor=await reviewer();
-  if(!["director","einnovation"].includes(actor.role))throw new ControlAccessError(403,"Executive/e-Innovation approval required.");
+  // Role membership in Command Centre is sufficient for app review.
   const raw=await request.text();
   if(raw.length>2000)throw new ControlAccessError(413,"Request too large.");
   const obj:unknown=JSON.parse(raw);
