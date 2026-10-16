@@ -11,6 +11,6 @@ export default async function ExternalRequestsPage(){
  if(!session?.user)redirect("/login/staff?returnTo=%2Fcontrol%2Fadministration%2Fexternal");
  let operator;
  try{operator=await requireControlOperator();}catch{notFound();}
- if(!["director","einnovation","servicedesk"].includes(operator.role))notFound();
- return <div className={poppins.className}><ExternalAppReview canDecide={operator.role!=="servicedesk"}/></div>;
+
+ return <div className={poppins.className}><ExternalAppReview canDecide={true}/></div>;
 }
