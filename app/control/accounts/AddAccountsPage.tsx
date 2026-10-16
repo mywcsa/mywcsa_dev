@@ -18,7 +18,8 @@ export default function AddAccountsPage(){
  const selected=choices.find(c=>c.id===type)!;
  async function create(e:FormEvent<HTMLFormElement>){
   e.preventDefault();setBusy(true);setError("");setCreated(null);setShowPassword(false);
-  const fd=new FormData(e.currentTarget);
+  const submittedForm=e.currentTarget;
+  const fd=new FormData(submittedForm);
   const request:Record<string,unknown>={action:"create_account",account_type:type,
     name:String(fd.get("name")||"").trim(),email:String(fd.get("email")||"").trim(),
     username:String(fd.get("username")||"").trim(),dob:String(fd.get("dob")||""),
@@ -29,7 +30,7 @@ export default function AddAccountsPage(){
    if(!response.ok)throw new Error(data.error||"The new account could not be created.");
    if(!data.temporaryPassword||data.result?.accountCreated!==true)throw new Error("The server did not confirm account provisioning.");
    setCreated({email:String(request.email),password:data.temporaryPassword,login:data.result.login,type,note:data.result.note});
-   (e.currentTarget as HTMLFormElement).reset();
+   submittedForm.reset();
   }catch(cause){setError(cause instanceof Error?cause.message:"Account creation failed. Nothing has been confirmed.");}
   finally{setBusy(false);}
  }
@@ -70,7 +71,7 @@ export default function AddAccountsPage(){
     <div className={s.panelHead}><div><h2>2. Account details</h2><p>{selected.description}</p></div></div>
     <form key={type} className={s.form} onSubmit={create}>
      <div className={s.grid2}>
-      <label className={s.label}>Name and surname / Display name<input style={inputStyle} name="name" minLength={2} maxLength={150} required placeholder="Full name"/></label>
+      <label className={s.label}>Name and surname / Display name<input style={inputStyle} name="name" minLength={2} maxLength={120} required placeholder="Full name"/></label>
       <label className={s.label}>Email address<input style={inputStyle} name="email" type="email" required placeholder={type==="staff"?"name@wcsports.co.za":"name@example.com"}/></label>
       {type!=="staff"&&<label className={s.label}>GovApps username<input style={inputStyle} name="username" required minLength={4} maxLength={64} pattern="[a-zA-Z0-9_.\-]+" placeholder="Username"/></label>}
       {type==="external_user"&&<label className={s.label}>Date of birth<input style={inputStyle} name="dob" type="date" min="1900-01-01" max={new Date().toISOString().slice(0,10)} required/></label>}
