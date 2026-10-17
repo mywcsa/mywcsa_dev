@@ -16,7 +16,8 @@ export function mailSettings(){
  const secret=(process.env.GOVAPPS_MAIL_CLIENT_SECRET||"").trim();
  const sender=(process.env.GOVAPPS_MAIL_FROM||"").trim().toLowerCase();
  const ready=uuid(tenant)&&uuid(client)&&secret.length>=8&&validDomain(sender);
- return {ready,sender:validDomain(sender)?sender:null,provider:"Microsoft Graph / Exchange Online" as const,
+ const enabled=process.env.GOVAPPS_MAIL_ENABLED==="true";
+ return {ready,enabled,sender:validDomain(sender)?sender:null,provider:"Microsoft Graph / Exchange Online" as const,
   needs: !ready?["GOVAPPS_MAIL_TENANT_ID","GOVAPPS_MAIL_CLIENT_ID","GOVAPPS_MAIL_CLIENT_SECRET","GOVAPPS_MAIL_FROM"]:[]};
 }
 async function auditEmail(input:MailInput,result:MailResult){
@@ -45,6 +46,13 @@ export async function sendGovAppsEmail(input:MailInput):Promise<MailResult>{
  if(invalid)return {status:"failed",errorCategory:"invalid_message"};
  let result:MailResult={status:"unconfigured",errorCategory:"provider_not_configured"};
  if(!settings.ready){await auditEmail(input,result);return result;}
+ // A separately controlled flag prevents production workflows from sending
+ // while Exchange domain, RBAC scope and mailbox delivery are still being verified.
+ // Only the dedicated authenticated operator test path can run before activation.
+ if(!settings.enabled && input.category!=="test"){
+   result={status:"unconfigured",errorCategory:"email_activation_disabled"};
+   await auditEmail(input,result);return result;
+ }
  try{
   const tokenResponse=await fetch("https://login.microsoftonline.com/"+encodeURIComponent(process.env.GOVAPPS_MAIL_TENANT_ID!)+"/oauth2/v2.0/token",{
    method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},
