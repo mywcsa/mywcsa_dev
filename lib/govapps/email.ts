@@ -7,7 +7,7 @@ export type MailResult={status:"accepted"|"unconfigured"|"failed";errorCategory?
 export type MailInput={to:string;subject:string;body:string;category:EmailCategory;referenceType?:string;referenceId?:string;actor?:string;replyTo?:string};
 
 const validEmail=(s:string)=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)&&s.length<=254;
-const validDomain=(s:string)=>/^[^@\s]+@wcsports\.co\.za$/i.test(s);
+const validDomain=(s:string)=>/^[^@\s]+@(?:govapps\.)?wcsports\.co\.za$/i.test(s);
 const uuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export function mailSettings(){
