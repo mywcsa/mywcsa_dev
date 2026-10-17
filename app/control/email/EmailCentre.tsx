@@ -2,7 +2,7 @@
 import {useCallback,useEffect,useState} from "react";
 import Link from "next/link";
 type Event={id:number;category:string;status:string;error_category:string|null;reference_type:string|null;reference_id:string|null;actor_email:string|null;created_at:string};
-type Status={sender:{ready:boolean;sender:string|null;provider:string;needs:string[]};events:Event[];operator:string};
+type Status={sender:{ready:boolean;enabled:boolean;sender:string|null;provider:string;needs:string[]};events:Event[];operator:string};
 const box={background:"rgba(255,255,255,.78)",border:"1px solid rgba(255,255,255,.9)",borderRadius:20,
  boxShadow:"0 15px 35px #00148413",padding:"clamp(19px,3vw,30px)",backdropFilter:"blur(18px)"} as const;
 export default function EmailCentre(){
@@ -51,6 +51,9 @@ export default function EmailCentre(){
       {loading?"Checking configuration…":data?.sender.ready?"● Server credentials configured":"○ Connection setup required"}
      </span>
      {data?.sender.sender&&<span style={{padding:"9px 13px"}}>Sending mailbox: {data.sender.sender}</span>}
+     <span style={{background:data?.sender.enabled?"#186b56":"#805d2b",padding:"9px 13px",borderRadius:20,fontSize:11}}>
+      {data?.sender.enabled?"Production notifications enabled":"Production notifications disabled until tested"}
+     </span>
     </div>
    </section>
    {error&&<p role="alert" style={{...box,color:"#a43b53",background:"#fff0f2",fontSize:12}}>{error}</p>}
@@ -72,7 +75,7 @@ export default function EmailCentre(){
      <button type="button" onClick={()=>void load()} style={{padding:"12px 16px",border:"1px solid #bbd1eb",background:"#e9f3ff",borderRadius:11,color:"#265ba0",cursor:"pointer"}}>↻ Refresh status</button>
      <span style={{fontSize:11,color:"#657da0"}}>{data?.operator||"Signed-in Command Centre operator"}</span>
     </div>
-    <p style={{fontSize:11,color:"#7d92ae",lineHeight:1.8}}>A successful test means Microsoft Graph accepted the message, not that the recipient has received it. Confirm delivery in Outlook.</p>
+    <p style={{fontSize:11,color:"#7d92ae",lineHeight:1.8}}>A successful test means Microsoft Graph accepted the message, not that the recipient has received it. Confirm delivery in Outlook. After mailbox-scoped permission checks and confirmed delivery, a deployment administrator may set GOVAPPS_MAIL_ENABLED=true in Vercel Production and redeploy.</p>
    </section>
    <section style={box}>
     <h2 style={{fontSize:18,color:"#001484",margin:"0 0 10px"}}>Recent email activity</h2>
