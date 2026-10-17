@@ -1,46 +1,43 @@
-# MyWCSA GovApps — Outbound Microsoft 365 Email
+# MyWCSA GovApps — Microsoft 365 Outbound Email
 
-## Current integration
+**Current official sender: communications@wcsports.co.za.**
+This existing WCSA Microsoft 365 account and Exchange mailbox were confirmed through the connected Outlook tools.
 
-Outbound email is implemented through **Microsoft Graph application-to-application client credentials**. Application-level \`Mail.Send\` requires tenant admin approval and the app should be scoped to a dedicated sender mailbox using Exchange Online **RBAC for Applications**. A user connection to the ChatGPT Outlook plugin is *not* an authorisation for the deployed Next.js server.
+The previous proposed \`notifications@govapps.wcsports.co.za\` sender is **cancelled**. No additional GovApps email subdomain, new mailbox, or DNS change is needed for the existing Communications account.
 
-The following Vercel **Production** environment variables are required, kept server-only and not prefixed with \`NEXT_PUBLIC_\`:
+## Current production variables
 
-- \`GOVAPPS_MAIL_TENANT_ID\` — Entra tenant GUID
-- \`GOVAPPS_MAIL_CLIENT_ID\` — dedicated mail application (client) GUID
-- \`GOVAPPS_MAIL_CLIENT_SECRET\` — dedicated confidential app credential
-- \`GOVAPPS_MAIL_FROM\` — verified Exchange Online mailbox, e.g. a registered \`@wcsports.co.za\` address or provisioned \`@govapps.wcsports.co.za\` mailbox
+- \`GOVAPPS_MAIL_FROM=communications@wcsports.co.za\` — configured/encrypted in Vercel Production
+- \`GOVAPPS_MAIL_ENABLED=false\` — configured/encrypted, outbound transactional notifications OFF until the test succeeds
+- \`GOVAPPS_MAIL_TENANT_ID\` — not yet configured
+- \`GOVAPPS_MAIL_CLIENT_ID\` — not yet configured
+- \`GOVAPPS_MAIL_CLIENT_SECRET\` — not yet configured
 
-**Do not fabricate the sending mailbox or merely create a DNS alias.** For an address such as \`notifications@govapps.wcsports.co.za\` to send via Exchange, the subdomain must be an accepted domain and the sending address must be attached to a permitted Exchange mailbox. Confirm that mailbox can actually send, configure the Graph application's access only to the authorised mailbox, and verify SPF/DKIM/DMARC for the sending domain. Never share the secret in a chat or client UI.
+The sender in \`lib/govapps/email.ts\` is deliberately restricted to **communications@wcsports.co.za**. A signed-in Outlook connection is not a server-side Graph \`Mail.Send\` grant.
 
-## App paths
+## Authenticated Email Centre
 
-- \`/control/email\` — restricted Email Centre; configuration diagnostics, send an authenticated test to the current operator's own mailbox, last 100 attempts.
-- \`/api/control/email\` — server-only operator endpoint. POST \`{"action":"send_test"}\`; operator can only test their own work address; max 3 attempts per 10-minute window.
-- \`lib/govapps/email.ts\` — common server-only send helper; no public arbitrary-recipient mail endpoint.
+- https://govapps.wcsports.co.za/control/email — configuration status, privacy-safe send log, controlled test.
+- \`/api/control/email\` — only a Command Centre operator may request a test, limited to that operator's own WCSA email and three attempts in ten minutes.
+- \`lib/govapps/email.ts\` — sends plain-text transactional mail with Microsoft Graph application-only token, when configured.
 
-## Notifications currently wired
+## Events currently wired
 
-1. Service ticket created from a received email manually entered by an operator → acknowledgment with ticket reference to the sender, reply to ServiceDesk.
-2. Service ticket resolved → update to known requester's email where present.
-3. Appointment booked → appointment summary including the South African local appointment time.
-4. External User app request approved or declined → status update with a link to their personal GovApps launcher.
+- Acknowledgements for ServiceDesk email intake tickets.
+- Ticket resolved notices.
+- Appointment booking notices.
+- External User app approval and decline notices.
 
-Outgoing messages are **transactional**, plain-text and do **not** include private ID numbers, passwords, Graph tokens or raw error payloads. Message status audit stores only a SHA-256 recipient fingerprint, category, reference, error category, server acceptance status and operator/date. Mailbox secrets and message bodies are never persisted in the mail audit.
+Delivery record statuses are \`accepted\` (Graph HTTP 202, not guaranteed delivery), \`failed\`, or \`unconfigured\`. Logs contain only hashed recipient identifiers and non-sensitive delivery metadata.
 
-## Status semantics
+## Provisioning and least privilege
 
-- \`accepted\`: Graph returned **202**: message accepted for processing, not delivery proof.
-- \`unconfigured\`: environment missing/incomplete; no send attempted.
-- \`failed\`: Graph rejected or network unavailable; main business operation remains saved, no user should be told their email arrived.
-- The app does not automatically retry ambiguous failures (avoids duplicate transactional messages). It has no inbound mailbox ingestion or reset-link token flow in this change.
+An authorised Microsoft 365 admin must create a separate single-tenant Entra mail application, grant only mailbox-scoped \`Application Mail.Send\` through Exchange Online RBAC for Applications, then securely add the three missing Production environment values. Avoid additional Entra tenant-wide Graph Application \`Mail.Send\` consent when using the scoped RBAC assignment; privileges are additive.
 
-## Deployment checklist
+After a production redeploy, use **Send a test email to my account** and confirm the message really arrives from Communications. Only then set \`GOVAPPS_MAIL_ENABLED=true\` and redeploy.
 
-1. Provision the sending mailbox in Microsoft 365; verify the mailbox's licence and domain. Do not assume \`*@govapps.wcsports.co.za\` addresses exist.
-2. Create a **dedicated** Microsoft Entra application, approve Graph **Application Mail.Send**, and apply Exchange mailbox scoping. Avoid granting Mail.Read/Mail.ReadWrite or unscoped multi-mailbox send where not required.
-3. Save the four variables in Vercel Production → redeploy.
-4. Sign in as an authorised Command Centre operator, go to \`/control/email\` and click **Send a test email to my account**.
-5. Verify acceptance is recorded AND the mail arrives (or inspect Exchange message trace); only then describe production email delivery as operational.
+**Detailed authoritative runbook:** [GovApps Communications sender provisioning](./govapps-sender-communications-20261017.md)
 
-Microsoft references: https://learn.microsoft.com/en-us/graph/api/user-sendmail , https://learn.microsoft.com/en-us/graph/permissions-reference and https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac.
+Docs:
+https://learn.microsoft.com/en-us/graph/api/user-sendmail
+https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac
