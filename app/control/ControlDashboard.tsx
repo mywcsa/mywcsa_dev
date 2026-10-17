@@ -149,6 +149,7 @@ export default function ControlDashboard({ initial }: { initial:Data }) {
       <div className={s.headerRight}>
         <div className={s.authStatus}><span className={s.greenDot}/><strong>Authorised operator</strong><small>{data.operator.display_name||roleNames[role]}</small></div>
         {["director","einnovation"].includes(role)&&<Link href="/control/administration" className={s.headerButton}><Glyph name="shield" size={17}/> System administration</Link>}
+        <Link href="/control/email" className={s.headerButton}><Glyph name="mail" size={17}/> Email Centre</Link>
         <Link href="/control/accounts" className={s.headerButton}><Glyph name="users" size={17}/> ＋ Add Accounts</Link>
         <Link href="/control/operations" className={s.headerButton}><Glyph name="grid" size={17}/> Operations & Control</Link>
         <button className={s.headerButton} onClick={reload} disabled={refreshing}><Glyph name="activity" size={17}/>{refreshing?"Refreshing…":"Refresh"}</button>
