@@ -74,7 +74,11 @@ $sc = Get-ManagementScope -Identity $ScopeName
 Get-Recipient -RecipientPreviewFilter $sc.RecipientFilter |
     Format-Table Name,PrimarySmtpAddress,CustomAttribute15
 
-# Stop if the preview is not exactly the authorised sender.
+# Automatically abort if preview is not exactly the authorised sender.
+$recipients = @(Get-Recipient -RecipientPreviewFilter $sc.RecipientFilter)
+if ($recipients.Count -ne 1 -or $recipients[0].PrimarySmtpAddress.ToString().ToLower() -ne $Sender.ToLower()) {
+    throw "Mailbox-scope verification failed. No Graph send permission has been assigned."
+}
 New-ServicePrincipal -AppId $AppId -ObjectId $ServiceId -DisplayName "MyWCSA GovApps Mail Sender"
 New-ManagementRoleAssignment -App $ServiceId -Role "Application Mail.Send" -CustomResourceScope $ScopeName
 
