@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from "next/server";
 import {requireControlOperator,ControlAccessError} from "@/lib/control/centre";
 import {externalDb} from "@/lib/external/access";
+import {sendGovAppsEmail,serviceLinks} from "@/lib/govapps/email";
 export const dynamic="force-dynamic";
 export const runtime="nodejs";
 const h={"Cache-Control":"no-store, private"};
@@ -37,6 +38,23 @@ export async function POST(request:NextRequest){
    throw new ControlAccessError(400,"Invalid review reference or decision.");
   const result=await externalDb("rpc/govapps_external_decide_app",{method:"POST",
    body:JSON.stringify({p_actor:actor.email,p_request_id:id,p_decision:body.decision})});
+  const decision=result as {account_id?:string;app_slug?:string;status?:string};
+  if(decision.account_id){
+   try{
+    const people=await externalDb<Array<{email:string}>>("govapps_accounts?select=email&id=eq."+encodeURIComponent(decision.account_id)+"&account_type=eq.external_user&limit=1");
+    if(people[0]?.email){
+     await sendGovAppsEmail({to:people[0].email,category:"external_app_decision",actor:actor.email,
+      referenceType:"external_app_request",referenceId:String(id),replyTo:"ServiceDesk@wcsports.co.za",
+      subject:"MyWCSA GovApps · Application request update",
+      body:"The status of your application request has changed.\n\nApplication: "+
+       String(decision.app_slug||"GovApps")+
+       "\nDecision: "+String(decision.status||body.decision)+
+       "\n\nSign in to your personal launcher to review your allocation.\n"+serviceLinks.external+
+       "\n\nFor questions contact ServiceDesk@wcsports.co.za."
+     });
+    }
+   }catch{/* Successful approval must not be rolled back because an optional email failed. */}
+  }
   return NextResponse.json({ok:true,request:result},{headers:h});
  }catch(e){return err(e);}
 }

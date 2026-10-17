@@ -95,7 +95,7 @@ export default function OperationsConsole({initialRole}:{initialRole:string}){
    <aside className={s.sidebar}><span className={s.sideEyebrow}>OPERATIONS & CONTROL</span>
     {tabs.map(t=><button key={t.id} onClick={()=>{setTab(t.id);setError("");setMessage("");}}
      className={tab===t.id?s.selected:""}><span className={s.navIcon}>{t.icon}</span>{t.label}<span className={s.arr}>›</span></button>)}
-    <div className={s.sidebarLinks}><Link href="/control/accounts">+ ADD ACCOUNTS ↗</Link><Link href="/control/administration">System administration ↗</Link>
+    <div className={s.sidebarLinks}><Link href="/control/email">✉ EMAIL CENTRE ↗</Link><Link href="/control/accounts">+ ADD ACCOUNTS ↗</Link><Link href="/control/administration">System administration ↗</Link>
      <Link href="/control/administration/external">External approvals ↗</Link>
      <a href="mailto:ServiceDesk@wcsports.co.za">Contact ServiceDesk ↗</a></div>
    </aside>

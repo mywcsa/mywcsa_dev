@@ -1,5 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {randomBytes} from "node:crypto";
+import {sendGovAppsEmail,serviceLinks} from "@/lib/govapps/email";
 import {requireControlOperator,ControlAccessError} from "@/lib/control/centre";
 import {manager,support,writer,opsSnapshot,opsInsert,opsPatch,opsRead,opsRpc,opsAudit,opsIncident,safeCsv,query,type RecordObject} from "@/lib/control/operations";
 export const runtime="nodejs";export const dynamic="force-dynamic";
@@ -109,6 +110,16 @@ export async function POST(request:NextRequest){
     p_actor:actor,p_kind:kind,p_title:subject,p_description:content,p_target_email:sender,
     p_wcsa_id:null,p_priority:priority
    });
+   const ticket=result as {id?:number};
+   const reference=ticket.id?"CC-"+String(ticket.id).padStart(6,"0"):"your request";
+   await sendGovAppsEmail({to:sender,category:"ticket_received",actor,
+    referenceType:"ticket",referenceId:ticket.id?String(ticket.id):undefined,
+    replyTo:"ServiceDesk@wcsports.co.za",
+    subject:"MyWCSA GovApps · Help request received · "+reference,
+    body:"Your help request has been recorded by WCSA ServiceDesk.\n\nReference: "+reference+
+     "\nSubject: "+subject+"\n\nOur team will review your request. Please quote the reference in any follow-up.\n\n"+
+     "If you did not contact us, please report this to ServiceDesk@wcsports.co.za.\n\nWCSA ServiceDesk\n"+serviceLinks.home
+   });
   }else if(action==="walkin"){
    
    const type=value(p,"account_type"),name=value(p,"name"),email=value(p,"email").toLowerCase(),purpose=value(p,"purpose");
@@ -155,11 +166,20 @@ export async function POST(request:NextRequest){
   }else if(action==="ticket_note"||action==="solve_ticket"){
    const ticket=id(p.ticket_id),content=value(p,"content");
    if(!ticket||content.length<10||content.length>3000)wrong("Enter a ticket ID and meaningful work details (10–3000 characters).");
-   const rows=await opsRead<RecordObject>("govapps_control_requests",{select:"id,team,kind,status",id:"eq."+ticket,limit:"1"});
+   const rows=await opsRead<RecordObject>("govapps_control_requests",{select:"id,team,kind,status,title,target_email",id:"eq."+ticket,limit:"1"});
    const t=rows[0];if(!t)wrong("Ticket not found.");
    
    if(action==="solve_ticket"){
     result=await opsRpc("govapps_control_resolve_ticket",{p_actor:actor,p_request:ticket,p_solution:content});
+    const target=String(t.target_email||"");
+    if(validEmail(target))await sendGovAppsEmail({to:target,category:"ticket_resolved",actor,
+     referenceType:"ticket",referenceId:String(ticket),replyTo:"ServiceDesk@wcsports.co.za",
+     subject:"MyWCSA GovApps · Ticket CC-"+String(ticket).padStart(6,"0")+" resolved",
+     body:"WCSA ServiceDesk has recorded a resolution for your ticket.\n\n"+
+      "Reference: CC-"+String(ticket).padStart(6,"0")+"\nSubject: "+String(t.title||"Support request")+
+      "\n\nIf you still need assistance, reply to ServiceDesk@wcsports.co.za with your reference.\n\n"+
+      serviceLinks.home
+    });
    }else{
     result=await opsInsert("govapps_control_ticket_updates",{request_id:ticket,actor_email:actor,
      update_kind:value(p,"kind")==="worklog"?"worklog":"note",content});
@@ -175,6 +195,15 @@ export async function POST(request:NextRequest){
     value(p,"notes").length>900)wrong("Review appointment details and selected duration.");
    result=await opsRpc("govapps_control_book_appointment",{p_actor:actor,p_name:name,p_email:email,
     p_service:service,p_assignee:assignee,p_team:team,p_start:new Date(start).toISOString(),p_minutes:minutes,p_notes:value(p,"notes")});
+   const booked=result as {id?:number;starts_at?:string};
+   await sendGovAppsEmail({to:email,category:"appointment",actor,
+    referenceType:"appointment",referenceId:booked.id?String(booked.id):undefined,
+    replyTo:"ServiceDesk@wcsports.co.za",
+    subject:"MyWCSA GovApps · Appointment booked"+(booked.id?" #"+booked.id:""),
+    body:"Your appointment request has been booked with WCSA.\n\nService: "+service+
+     "\nScheduled time (South Africa): "+new Date(start).toLocaleString("en-ZA",{timeZone:"Africa/Johannesburg",dateStyle:"full",timeStyle:"short"})+
+     "\nDuration: "+minutes+" minutes\n\nFor enquiries contact ServiceDesk@wcsports.co.za.\n\n"+serviceLinks.home
+   });
   }else if(action==="booking_status"){
    const record=id(p.id),status=value(p,"status");
    if(!record||!["arrived","completed","cancelled","no_show"].includes(status))wrong("Invalid appointment state.");
