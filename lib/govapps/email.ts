@@ -8,6 +8,7 @@ export type MailInput={to:string;subject:string;body:string;category:EmailCatego
 
 const validEmail=(s:string)=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)&&s.length<=254;
 const validDomain=(s:string)=>/^[^@\s]+@(?:govapps\.)?wcsports\.co\.za$/i.test(s);
+const OFFICIAL_GOVAPPS_SENDER="communications@wcsports.co.za";
 const uuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export function mailSettings(){
@@ -15,9 +16,9 @@ export function mailSettings(){
  const client=(process.env.GOVAPPS_MAIL_CLIENT_ID||"").trim();
  const secret=(process.env.GOVAPPS_MAIL_CLIENT_SECRET||"").trim();
  const sender=(process.env.GOVAPPS_MAIL_FROM||"").trim().toLowerCase();
- const ready=uuid(tenant)&&uuid(client)&&secret.length>=8&&validDomain(sender);
+ const ready=uuid(tenant)&&uuid(client)&&secret.length>=8&&sender===OFFICIAL_GOVAPPS_SENDER;
  const enabled=process.env.GOVAPPS_MAIL_ENABLED==="true";
- return {ready,enabled,sender:validDomain(sender)?sender:null,provider:"Microsoft Graph / Exchange Online" as const,
+ return {ready,enabled,sender:sender===OFFICIAL_GOVAPPS_SENDER?sender:null,provider:"Microsoft Graph / Exchange Online" as const,
   needs: !ready?["GOVAPPS_MAIL_TENANT_ID","GOVAPPS_MAIL_CLIENT_ID","GOVAPPS_MAIL_CLIENT_SECRET","GOVAPPS_MAIL_FROM"]:[]};
 }
 async function auditEmail(input:MailInput,result:MailResult){
