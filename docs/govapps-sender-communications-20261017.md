@@ -26,34 +26,48 @@ https://learn.microsoft.com/en-us/graph/api/user-sendmail
 
 ### Exchange PowerShell example (to be run by authorised Exchange administrator)
 
-Use the actual Entra application/client ID and its **enterprise service principal object ID**. The tag is just an example: first confirm it doesn't collide with existing \`CustomAttribute15\` usage; do not overwrite production metadata without checking.
+Use the **Application (client) ID** from **App registrations → Overview** and the **Enterprise application Object ID** from **Enterprise applications → MyWCSA GovApps | Outbound Mail → Overview**. These are different objects: do **not** copy the App Registration's Object ID.
+
+Use an exact address recipient filter instead of overwriting \`CustomAttribute15\` on an existing live mailbox. Exchange's supported OPATH filter properties include \`EmailAddresses\`. Preview and assert exactly the Communications mailbox is matched **before** any role assignment.
 
 \`\`\`powershell
-Connect-ExchangeOnline -UserPrincipalName "<EXCHANGE_ADMIN_UPN>"
+# Run in an authorised Exchange Online administrator PowerShell session.
+Import-Module ExchangeOnlineManagement
+Connect-ExchangeOnline
+
 $Sender    = "communications@wcsports.co.za"
-$AppId     = "<DEDICATED_MAIL_APP_CLIENT_ID>"
-$ServiceId = "<ENTERPRISE_APP_SERVICE_PRINCIPAL_OBJECT_ID>"
-$Tag       = "WCSA-GOVAPPS-COMMUNICATIONS-2026"
-$Scope     = "MyWCSA GovApps Communications Mail Only"
+$AppId     = "<APPLICATION_CLIENT_ID_FROM_APP_REGISTRATIONS>"
+$ServiceId = "<OBJECT_ID_FROM_ENTERPRISE_APPLICATIONS>"
+$Scope     = "MyWCSA GovApps - Communications Only"
 
-Get-EXOMailbox -Identity $Sender -ErrorAction Stop
-# Check existing CustomAttribute15 before editing; stop if it is used by another workflow.
-Get-Recipient -Identity $Sender | Format-List PrimarySmtpAddress,CustomAttribute15
-
-Set-Mailbox -Identity $Sender -CustomAttribute15 $Tag
-New-ManagementScope -Name $Scope -RecipientRestrictionFilter "CustomAttribute15 -eq '$Tag'"
-$sc = Get-ManagementScope -Identity $Scope
-$recipients = @(Get-Recipient -RecipientPreviewFilter $sc.RecipientFilter)
-if ($recipients.Count -ne 1 -or $recipients[0].PrimarySmtpAddress.ToString().ToLower() -ne $Sender) {
-    throw "Sender scope is not exactly the intended mailbox. Stopping."
+# Fail immediately if the sender doesn't resolve to the expected mailbox.
+$mailbox = Get-EXOMailbox -Identity $Sender -ErrorAction Stop
+if ($mailbox.PrimarySmtpAddress.ToString().ToLowerInvariant() -ne $Sender) {
+    throw "Communications is not the mailbox primary SMTP address. Stop and verify its identity."
 }
+
+# This filter DOES NOT alter mailbox CustomAttribute fields.
+New-ManagementScope -Name $Scope -RecipientRestrictionFilter "EmailAddresses -eq '$Sender'"
+$scopeObject = Get-ManagementScope -Identity $Scope
+$matches = @(Get-Recipient -RecipientPreviewFilter $scopeObject.RecipientFilter -ResultSize Unlimited)
+if ($matches.Count -ne 1 -or $matches[0].PrimarySmtpAddress.ToString().ToLowerInvariant() -ne $Sender) {
+    throw "Scope must include exactly communications@wcsports.co.za. No role assigned."
+}
+
+# The ObjectId here is the ENTERPRISE application's service principal Object ID.
 New-ServicePrincipal -AppId $AppId -ObjectId $ServiceId -DisplayName "MyWCSA GovApps Outbound Mail"
 New-ManagementRoleAssignment -App $ServiceId -Role "Application Mail.Send" -CustomResourceScope $Scope
+
+# Positive authorization test: Application Mail.Send should be InScope=True.
 Test-ServicePrincipalAuthorization -Identity $ServiceId -Resource $Sender |
-    Format-Table RoleName,InScope,AllowedResourceScope
+  Format-Table RoleName,InScope,AllowedResourceScope
 \`\`\`
 
-Afterward test \`Test-ServicePrincipalAuthorization\` with another existing WCSA mailbox and verify its sending role is **not** in scope.
+**Mandatory negative test:** Run \`Test-ServicePrincipalAuthorization -Identity $ServiceId -Resource "<OTHER_EXISTING_WCSA_MAILBOX>"\` and verify \`Application Mail.Send\` is \`InScope=False\`. Replace that placeholder with a real mailbox you are authorised to test.
+
+**Important:** The authorization simulation does not account for **additional Microsoft Entra ID application permission grants**. Before accepting the result, check Entra → **Enterprise applications** → this application's **Permissions**, and confirm no separate unrestricted Microsoft Graph \`Mail.Send\` application consent remains. Exchange RBAC and Entra Graph grants are additive; an unscoped Entra grant can defeat mailbox scoping. <https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac>
+
+If the management scope or service principal already exists, review it rather than blindly running duplicate creation commands. Verify the role assignment and wait for Exchange role propagation before testing an actual message.
 
 ## Add remaining Vercel Production variables
 
