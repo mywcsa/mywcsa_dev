@@ -46,3 +46,9 @@
 - Preview compilation success is not full Graph, SharePoint or user-acceptance testing.
 - Connected Outlook/SharePoint user permissions are distinct from production app-only Graph service permissions.
 - PR #28 remains a draft: no automatic merge or production release until the correctly scoped Microsoft configuration and acceptance tests are complete.
+
+## Archive-only Microsoft Entra application and activation
+
+The archival code now requires a **dedicated** Microsoft Entra application rather than reusing the GOVAPPS_MAIL_* identity. Vercel production already contains the verified SharePoint host, site path and library drive ID. New required credentials are `WCDA_SHAREPOINT_TENANT_ID`, `WCDA_SHAREPOINT_CLIENT_ID`, and sensitive `WCDA_SHAREPOINT_CLIENT_SECRET` (not yet present). The Vercel flags `WCDA_GRAPH_ARCHIVE_ENABLED=false` and `WCDA_SHAREPOINT_ACCESS_REVIEWED=false` are explicitly configured, and remain disabled until both approval gates are satisfied.
+
+See **[SHAREPOINT_ARCHIVE_ACTIVATION.md](SHAREPOINT_ARCHIVE_ACTIVATION.md)** for the up-to-date verified target, current Owners/Members/Visitors ACL findings, admin dry-run PowerShell script, the Entra `Sites.Selected` consent and site grant, and staging/UAT sign-off. This supersedes earlier instructions to use the mail app's client secret for SharePoint.
