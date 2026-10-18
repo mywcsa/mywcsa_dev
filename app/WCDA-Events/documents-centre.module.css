@@ -9,3 +9,7 @@
 .docInfo{display:grid;gap:4px;flex:1;min-width:0}.docInfo strong{font-size:12px;overflow-wrap:anywhere}.docInfo span,.docInfo small{font-size:10px;color:#7284a1;line-height:1.5}.doc a{padding:9px 12px;border-radius:10px;background:#e8effe;color:#001484;font-size:10px;text-decoration:none;font-weight:750}
 .empty{padding:23px;color:#7389a2;font-size:12px}.error,.success{padding:12px 15px;border-radius:12px;font-size:11px}.error{color:#9d2b43;border:1px solid #eac8cc;background:#fff1f3}.success{color:#137453;border:1px solid #bce2d0;background:#eafbf3}
 @media(max-width:600px){.formGrid{grid-template-columns:1fr}.fileLabel{grid-column:auto}.panel{padding:14px}.cardHead{align-items:start;flex-direction:column}.doc{flex-wrap:wrap}.doc a{margin-left:58px}}
+
+.archiveButton{background:#001484;color:#fff;font:600 10px Poppins,"Segoe UI",sans-serif;padding:10px 13px;border:0;border-radius:10px;cursor:pointer}
+.archiveButton:disabled{opacity:.48;cursor:not-allowed}
+.archiveStatus{font-size:10px;font-weight:650;color:#2d6681;padding:9px 11px;background:#e6f5f7;border-radius:9px}
