@@ -132,6 +132,7 @@ export type CreateEmsInput = {
   startDate: string;
   endDate: string;
   estimatedAttendance: number | null;
+  details: Record<string, string | boolean>;
 };
 
 export function validateEmsInput(raw: unknown): CreateEmsInput {
@@ -153,11 +154,35 @@ export function validateEmsInput(raw: unknown): CreateEmsInput {
     if (!Number.isSafeInteger(n) || n < 0 || n > 100000000) throw new EmsError(400,"Attendance must be a valid non-negative whole number.");
     estimatedAttendance = n;
   }
-  return {organiserName,name,category,venueName,venueAddress,startDate,endDate,estimatedAttendance};
+  const contactName=str(obj.contactName);
+  const contactPhone=str(obj.contactPhone);
+  const description=str(obj.description);
+  const details: Record<string,string|boolean>={
+    description,contactName,contactPhone,
+    audience:str(obj.audience),
+    ticketing:str(obj.ticketing)||"free",
+    foodVendors:obj.foodVendors===true,
+    alcoholPlanned:obj.alcoholPlanned===true,
+    roadClosures:obj.roadClosures===true,
+    medicalPlan:str(obj.medicalPlan),
+    safetyPlan:str(obj.safetyPlan),
+    accessibilityPlan:str(obj.accessibilityPlan),
+    trafficPlan:str(obj.trafficPlan),
+    additionalNotes:str(obj.additionalNotes),
+  };
+  if(contactName.length>150||contactPhone.length>30||
+     (contactPhone.length>0&&!/^[0-9+() .-]+$/.test(contactPhone))||
+     description.length>3000||details.audience.length>300||
+     !["free","ticketed","invitation"].includes(details.ticketing as string)||
+     details.medicalPlan.length>1200||details.safetyPlan.length>2000||
+     details.accessibilityPlan.length>1000||details.trafficPlan.length>1200||
+     details.additionalNotes.length>1000||JSON.stringify(details).length>7000)
+    throw new EmsError(400,"Review the contact and planning details. One or more fields are invalid or too long.");
+  return {organiserName,name,category,venueName,venueAddress,startDate,endDate,estimatedAttendance,details};
 }
 
 export async function createEmsEvent(actor: EmsActor, input: CreateEmsInput): Promise<{id:string;reference:string;status:string;created_at:string}> {
-  return emsDatabase("rpc/wcda_ems_create_event", {
+  return emsDatabase("rpc/wcda_ems_submit_detailed_event", {
     method: "POST",
     body: JSON.stringify({
       p_actor_id:actor.id,
@@ -170,6 +195,7 @@ export async function createEmsEvent(actor: EmsActor, input: CreateEmsInput): Pr
       p_start_date:input.startDate,
       p_end_date:input.endDate,
       p_estimated_attendance:input.estimatedAttendance,
+      p_details:input.details,
     }),
   });
 }
