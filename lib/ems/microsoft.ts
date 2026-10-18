@@ -16,8 +16,17 @@ export const mailConfigured=()=>process.env.WCDA_GRAPH_SEND_ENABLED==="true";
 // Archive access must be reviewed independently of the Graph deployment flag.
 export const archiveConfigured=()=>process.env.WCDA_GRAPH_ARCHIVE_ENABLED==="true"&&process.env.WCDA_SHAREPOINT_ACCESS_REVIEWED==="true";
 
-async function token():Promise<string>{
- const c=graphSettings();
+// WCDA records uses a dedicated least-privilege app rather than reusing the
+// tenant's Mail.Send credential and accidentally combining mail + records scopes.
+function archiveGraphSettings():GraphSettings {
+ const tenant=value("WCDA_SHAREPOINT_TENANT_ID");
+ const clientId=value("WCDA_SHAREPOINT_CLIENT_ID");
+ const clientSecret=value("WCDA_SHAREPOINT_CLIENT_SECRET");
+ if(!/^[a-f0-9-]{36}$/i.test(tenant)||!/^[a-f0-9-]{36}$/i.test(clientId)||!clientSecret)
+  throw new EmsError(503,"A dedicated WCDA SharePoint app registration and private service credential are required.");
+ return {tenant,clientId,clientSecret};
+}
+async function token(c:GraphSettings):Promise<string>{
  let r:Response;
  try{r=await fetch("https://login.microsoftonline.com/"+encodeURIComponent(c.tenant)+"/oauth2/v2.0/token",{
   method:"POST",
@@ -40,7 +49,7 @@ function mailbox(){
 export async function sendCaseMail(args:{recipient:string;subject:string;body:string}):Promise<void>{
  if(!mailConfigured())throw new EmsError(503,"Graph email delivery is disabled until administration completes configuration.");
  const from=mailbox();
- const access=await token();
+ const access=await token(graphSettings());
  let r:Response;
  try{r=await fetch("https://graph.microsoft.com/v1.0/users/"+encodeURIComponent(from)+"/sendMail",{
   method:"POST",headers:{Authorization:"Bearer "+access,"Content-Type":"application/json"},
@@ -138,7 +147,7 @@ async function verifyArchiveFolder(access:string,c:ReturnType<typeof archiveSett
 }
 export async function prepareArchive(){
  const c=archiveSettings();
- const access=await token();
+ const access=await token(archiveGraphSettings());
  const folderId=await verifyArchiveFolder(access,c);
  return {settings:{...c,folderId},access};
 }
