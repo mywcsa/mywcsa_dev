@@ -36,6 +36,14 @@ if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) {
  throw 'Install Microsoft.Graph.Authentication from PSGallery in an approved admin workstation before running this script.'
 }
 
+function Get-GraphValue($item,[string]$property){
+ if($null -eq $item){return $null}
+ if($item -is [System.Collections.IDictionary]){return $item[$property]}
+ $p=$item.PSObject.Properties[$property]
+ if($null -ne $p){return $p.Value}
+ return $null
+}
+
 try {
  # This is an interactive delegated admin token, used ONLY to grant a narrower
  # application permission; it is not a credential for GovApps production.
@@ -55,10 +63,13 @@ try {
  Write-Warning 'This grants site-wide app write access, not folder-only access. Use a DEDICATED app registration for the archive.'
 
  $permissions=Invoke-MgGraphRequest -Method GET -Uri ("{0}/permissions" -f $endpoint)
- $matches=@($permissions.value | Where-Object {
+ $matches=@((Get-GraphValue $permissions 'value') | Where-Object {
   $item=$_
-  $a=@($item.grantedToIdentitiesV2)+@($item.grantedToIdentities)
-  @($a | Where-Object { $_.application -and $_.application.id -eq $ApplicationClientId }).Count -gt 0
+  $a=@(Get-GraphValue $item 'grantedToIdentitiesV2')+@(Get-GraphValue $item 'grantedToIdentities')
+  @($a | Where-Object {
+   $identity=Get-GraphValue $_ 'application'
+   $identity -and (Get-GraphValue $identity 'id') -eq $ApplicationClientId
+  }).Count -gt 0
  })
  if($matches.Count -gt 0){
   Write-Warning ('The app already has {0} site permission(s). Review existing roles; no new grant was created.' -f $matches.Count)
