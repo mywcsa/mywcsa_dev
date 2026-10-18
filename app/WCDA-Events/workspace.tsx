@@ -10,6 +10,7 @@ import OfficeCapture from "./office-capture";
 import FinanceDesk from "./finance-desk";
 import OrganiserApplication from "./organiser-application";
 import DocumentsCentre from "./documents-centre";
+import CorrespondenceCentre from "./correspondence-centre";
 
 type NavGroup = { name: string; items: string[] };
 const internal: NavGroup[] = [
@@ -105,7 +106,8 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
         {actor.mode==="staff"&&tab==="Capture in Office"&&!canCreate&&<p className={styles.notice}>Your staff role does not have intake capture permission.</p>}
         {actor.mode==="staff"&&tab==="Finance & Payments"&&<FinanceDesk actor={actor} events={events}/>}
         {actor.mode==="staff"&&tab==="Documents & Records"&&<DocumentsCentre actor={actor} events={events}/>}
-        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&tab!=="Documents & Records"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
+        {actor.mode==="staff"&&tab==="Correspondence & Cases"&&<CorrespondenceCentre actor={actor} events={events}/>}
+        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&tab!=="Documents & Records"&&tab!=="Correspondence & Cases"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
         {actor.mode!=="staff"&&registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
           <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>My Events</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
           {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
@@ -113,7 +115,8 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
         </section>}
         {actor.mode!=="staff"&&tab==="Payments & Invoices"&&<FinanceDesk actor={actor} events={events}/>}
         {actor.mode!=="staff"&&tab==="Documents & Compliance"&&<DocumentsCentre actor={actor} events={events}/>}
-        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&tab!=="Payments & Invoices"&&tab!=="Documents & Compliance"&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
+        {actor.mode!=="staff"&&tab==="Messages & Support"&&<CorrespondenceCentre actor={actor} events={events}/>}
+        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&tab!=="Payments & Invoices"&&tab!=="Documents & Compliance"&&tab!=="Messages & Support"&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
           <a href="mailto:finances@wcsports.co.za">Finance · finances@wcsports.co.za</a>
           <a href="mailto:WCDA.Certificates@wcsports.co.za">Certificates · WCDA.Certificates@wcsports.co.za</a>
           <a href="mailto:WCDAEms@govapps.wcsports.co.za">System · WCDAEms@govapps.wcsports.co.za</a>
