@@ -172,11 +172,11 @@ export function validateEmsInput(raw: unknown): CreateEmsInput {
   };
   if(contactName.length>150||contactPhone.length>30||
      (contactPhone.length>0&&!/^[0-9+() .-]+$/.test(contactPhone))||
-     description.length>3000||details.audience.length>300||
+     description.length>3000||str(obj.audience).length>300||
      !["free","ticketed","invitation"].includes(details.ticketing as string)||
-     details.medicalPlan.length>1200||details.safetyPlan.length>2000||
-     details.accessibilityPlan.length>1000||details.trafficPlan.length>1200||
-     details.additionalNotes.length>1000||JSON.stringify(details).length>7000)
+     str(obj.medicalPlan).length>1200||str(obj.safetyPlan).length>2000||
+     str(obj.accessibilityPlan).length>1000||str(obj.trafficPlan).length>1200||
+     str(obj.additionalNotes).length>1000||JSON.stringify(details).length>7000)
     throw new EmsError(400,"Review the contact and planning details. One or more fields are invalid or too long.");
   return {organiserName,name,category,venueName,venueAddress,startDate,endDate,estimatedAttendance,details};
 }
