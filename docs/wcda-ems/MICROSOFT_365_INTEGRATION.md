@@ -9,6 +9,15 @@
 - Mail flow: authorised employee prepares message for registered event applicant (not a browser-selected address), a different appointed manager approves, and the approving manager explicitly sends. The database reserves the send attempt before Microsoft Graph is called. Graph HTTP 202 is acceptance, not proof of recipient delivery. Unknown outcomes are marked uncertain and not retried automatically.
 - Archive flow: verifies drive item is a folder and its webUrl host equals the approved SharePoint host. Verifies case access and original file size, reserves a unique archive record, uploads with If-None-Match: *, and audits Microsoft drive/item IDs, SHA-256 and archive timestamp. Ambiguous requests are held for human reconciliation. Archived evidence is not an issued certificate or endorsement.
 
+## Confirmed storage hierarchy (user-specified 18 October 2026)
+
+- SharePoint site display name: **MyWCSA GovApps**.
+- Document library display name: **MyWCSA GovApps**.
+- Existing archive folder: **MyWCSA Events** (keep this spelling; not MyWCDA Events).
+- The Graph archive adapter now validates **all three exact names** and that the library/folder URLs are descendants of the configured site. It refuses to fall back to the default drive, to personal OneDrive, or to another library.
+- Still need the exact SharePoint site URL to resolve the Graph site path, drive ID, folder ID and appropriate tenant/app access. The currently connected SharePoint identity only discovered personal OneDrive; guesses at likely site paths returned HTTP 404. No archive or files were changed.
+- Required Vercel setting now also includes `WCDA_SHAREPOINT_SITE_PATH` (for example, the verified `/sites/...` path from the real site URL), in addition to `WCDA_SHAREPOINT_HOST`, `WCDA_SHAREPOINT_DRIVE_ID`, and `WCDA_SHAREPOINT_FOLDER_ID`.
+
 ## Microsoft 365 administrator prerequisites
 
 1. Confirm the intended WCSA tenant. The connected delegated SharePoint search returned personal OneDrive files under jemresourcesza-my.sharepoint.com/personal/ebranch_wcsports_co_za, not an independently verified WCDA official document library. Do NOT silently archive official case records there.
@@ -18,7 +27,7 @@
 5. Configure secret values server-side in Vercel, never in NEXT_PUBLIC variables or GitHub code:
    * Existing production variable names: GOVAPPS_MAIL_TENANT_ID, GOVAPPS_MAIL_CLIENT_ID, GOVAPPS_MAIL_FROM.
    * Missing: GOVAPPS_MAIL_CLIENT_SECRET.
-   * WCDA_SHAREPOINT_DRIVE_ID, WCDA_SHAREPOINT_FOLDER_ID, WCDA_SHAREPOINT_HOST.
+   * WCDA_SHAREPOINT_DRIVE_ID, WCDA_SHAREPOINT_FOLDER_ID, WCDA_SHAREPOINT_HOST, WCDA_SHAREPOINT_SITE_PATH.
    * Enable only after configuration/testing: WCDA_GRAPH_SEND_ENABLED=true and WCDA_GRAPH_ARCHIVE_ENABLED=true.
 6. Test under a dedicated approved sandbox mailbox, site and app credentials before enabling production. Keep preview mail/archive flags disabled without separate test credentials.
 7. Test event case isolation, organiser read-only messages, preparer/approver separation, denied permissions, Graph sender scoping, correct destination, file hash, mail timeout and duplicate prevention. Do not use this workflow to auto-issue approvals.
