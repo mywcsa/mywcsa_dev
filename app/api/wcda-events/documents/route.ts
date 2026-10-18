@@ -70,6 +70,8 @@ export async function POST(request:Request){
   const length=Number(request.headers.get("content-length")||"0");
   if(length>11000000)throw new EmsError(413,"The file exceeds the 10 MB limit.");
   const {actor,ids}=await permittedEvents();
+  if(actor.mode==="staff"&&["auditor","viewer"].includes(actor.role||""))
+   throw new EmsError(403,"Audit and viewer accounts have read-only document access.");
   const form=await request.formData();
   const eventId=form.get("eventId");
   const kind=form.get("documentType");
