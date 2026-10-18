@@ -55,24 +55,71 @@ export async function sendCaseMail(args:{recipient:string;subject:string;body:st
 }
 
 export type ArchiveResult={itemId:string;driveId:string;eTag:string;sha256:string;archiveName:string};
+/** Exact, organisation-approved SharePoint hierarchy:
+ * Site: MyWCSA GovApps
+ * Library: MyWCSA GovApps
+ * Folder: MyWCSA Events
+ * Never fall back to the tenant's default document library or a user's OneDrive.
+ */
+const EXPECTED_SITE="MyWCSA GovApps";
+const EXPECTED_LIBRARY="MyWCSA GovApps";
+const EXPECTED_FOLDER="MyWCSA Events";
 function archiveSettings(){
- if(!archiveConfigured())throw new EmsError(503,"SharePoint archiving is disabled until the official WCDA library is confirmed.");
- const driveId=value("WCDA_SHAREPOINT_DRIVE_ID"),folderId=value("WCDA_SHAREPOINT_FOLDER_ID");
+ if(!archiveConfigured())throw new EmsError(503,"SharePoint archiving is disabled until the MyWCSA GovApps destination is authorised.");
+ const driveId=value("WCDA_SHAREPOINT_DRIVE_ID");
+ const folderId=value("WCDA_SHAREPOINT_FOLDER_ID");
  const host=value("WCDA_SHAREPOINT_HOST").toLowerCase();
+ const sitePath=value("WCDA_SHAREPOINT_SITE_PATH");
  if(!/^[a-zA-Z0-9_!.-]{10,240}$/.test(driveId)||!folderId||folderId.length>240||
-    !/^[a-z0-9-]+\.sharepoint\.com$/.test(host))
-  throw new EmsError(503,"Official WCDA SharePoint library, folder and host are not configured.");
- return {driveId,folderId,host};
+    !/^[a-z0-9-]+\.sharepoint\.com$/.test(host)||
+    !/^\/(?:sites|teams)\/[a-zA-Z0-9_%./-]{1,200}$/.test(sitePath)||
+    sitePath.includes(".."))
+   throw new EmsError(503,"MyWCSA GovApps SharePoint host, site path, library ID or Events folder ID is missing.");
+ return {driveId,folderId,host,sitePath};
+}
+type GraphSite={id?:string;displayName?:string;webUrl?:string};
+type GraphDrive={id?:string;name?:string;webUrl?:string;driveType?:string};
+type GraphFolder={id?:string;name?:string;folder?:unknown;webUrl?:string;parentReference?:{driveId?:string}};
+async function graphMetadata<T>(access:string,url:string):Promise<T>{
+ const r=await fetch(url,{headers:{Authorization:"Bearer "+access,Accept:"application/json"},
+   cache:"no-store",redirect:"error",signal:AbortSignal.timeout(12000)
+ }).catch(()=>{throw new EmsError(503,"Microsoft SharePoint could not verify the approved archive destination.");});
+ if(!r.ok)throw graphError(r);
+ return r.json() as Promise<T>;
+}
+function siteUrl(raw:string,host:string):URL{
+ let u:URL;
+ try{u=new URL(raw);}catch{throw new EmsError(503,"SharePoint returned an invalid site address.");}
+ if(u.protocol!=="https:"||u.hostname.toLowerCase()!==host||u.username||u.password||u.port)
+   throw new EmsError(503,"SharePoint returned a destination outside the approved tenant.");
+ return u;
 }
 async function verifyArchiveFolder(access:string,c:ReturnType<typeof archiveSettings>){
- const url="https://graph.microsoft.com/v1.0/drives/"+encodeURIComponent(c.driveId)+"/items/"+encodeURIComponent(c.folderId)+"?$select=id,folder,webUrl";
- const r=await fetch(url,{headers:{Authorization:"Bearer "+access},cache:"no-store",redirect:"error",signal:AbortSignal.timeout(12000)}).catch(()=>{
-  throw new EmsError(503,"The approved SharePoint destination could not be reached.");
- });
- if(!r.ok)throw graphError(r);
- const item=await r.json() as {folder?:unknown;webUrl?:string};
- if(!item.folder||typeof item.webUrl!=="string"||new URL(item.webUrl).hostname.toLowerCase()!==c.host)
-  throw new EmsError(503,"The configured SharePoint folder does not match the approved WCDA site.");
+ // Bind the configured drive ID to the *actual* named SharePoint site.
+ const graph="https://graph.microsoft.com/v1.0";
+ const site=await graphMetadata<GraphSite>(access,graph+"/sites/"+c.host+":"+c.sitePath+"?$select=id,displayName,webUrl");
+ if(!site.id||site.displayName?.trim().toLowerCase()!==EXPECTED_SITE.toLowerCase()||!site.webUrl)
+   throw new EmsError(503,"The selected SharePoint site must be named MyWCSA GovApps.");
+ const officialSite=siteUrl(site.webUrl,c.host);
+ if(officialSite.pathname.replace(/\/$/,"").toLowerCase()!==c.sitePath.replace(/\/$/,"").toLowerCase())
+   throw new EmsError(503,"The SharePoint site URL is not the configured MyWCSA GovApps site.");
+ const drive=await graphMetadata<GraphDrive>(access,graph+"/drives/"+encodeURIComponent(c.driveId)+"?$select=id,name,webUrl,driveType");
+ if(drive.id!==c.driveId||drive.name?.trim()!==EXPECTED_LIBRARY||
+    drive.driveType!=="documentLibrary"||!drive.webUrl)
+   throw new EmsError(503,"The selected document library must be MyWCSA GovApps.");
+ const libraryUrl=siteUrl(drive.webUrl,c.host);
+ const sitePrefix=officialSite.pathname.replace(/\/$/,"").toLowerCase()+"/";
+ if(!libraryUrl.pathname.toLowerCase().startsWith(sitePrefix))
+   throw new EmsError(503,"This document library does not belong to the approved MyWCSA GovApps site.");
+ const folder=await graphMetadata<GraphFolder>(access,
+  graph+"/drives/"+encodeURIComponent(c.driveId)+"/items/"+encodeURIComponent(c.folderId)+
+  "?$select=id,name,folder,webUrl,parentReference");
+ if(folder.id!==c.folderId||folder.name?.trim()!==EXPECTED_FOLDER||!folder.folder||!folder.webUrl||
+    (folder.parentReference?.driveId&&folder.parentReference.driveId!==c.driveId))
+   throw new EmsError(503,"The selected archive folder must be MyWCSA Events inside the approved library.");
+ const folderUrl=siteUrl(folder.webUrl,c.host);
+ if(!folderUrl.pathname.toLowerCase().startsWith(libraryUrl.pathname.replace(/\/$/,"").toLowerCase()+"/"))
+   throw new EmsError(503,"The MyWCSA Events folder is outside the approved document library.");
 }
 export async function prepareArchive(){
  const c=archiveSettings();
