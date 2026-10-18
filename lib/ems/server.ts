@@ -1,6 +1,7 @@
 import "server-only";
 import { auth } from "@/auth";
 import { supabaseConfig } from "@/lib/ams/supabase";
+import { authorisedStaffApps } from "@/lib/govapps/staff-app-access";
 
 export const EMS_ROOT = "/WCDA-Events" as const;
 export const EMS_PRODUCTION_URL = "https://GovApps.wcsports.co.za/WCDA-Events" as const;
@@ -85,9 +86,17 @@ export async function getEmsActor(): Promise<EmsActor | null> {
   const email = str(user.email).toLowerCase();
   const id = str(user.id);
   if (!email || !id) return null;
-  if (user.authProvider === "microsoft-entra-id") {
-    // A Microsoft staff session alone NEVER grants EMS access.
-    // Require a current, active WCDA appointment; fail closed on lookup errors.
+  if (user.authProvider === "microsoft-entra-id" || user.authProvider === "staff-password") {
+    // Approved fallback staff logins must pass the same live launcher account checks:
+    // enabled password account, first-use rotation completed, global fallback enabled,
+    // and explicit WCDA app allocation. Neither login method grants an EMS role by itself.
+    if(user.authProvider === "staff-password") {
+      try {
+        const allowed=await authorisedStaffApps({email,authProvider:user.authProvider});
+        if(!allowed.has("wcda-events"))return null;
+      } catch {return null;}
+    }
+    // Both providers still require a current active WCDA appointment.
     try {
       const rows = await emsDatabase<Array<{role:string;active:boolean}>>(
         "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&active=eq.true&limit=1"
