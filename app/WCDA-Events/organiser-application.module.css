@@ -1,0 +1,26 @@
+.shell{border:1px solid #cbdcf0;border-radius:19px;background:rgba(255,255,255,.89);backdrop-filter:blur(22px);box-shadow:0 10px 35px #517db722;padding:clamp(15px,3vw,29px);font-family:Poppins,"Segoe UI",sans-serif;color:#1c3558}
+.header{display:flex;justify-content:space-between;align-items:start;gap:15px}.header h2{font-size:25px;letter-spacing:-1px;margin:6px 0}.header p{font-size:12px;color:#617991;line-height:1.7;max-width:680px;margin:0}
+.overline,.sectionCount{font-size:10px;font-weight:750;letter-spacing:1.9px;color:#001484}
+.cancel{background:#eff3fc;border:1px solid #d3e0f3;border-radius:11px;color:#284e7d;cursor:pointer;padding:10px 15px;font:600 11px Poppins}
+.progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:27px 0 30px}
+.step{display:flex;align-items:center;gap:10px;background:#f1f5fb;border:1px solid #e0e8f2;border-radius:12px;padding:11px;text-align:left;color:#7386a0;font:600 10px Poppins;cursor:pointer}
+.step b{background:#e1e9f6;color:#58759a;border-radius:8px;display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px}
+.active{background:#eef3ff;border-color:#7d9be9;color:#001484}.active b{background:#001484;color:white}
+.complete{background:#e6f5ef;border-color:#bfe5d2;color:#226951}.complete b{background:#2e9273;color:#fff}
+.section h3{font-size:20px;letter-spacing:-.6px;margin:8px 0}.section>p{font-size:11px;line-height:1.8;color:#647a96;max-width:690px;margin-bottom:21px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.grid label{display:grid;gap:8px;align-content:start;color:#335477;font-size:11px;font-weight:650}
+.grid input,.grid select,.grid textarea{width:100%;padding:11px 13px;min-height:42px;border:1px solid #cfdeed;border-radius:10px;background:#fff;font:400 12px Poppins,"Segoe UI",sans-serif;color:#183b65;outline:none}
+.grid input:focus,.grid select:focus,.grid textarea:focus{border-color:#001484;box-shadow:0 0 0 3px #0014841b}.grid input:read-only{background:#f0f4fa;color:#768ba7}
+.wide{grid-column:1/-1}.info{font-size:11px;line-height:1.75;margin-top:19px;color:#31588b;padding:13px 16px;border:1px solid #d1e2f9;border-radius:12px;background:#f0f6ff}
+.checkGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:19px}
+.checkGrid label,.declarations label{display:flex;gap:11px;align-items:start;border:1px solid #dce6f3;border-radius:12px;background:#f8faff;padding:15px;font-size:11px;color:#3f5d80;line-height:1.6;cursor:pointer}
+.checkGrid input,.declarations input{accent-color:#001484;width:16px;height:16px;flex:0 0 16px;margin:1px 0}
+.summary{border:1px solid #dbe7f5;background:#f7faff;border-radius:13px;padding:15px 19px}.summary dl{display:grid;grid-template-columns:105px minmax(0,1fr);gap:12px;margin:0;font-size:11px;line-height:1.6}.summary dt{font-weight:700;color:#637a98}.summary dd{margin:0;color:#1d395c;overflow-wrap:anywhere}
+.declarations{display:grid;gap:10px;margin-top:17px}.declarations label{background:#fff}
+.footer{display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:24px;margin-top:26px;border-top:1px solid #e2eaf4}.footer span{font-size:10px;color:#7990a9}
+.footer button{border:0;border-radius:12px;padding:12px 19px;font:600 12px Poppins;cursor:pointer}
+.next{background:#001484;color:white;box-shadow:0 8px 20px #00148425}.back{color:#164889;background:#e9f0fc}
+.footer button:disabled{opacity:.42;cursor:not-allowed}.error{border-radius:11px;border:1px solid #e9b6bb;background:#fff1f2;padding:13px 16px;color:#9c2944;font-size:11px}
+.disclaimer{font-size:10px;line-height:1.7;color:#6a7c92}
+@media(max-width:830px){.progress{grid-template-columns:repeat(2,minmax(0,1fr))}.checkGrid{grid-template-columns:1fr}}
+@media(max-width:540px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.header h2{font-size:21px}.header{flex-wrap:wrap}.progress{gap:6px;margin:20px 0}.step{font-size:9px;padding:8px;gap:6px}.step b{flex-basis:25px;width:25px;height:25px}.footer{flex-wrap:wrap}.footer span{display:none}.summary dl{grid-template-columns:80px 1fr;gap:8px}}
