@@ -1,3 +1,4 @@
+import { notifyAfterCommit } from "@/lib/mail/govapps";
 import { randomBytes } from "node:crypto";
 import {
   registryIdentity,
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
         "Complete the school, payer and Registry review details, and confirm that review is complete.",
       );
     const token = randomBytes(32).toString("base64url");
-    const invoice = await rpc("wcsa_registry_issue_invoice", {
+    const invoice = await rpc<{reference:string}>("wcsa_registry_issue_invoice", {
       ...actor,
       p_name: name,
       p_emis: emis,
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
       p_token_hash: tokenHash(token),
       p_mode: paymentMode(),
     });
+    await notifyAfterCommit({kind:"invoice_issued",to:email,reference:invoice.reference,organisation:name});
     return Response.json(
       { invoice, paymentCode: token },
       { status: 201, headers: { "Cache-Control": "no-store" } },
