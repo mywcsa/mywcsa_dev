@@ -5,7 +5,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const headers={"Cache-Control":"no-store"};
 const uuid=(v:unknown):v is string=>typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
-const privileged=(role:string|undefined)=>["finance","manager","executive"].includes(role||"");
+const privileged=(role:string|undefined)=>["finance","manager","super_admin","executive"].includes(role||"");
 function failure(e:unknown){
  return Response.json({error:e instanceof EmsError?e.message:"The EMS payment service is unavailable."},
   {status:e instanceof EmsError?e.status:503,headers});
@@ -54,7 +54,7 @@ export async function POST(request:Request){
    return Response.json({invoice:result}, {status:201,headers});
   }
   if(action==="approve"||action==="cancel"){
-   if(actor.mode!=="staff"||!["manager","executive"].includes(actor.role||""))
+   if(actor.mode!=="staff"||!["manager","super_admin","executive"].includes(actor.role||""))
      throw new EmsError(403,"An authorised independent manager is required.");
    const invoice=await currentInvoice(body.invoiceId,ids);
    const reason=typeof body.reason==="string"?body.reason.trim():"";
