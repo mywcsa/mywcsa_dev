@@ -24,20 +24,20 @@ const moduleBySection:Record<string,string>={
 };
 const documentTabs=new Set(["Letters & Memoranda","Certificates & Verification","Documents & Records"]);
 const decisionTabs=new Set(["Reviews & Endorsements"]);
-const canRequestRole=new Set(["assessor","compliance","registrar","manager","executive"]);
-const canDraftRole=new Set(["certificates","registrar","manager","executive"]);
+const canRequestRole=new Set(["assessor","compliance","registrar","manager","super_admin","executive"]);
+const canDraftRole=new Set(["certificates","registrar","manager","super_admin","executive"]);
 const allowedModules:Record<string,string[]>={
- finance:["finance","manager","executive"],
- safety:["compliance","operations","manager","executive","assessor"],
- inspections:["compliance","operations","manager","executive","assessor"],
- incidents:["compliance","operations","manager","executive","assessor"],
- vendors:["operations","manager","executive","registrar"],
- personnel:["operations","manager","executive","registrar"],
- logistics:["operations","manager","executive","registrar"],
- accreditation:["operations","manager","executive","registrar"],
- operations:["operations","manager","executive","registrar"],
- scheduling:["operations","manager","executive","registrar"],
- correspondence:["operations","manager","executive","registrar","assessor","compliance","finance","certificates"],
+ finance:["finance","manager","super_admin","executive"],
+ safety:["compliance","operations","manager","super_admin","executive","assessor"],
+ inspections:["compliance","operations","manager","super_admin","executive","assessor"],
+ incidents:["compliance","operations","manager","super_admin","executive","assessor"],
+ vendors:["operations","manager","super_admin","executive","registrar"],
+ personnel:["operations","manager","super_admin","executive","registrar"],
+ logistics:["operations","manager","super_admin","executive","registrar"],
+ accreditation:["operations","manager","super_admin","executive","registrar"],
+ operations:["operations","manager","super_admin","executive","registrar"],
+ scheduling:["operations","manager","super_admin","executive","registrar"],
+ correspondence:["operations","manager","super_admin","executive","registrar","assessor","compliance","finance","certificates"],
 };
 const formats:[string,string][]=[
  ["endorsement_letter","Endorsement letter"],
@@ -206,7 +206,7 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
       {rows.map(item=><article key={item.id} className={styles.record}>
        <div><strong>{item.title}</strong><small>{item.created_by_email} · {formatDate(item.created_at)}</small><p>{item.description}</p></div>
        <div><span className={styles.status}>{nice(item.status)}</span>
-       {(actor.email===item.created_by_email||["executive","manager"].includes(actor.role||""))?
+       {(actor.email===item.created_by_email||["super_admin","executive","manager"].includes(actor.role||""))?
        <select aria-label={"Status for "+item.title} disabled={busy} value={item.status}
         onChange={e=>void save("set_work_status",{recordId:item.id,status:e.target.value})}>
         {["open","in_progress","blocked","completed"].map(s=><option key={s} value={s}>{nice(s)}</option>)}
