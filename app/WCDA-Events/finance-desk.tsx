@@ -10,8 +10,8 @@ const shortDate=(iso:string|null)=>iso?new Date(iso).toLocaleDateString("en-ZA",
 
 export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEvent[]}){
  const isStaff=actor.mode==="staff";
- const mayPrepare=isStaff&&["finance","manager","executive"].includes(actor.role||"");
- const mayApprove=isStaff&&["manager","executive"].includes(actor.role||"");
+ const mayPrepare=isStaff&&["finance","manager","super_admin","executive"].includes(actor.role||"");
+ const mayApprove=isStaff&&["manager","super_admin","executive"].includes(actor.role||"");
  const[records,setRecords]=useState<EmsInvoice[]>([]);
  const[receipts,setReceipts]=useState<EmsReceipt[]>([]);
  const[busy,setBusy]=useState(false);
