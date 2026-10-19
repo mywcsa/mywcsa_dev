@@ -72,6 +72,7 @@ export default function AdminConsole(){
     <div><span className={s.kicker}>CONTROL & CONFIGURATION</span><h1>System administration</h1>
      <p>Manage staff access, allocate applications, publish sign-in notices and configure GovApps.</p></div>
    </section>
+   <div style={{marginBottom:16}}><Link href="/control/administration/external" style={{display:"inline-flex",background:"#ffffffdf",color:"#001484",padding:"12px 17px",borderRadius:12,border:"1px solid white",boxShadow:"0 5px 19px #00148413",fontWeight:750,fontSize:12,textDecoration:"none"}}>External User App Requests · Review & Approve →</Link></div>
    {loading&&<p style={{padding:25}}>Loading authorised administration records…</p>}
    {error&&<p role="alert" style={{color:"#a12346",background:"#ffe9ee",borderRadius:10,padding:15}}>{error}</p>}
    {success&&<p role="status" style={{color:"#08614f",background:"#dff9ee",borderRadius:10,padding:15}}>{success}</p>}

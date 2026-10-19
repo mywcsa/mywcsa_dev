@@ -15,8 +15,25 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Membership Portal | MyWCSA GovApps",
-  description: "Membership registration, renewals and services for Western Cape Sports Association NPC initiatives.",
+  title: "WCSA Membership & Registration | MyWCSA GovApps",
+  description: "Register or renew membership for schools, clubs, associations and community organisations through Western Cape Sports Association NPC initiatives.",
+  alternates: { canonical: "/membership" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: "WCSA Membership & Registration | MyWCSA GovApps",
+    description: "Membership registration and renewals for schools, clubs, associations and community organisations.",
+    url: "/membership",
+    siteName: "MyWCSA GovApps",
+    type: "website",
+    locale: "en_ZA",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "MyWCSA GovApps digital services" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WCSA Membership & Registration | MyWCSA GovApps",
+    description: "Register or renew WCSA membership online.",
+    images: ["/opengraph-image"],
+  },
 };
 
 type Fee = { initiative: string; category: string; year: string; amount: number; currency: string };

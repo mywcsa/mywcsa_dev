@@ -2,6 +2,7 @@ import "server-only";
 import { auth } from "@/auth";
 import { supabaseConfig } from "@/lib/ams/supabase";
 import { authorisedStaffApps } from "@/lib/govapps/staff-app-access";
+import { externalAppApproved, externalSession } from "@/lib/external/access";
 
 export const EMS_ROOT = "/WCDA-Events" as const;
 export const EMS_PRODUCTION_URL = "https://GovApps.wcsports.co.za/WCDA-Events" as const;
@@ -107,8 +108,29 @@ export async function getEmsActor(): Promise<EmsActor | null> {
       return null;
     }
   }
-  if (user.authProvider === "business-partner" || user.authProvider === "external-user") {
-    return {id,email,name:str(user.name)||email,mode:"organiser"};
+  if (user.authProvider === "external-user") {
+    // External users require an approved WCDA Events app allocation,
+    // independently from their basic GovApps account.
+    try {
+      const account=await externalSession();
+      if(!account||account.id!==id||!(await externalAppApproved(id,"wcda-events")))return null;
+      return {id,email,name:str(user.name)||email,mode:"organiser"};
+    } catch {return null;}
+  }
+  if (user.authProvider === "business-partner") {
+    // App allocation is mandatory; neither possession of a partner account nor a
+    // registered WCSA ID automatically permits direct WCDA Event operations.
+    try {
+      const partners=await emsDatabase<Array<{id:string;email:string}>>(
+        "govapps_accounts?select=id,email&id=eq."+encodeURIComponent(id)+"&account_type=eq.business_partner&status=eq.active&limit=1"
+      );
+      if(!partners.length||partners[0].email.toLowerCase()!==email)return null;
+      const grants=await emsDatabase<Array<{account_id:string}>>(
+        "govapps_control_partner_app_grants?select=account_id&account_id=eq."+encodeURIComponent(id)+"&app_slug=eq.wcda-events&status=eq.approved&limit=1"
+      );
+      if(!grants.length)return null;
+      return {id,email,name:str(user.name)||email,mode:"organiser"};
+    }catch{return null;}
   }
   // Sessions without an explicit recognised provider receive no EMS staff privileges.
   return null;
