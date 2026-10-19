@@ -1,5 +1,5 @@
 import {EmsError,requireEmsActor,listEmsEvents} from "@/lib/ems/server";
-import {eventPaymentReference,gatewayConfig,initializeEventCheckout,listEventInvoices,listReceipts,paymentAction,settleEms,verifiedCheckoutUrl,type EmsInvoice} from "@/lib/ems/payments";
+import {eventPaymentReference,checkoutConfig,initializeEventCheckout,listEventInvoices,listReceipts,paymentAction,settleEms,verifiedCheckoutUrl,type EmsInvoice} from "@/lib/ems/payments";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
@@ -66,7 +66,7 @@ export async function POST(request:Request){
    if(actor.mode!=="organiser")throw new EmsError(403,"Sign in as the event organiser to pay.");
    const invoice=await currentInvoice(body.invoiceId,ids);
    if(invoice.status==="paid")return Response.json({paid:true},{headers});
-   const cfg=gatewayConfig();
+   const cfg=checkoutConfig();
    if(origin!==cfg.origin)throw new EmsError(403,"Open checkout on the official GovApps website.");
    const state=await paymentAction("begin_checkout",actor,invoice.id,invoice.event_id,{mode:cfg.mode}) as EmsInvoice;
    if(state.status==="paid")return Response.json({paid:true},{headers});
