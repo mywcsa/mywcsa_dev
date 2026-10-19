@@ -63,7 +63,7 @@ export async function POST(request:Request){
   const visible=await rows(ids,false);
   const msg=visible.find(m=>m.id===body.messageId&&m.event_id===eventId);
   if(!msg)throw new EmsError(404,"Message does not belong to this case.");
-  if(!["manager","executive"].includes(actor.role||""))throw new EmsError(403,"Appointed manager/executive authority is required.");
+  if(!["manager","super_admin","executive"].includes(actor.role||""))throw new EmsError(403,"Appointed manager/executive authority is required.");
   if(name==="approve"){
     const record=await action("approve",actor,eventId,msg.id);
     return Response.json({message:record},{headers});
