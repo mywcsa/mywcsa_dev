@@ -21,7 +21,7 @@ const sectionCategory:Record<string,string>={
 const categories=[["general","General"],["application","Applications"],["review","Assessments"],["safety","Safety & Inspections"],["vendor","Contractors & Vendors"],["personnel","Personnel"],["logistics","Logistics"],["accreditation","Access & Accreditation"],["operations","Operations"],["incident","Incidents"],["certificate","Documents & Certification"],["finance","Finance"],["correspondence","Correspondence"]];
 const readable=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
 const date=(d?:string|null)=>d?new Date(d.length===10?d+"T12:00:00":d).toLocaleDateString("en-ZA",{day:"2-digit",month:"short",year:"numeric"}):"—";
-const canReview=(role?:string)=>["executive","registrar","manager","assessor","compliance"].includes(role||"");
+const canReview=(role?:string)=>["super_admin","executive","registrar","manager","assessor","compliance"].includes(role||"");
 const isEditable=(role?:string)=>role!=="auditor"&&role!=="viewer";
 const isWorkView=(s:string)=>s==="My Work"||s==="Dashboard";
 const isRegistryView=(s:string)=>["Event Applications","Event Registry","Reviews & Endorsements","Safety & Compliance","Inspections & Corrective Actions"].includes(s);
