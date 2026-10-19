@@ -5,7 +5,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const headers={"Cache-Control":"private, no-store"};
 const uuid=(s:unknown):s is string=>typeof s==="string"&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(s);
-const roles=["manager","executive","compliance","certificates","registrar"];
+const roles=["manager","super_admin","executive","compliance","certificates","registrar"];
 type EventDoc={id:string;event_id:string;file_name:string;file_size:number;mime_type:string;storage_path:string};
 type ArchiveRecord={id:string;event_id:string;document_id:string;state:"processing"|"archived"|"uncertain";archive_name:string|null;file_sha256:string|null;archived_at:string|null;created_at:string};
 function failure(e:unknown){return Response.json({error:e instanceof EmsError?e.message:"SharePoint archive service is unavailable."},{status:e instanceof EmsError?e.status:503,headers});}
