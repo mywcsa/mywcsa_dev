@@ -6,7 +6,7 @@ type Doc={id:string;event_id:string;document_type:string;file_name:string;mime_t
 type Archive={id:string;event_id:string;document_id:string;state:"processing"|"archived"|"uncertain";archive_name:string|null;file_sha256:string|null;archived_at:string|null;};
 const kinds=[["application","Application and registration"],["safety","Safety and security"],["medical","Medical and emergency planning"],["venue","Venue and landowner documents"],["insurance","Insurance and liability"],["programme","Event programme"],["compliance","Compliance and permits"],["other","Other supporting evidence"]];
 export default function DocumentsCentre({actor,events}:{actor:EmsActor;events:EmsEvent[]}){
- const canArchive=actor.mode==="staff"&&["manager","executive","compliance","certificates","registrar"].includes(actor.role||"");
+ const canArchive=actor.mode==="staff"&&["manager","super_admin","executive","compliance","certificates","registrar"].includes(actor.role||"");
  const[archives,setArchives]=useState<Archive[]>([]);
  const[archiveEnabled,setArchiveEnabled]=useState(false);
  const[archiving,setArchiving]=useState("");
