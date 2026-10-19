@@ -65,8 +65,25 @@ async function gatewayRequest(path:string, key:string, method:"GET"|"POST",data?
    throw new EmsError(502,"Paystack could not complete this request. Check payment status before retrying.");
  return body.data as Record<string,unknown>;
 }
-export async function initializeEventCheckout(invoice:EmsInvoice){
+/**
+ * Explicit EMS live-payment release gate.
+ * Existing membership gateway credentials/mode remain unchanged.
+ * Closing this gate must NOT suppress verification or settlement of
+ * transactions that were already initiated.
+ */
+export function checkoutConfig(){
  const cfg=gatewayConfig();
+ if(cfg.mode==="live"){
+  if(process.env.WCDA_EVENTS_LIVE_PAYMENTS_ENABLED!=="true")
+   throw new EmsError(503,"MyWCDA Events live payments are awaiting finance launch authorisation. No charge has been made.");
+  if(cfg.origin!=="https://govapps.wcsports.co.za")
+   throw new EmsError(503,"Live event payments require the verified official GovApps callback origin.");
+ }
+ return cfg;
+}
+
+export async function initializeEventCheckout(invoice:EmsInvoice){
+ const cfg=checkoutConfig();
  const result=await gatewayRequest("initialize",cfg.key,"POST",{
    reference:invoice.reference,email:invoice.customer_email,
    amount:invoice.amount_cents,currency:"ZAR",
