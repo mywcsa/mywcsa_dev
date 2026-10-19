@@ -39,7 +39,7 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
   const [notice,setNotice]=useState("");
   const [showForm,setShowForm]=useState(false);
   const isStaffViewer=actor.mode==="staff" && actor.role==="viewer";
-  const canCreate=actor.mode==="organiser"||["registrar","manager","assessor","intake","compliance","operations","finance","certificates"].includes(actor.role||"");
+  const canCreate=actor.mode==="organiser"||["super_admin","registrar","manager","assessor","intake","compliance","operations","finance","certificates"].includes(actor.role||"");
   const registryTabs=["Dashboard","Event Applications","Event Registry","My Events"];
   const navigable=groups.flatMap(g=>g.items);
   const matches=query.trim()?navigable.filter(x=>x.toLowerCase().includes(query.toLowerCase())).slice(0,5):[];
