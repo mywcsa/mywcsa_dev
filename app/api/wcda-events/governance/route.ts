@@ -33,7 +33,7 @@ export async function GET(request:Request) {
   ]);
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Johannesburg",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
   const sign=authority[0];
-  const mayDecide=actor.role==="executive"||actor.role==="manager";
+  const mayDecide=["super_admin","executive","manager"].includes(actor.role||"");
   const activeSigner=Boolean(mayDecide&&sign?.active&&sign?.may_endorse&&String(sign.effective_from)<=today&&(!sign.expires_on||String(sign.expires_on)>=today));
   return Response.json({work,drafts,reviews,role:actor.role,activeSigner},{headers});
  }catch(error){return errorResponse(error);}
