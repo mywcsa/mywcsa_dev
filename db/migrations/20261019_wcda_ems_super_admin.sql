@@ -100,7 +100,7 @@ begin
     jsonb_build_object('event_reference',v_e.reference,'result_id',coalesce(v_result->>'id',''),'payload',p_payload));
  return v_result;
 end;
-$function$
+$function$;
 
 
 -- Existing wcda_ems_governance_action actions extended to include super_admin, same human checks.
@@ -234,7 +234,7 @@ begin
   jsonb_build_object('result',v_result,'module',coalesce(v_module,''),'decision',coalesce(v_status,'')));
  return v_result;
 end;
-$function$
+$function$;
 
 
 -- Existing wcda_ems_invoice_action actions extended to include super_admin, same human checks.
@@ -399,7 +399,7 @@ begin
  end if;
  return to_jsonb(v_invoice);
 end;
-$function$
+$function$;
 
 
 -- Existing wcda_ems_correspondence_action actions extended to include super_admin, same human checks.
@@ -469,7 +469,7 @@ begin
   jsonb_build_object('messageId',v_row.id,'status',v_row.status,'kind',v_row.kind));
  return to_jsonb(v_row);
 end;
-$function$
+$function$;
 
 
 -- Existing wcda_ems_archive_action actions extended to include super_admin, same human checks.
@@ -526,7 +526,7 @@ begin
   jsonb_build_object('documentId',v_row.document_id,'archiveId',v_row.id,'state',v_row.state));
  return to_jsonb(v_row);
 end;
-$function$
+$function$;
 
 
 -- Existing wcda_ems_capture_office_event actions extended to include super_admin, same human checks.
@@ -619,6 +619,6 @@ begin
   return jsonb_build_object('id',v_event.id,'reference',v_reference,'status',v_event.status,
     'captureChannel',v_channel,'dateReceived',v_received,'createdAt',v_event.created_at);
 end;
-$function$
+$function$;
 
 
