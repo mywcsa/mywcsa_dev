@@ -17,8 +17,8 @@ const title=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase()
 const day=(v:string|null)=>v?new Date(v).toLocaleString("en-ZA",{dateStyle:"medium",timeStyle:"short"}):"—";
 export default function CorrespondenceCentre({actor,events}:{actor:EmsActor;events:EmsEvent[]}){
  const isStaff=actor.mode==="staff";
- const canCompose=isStaff&&["registrar","manager","executive","assessor","operations","compliance","finance","certificates"].includes(actor.role||"");
- const canApprove=isStaff&&["manager","executive"].includes(actor.role||"");
+ const canCompose=isStaff&&["registrar","manager","super_admin","executive","assessor","operations","compliance","finance","certificates"].includes(actor.role||"");
+ const canApprove=isStaff&&["manager","super_admin","executive"].includes(actor.role||"");
  const[records,setRecords]=useState<CaseMessage[]>([]);
  const[enabled,setEnabled]=useState(false);
  const[loading,setLoading]=useState(true);
