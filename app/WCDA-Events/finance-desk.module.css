@@ -44,3 +44,20 @@
 .footNote a{color:#001484;text-decoration:underline}
 .root button:disabled{opacity:.52;cursor:not-allowed}
 @media(max-width:640px){.formGrid{grid-template-columns:1fr}.wide{grid-column:auto}.invoiceTop{flex-direction:column}.amount{font-size:17px}.card{padding:15px}}
+
+
+/* Dedicated internal finance connectivity lab — separate from public billing. */
+.pilot{background:linear-gradient(125deg,#001484,#172a89 54%,#123e79);border-radius:22px;padding:clamp(20px,3vw,32px);color:#fff;margin:18px 0 24px;box-shadow:0 22px 45px rgba(0,20,132,.2);font-family:Poppins,Arial,sans-serif}
+.pilotHeading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pilotHeading span{font-size:10px;font-weight:750;letter-spacing:1.3px;color:#b7d6ff}
+.pilotHeading strong{font-size:30px;letter-spacing:-1px;color:white}
+.pilot h3{font-size:22px;letter-spacing:-.7px;margin:10px 0 7px;color:white}
+.pilot p{font-size:12px;line-height:1.8;color:#d6e7ff;max-width:760px}
+.pilot p strong{color:white}
+.pilotActions{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:24px 0 10px}
+.pilotActions label{display:grid;gap:7px;flex:1 1 300px;color:#e2edff;font-size:11px;font-weight:650}
+.pilotActions select{padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.34);background:#f5faff;color:#142952;font:inherit;width:100%}
+.pilotActions button{background:#fff;color:#001484;border:0;border-radius:12px;font:inherit;font-size:12px;font-weight:750;padding:14px 18px;cursor:pointer}
+.pilotActions button:disabled{opacity:.5;cursor:not-allowed}
+.pilot small{color:#bdd5fa}
+.pilotLabel{display:inline-flex;background:#edefff;color:#001484;border:1px solid #b8c6ff;padding:5px 9px;border-radius:50px;font-size:10px;font-weight:750;letter-spacing:.06em}
