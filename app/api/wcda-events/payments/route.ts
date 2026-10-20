@@ -43,6 +43,22 @@ export async function POST(request:Request){
   const {actor,events}=await context();
   const ids=events.map(x=>x.id);
   const action=body.action;
+  if(action==="prepare_r1_pilot"){
+   // Only the identified tester can create a one-rand connectivity invoice
+   // against an office application they personally captured.
+   if(actor.mode!=="staff"||actor.role!=="super_admin"||actor.email!=="ebranch@wcsports.co.za")
+    throw new EmsError(403,"Only the authorised R1 pilot tester may prepare this test invoice.");
+   if(!uuid(body.eventId)||!ids.includes(body.eventId))
+    throw new EmsError(404,"Capture and select your own office test application first.");
+   const event=events.find(e=>e.id===body.eventId);
+   if(!event||event.captured_by_email?.toLowerCase()!==actor.email)
+    throw new EmsError(403,"The pilot is limited to office applications captured by your account.");
+   const invoice=await import("@/lib/ems/server").then(m=>m.emsDatabase<Record<string,unknown>>(
+    "rpc/wcda_ems_prepare_r1_pilot",{
+      method:"POST",body:JSON.stringify({p_actor_id:actor.id,p_actor_email:actor.email,p_event_id:event.id})
+    }));
+   return Response.json({invoice},{status:201,headers});
+  }
   if(action==="prepare"){
    if(actor.mode!=="staff"||!privileged(actor.role))throw new EmsError(403,"Only an authorised finance officer may prepare an invoice.");
    if(!uuid(body.eventId)||!ids.includes(body.eventId))throw new EmsError(404,"Choose an authorised event record.");
@@ -63,10 +79,17 @@ export async function POST(request:Request){
    return Response.json({invoice:result},{headers});
   }
   if(action==="checkout"){
-   if(actor.mode!=="organiser")throw new EmsError(403,"Sign in as the event organiser to pay.");
    const invoice=await currentInvoice(body.invoiceId,ids);
+   const testPayer=actor.mode==="staff"&&actor.role==="super_admin"
+    &&actor.email==="ebranch@wcsports.co.za"&&invoice.is_pilot_test===true
+    &&invoice.amount_cents===100&&invoice.customer_email.toLowerCase()===actor.email
+    &&events.some(e=>e.id===invoice.event_id&&e.captured_by_email?.toLowerCase()===actor.email);
+   if(actor.mode!=="organiser"&&!testPayer)
+    throw new EmsError(403,"Only the linked organiser or the authorised R1 pilot tester may pay.");
+   if(actor.mode==="organiser"&&invoice.is_pilot_test)
+    throw new EmsError(403,"Internal connectivity-test invoices are not payable by organisers.");
    if(invoice.status==="paid")return Response.json({paid:true},{headers});
-   const cfg=checkoutConfig();
+   const cfg=checkoutConfig(invoice);
    if(origin!==cfg.origin)throw new EmsError(403,"Open checkout on the official GovApps website.");
    const state=await paymentAction("begin_checkout",actor,invoice.id,invoice.event_id,{mode:cfg.mode}) as EmsInvoice;
    if(state.status==="paid")return Response.json({paid:true},{headers});

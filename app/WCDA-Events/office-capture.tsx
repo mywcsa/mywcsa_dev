@@ -19,7 +19,7 @@ const initial=():CaptureForm=>({
 const categories=["Festival","Sport","Concert","Market","Conference","Cultural","Community","Religious","Exhibition","Other"];
 const channels=[{value:"office_walk_in",label:"Walk-in at WCDA office"},{value:"office_paper",label:"Paper application received"},{value:"office_email",label:"Application emailed to office"},{value:"staff_assisted",label:"Employee-assisted registration"}];
 const brief=(e:unknown)=>e instanceof Error?e.message:"Unable to submit the application.";
-export default function OfficeCapture({actor,events,onCaptured}:{actor:EmsActor;events:EmsEvent[];onCaptured:(reference:string)=>void}){
+export default function OfficeCapture({actor,events,onCaptured,onFinance}:{actor:EmsActor;events:EmsEvent[];onCaptured:(reference:string)=>void;onFinance:()=>void}){
  const [form,setForm]=useState<CaptureForm>(initial);
  const [stage,setStage]=useState(1);
  const [saving,setSaving]=useState(false);
@@ -27,10 +27,19 @@ export default function OfficeCapture({actor,events,onCaptured}:{actor:EmsActor;
  const [created,setCreated]=useState<{reference:string;id:string;status:string}|null>(null);
  const update=(key:keyof CaptureForm,value:string)=>setForm(s=>({...s,[key]:value}));
  const duplicate=events.filter(e=>e.name.trim().toLowerCase()===form.name.trim().toLowerCase()&&e.start_date===form.startDate&&e.venue_name.trim().toLowerCase()===form.venueName.trim().toLowerCase());
- const validStage1=form.organiserName.trim().length>=2&&form.contactName.trim().length>=2&&!!(form.contactEmail.trim()||form.contactPhone.trim())&&!!form.dateReceived;
- const validStage2=form.name.trim().length>=3&&form.venueName.trim().length>=2&&!!form.startDate&&!!form.endDate&&form.endDate>=form.startDate;
+ const validStage1=form.organiserName.trim().length>=2&&form.contactName.trim().length>=2
+   &&!!(form.contactEmail.trim()||form.contactPhone.trim())&&!!form.dateReceived
+   &&form.dateReceived<=todaySA()
+   &&(!form.contactEmail||/^[^ @]+@[^ @]+\.[^ @]+$/.test(form.contactEmail))
+   &&(!form.contactPhone||/^[0-9+() .-]{7,30}$/.test(form.contactPhone));
+ const validStage2=form.name.trim().length>=3&&form.venueName.trim().length>=2
+   &&!!form.startDate&&!!form.endDate&&form.endDate>=form.startDate;
  async function submit(e:FormEvent<HTMLFormElement>){
-   e.preventDefault();if(saving||!validStage1||!validStage2)return;
+   e.preventDefault();
+   if(saving)return;
+   if(!validStage1){setStage(1);setError("Check the received date and organiser contact details.");return;}
+   if(!validStage2){setStage(2);setError("Complete the event, venue and valid event date fields.");return;}
+   if(duplicate.length){setStage(3);setError("Review the possible duplicate before registering a second event.");return;}
    setSaving(true);setError("");
    try{
     const response=await fetch("/api/wcda-events/office-capture",{
@@ -48,6 +57,11 @@ export default function OfficeCapture({actor,events,onCaptured}:{actor:EmsActor;
     <p>This event has been entered into the EMS registry for formal assessment.</p>
     <div className={styles.receipt}><small>OFFICIAL EMS REFERENCE</small><strong>{created.reference}</strong><span>Status: Submitted — awaiting assessment</span><span>Capturing employee: {actor.name} ({actor.email})</span><span>Received: {form.dateReceived} · {channels.find(c=>c.value===form.captureChannel)?.label}</span></div>
     <p className={styles.warning}>This is an administrative capture confirmation, not an endorsement, licence, certificate or approval.</p>
+    {actor.email.toLowerCase()==="ebranch@wcsports.co.za"&&<div className={styles.nextAction}>
+       <strong>Next: your R1 payment connectivity test</strong>
+       <p>Go to Finance & Payments to prepare one R1 internal pilot invoice. A different manager must approve it before you can open Paystack checkout.</p>
+       <button type="button" onClick={onFinance}>Open Finance & R1 test →</button>
+    </div>}
     <div className={styles.actions}><button type="button" onClick={()=>{setCreated(null);setForm(initial());setStage(1);setError("");}}>Capture another event</button><button className={styles.outline} type="button" onClick={()=>{void navigator.clipboard.writeText(created.reference);}}>Copy reference</button></div>
   </section>;
  return <section className={styles.panel} aria-label="Internal employee event capture">

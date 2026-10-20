@@ -7,7 +7,7 @@ export type EmsInvoice = {
   status: "pending_approval"|"approved_for_payment"|"checkout_pending"|"paid"|"cancelled";
   prepared_by_email: string; approved_by_email: string|null; approved_at: string|null;
   approval_reason: string|null; payment_mode: "test"|"live"|null;
-  checkout_url: string|null; paid_at: string|null; created_at: string;
+  checkout_url: string|null; paid_at: string|null; created_at: string; is_pilot_test?: boolean;
 };
 export type EmsReceipt = {
   id: string; invoice_id: string; receipt_reference: string;
@@ -43,7 +43,7 @@ export async function listEventInvoices(ids:string[]) {
  if(!ids.length)return [] as EmsInvoice[];
  const uuids=ids.filter(id=>/^[a-f0-9-]{36}$/i.test(id)).slice(0,100);
  if(!uuids.length)return [] as EmsInvoice[];
- return emsDatabase<EmsInvoice[]>("wcda_ems_invoices?select=id,event_id,reference,description,amount_cents,currency,customer_email,status,prepared_by_email,approved_by_email,approved_at,approval_reason,payment_mode,checkout_url,paid_at,created_at&event_id=in.("+uuids.join(",")+")&order=created_at.desc");
+ return emsDatabase<EmsInvoice[]>("wcda_ems_invoices?select=id,event_id,reference,description,amount_cents,currency,customer_email,status,prepared_by_email,approved_by_email,approved_at,approval_reason,payment_mode,checkout_url,paid_at,created_at,is_pilot_test&event_id=in.("+uuids.join(",")+")&order=created_at.desc");
 }
 export async function listReceipts(ids:string[]) {
  if(!ids.length)return [] as EmsReceipt[];
@@ -71,24 +71,28 @@ async function gatewayRequest(path:string, key:string, method:"GET"|"POST",data?
  * Closing this gate must NOT suppress verification or settlement of
  * transactions that were already initiated.
  */
-export function checkoutConfig(){
- // Separate checkout release gate: blocks test *and* live checkout in production
- // unless explicitly released. Verification/settlement of already-started payments
- // must remain available even if checkout is disabled.
- if(process.env.WCDA_EVENTS_CHECKOUT_ENABLED!=="true")
-  throw new EmsError(503,"MyWCDA Events payment checkout is not yet released. No charge has been made.");
- const cfg=gatewayConfig();
- if(cfg.mode==="live"){
-  if(process.env.WCDA_EVENTS_LIVE_PAYMENTS_ENABLED!=="true")
-   throw new EmsError(503,"MyWCDA Events live payments are awaiting finance launch authorisation. No charge has been made.");
-  if(cfg.origin!=="https://govapps.wcsports.co.za")
-   throw new EmsError(503,"Live event payments require the verified official GovApps callback origin.");
+export function checkoutConfig(invoice?:EmsInvoice){
+ // Only the R1 internal pilot can bypass general release gates; settlement is independent.
+ const isPilot=invoice?.is_pilot_test===true
+   && invoice.amount_cents===100
+   && invoice.customer_email.toLowerCase()==="ebranch@wcsports.co.za";
+ if(isPilot){
+  if(process.env.WCDA_EVENTS_R1_PILOT_ENABLED!=="true")
+   throw new EmsError(503,"The R1 internal pilot has not been enabled for this deployment.");
+ } else if(process.env.WCDA_EVENTS_CHECKOUT_ENABLED!=="true"){
+  throw new EmsError(503,"MyWCDA Events checkout is not yet released for general event fees.");
  }
+ const cfg=gatewayConfig();
+ if(cfg.mode==="live" && !isPilot &&
+    process.env.WCDA_EVENTS_LIVE_PAYMENTS_ENABLED!=="true")
+  throw new EmsError(503,"General live event payments are awaiting finance release authorisation.");
+ if(cfg.origin!=="https://govapps.wcsports.co.za")
+  throw new EmsError(503,"WCDA Events checkout requires the official GovApps payment origin.");
  return cfg;
 }
 
 export async function initializeEventCheckout(invoice:EmsInvoice){
- const cfg=checkoutConfig();
+ const cfg=checkoutConfig(invoice);
  const result=await gatewayRequest("initialize",cfg.key,"POST",{
    reference:invoice.reference,email:invoice.customer_email,
    amount:invoice.amount_cents,currency:"ZAR",

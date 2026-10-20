@@ -27,6 +27,22 @@ const isWorkView=(s:string)=>s==="My Work"||s==="Dashboard";
 const isRegistryView=(s:string)=>["Event Applications","Event Registry","Reviews & Endorsements","Safety & Compliance","Inspections & Corrective Actions"].includes(s);
 const logError=(e:unknown)=>e instanceof Error?e.message:"Operation failed. Please retry.";
 
+const sectionIdentity:Record<string,{serial:string,icon:string,headline:string,description:string,theme:string}>={
+ "My Work":{serial:"A",icon:"✓",headline:"Your work, prioritised",description:"Assigned duties, due dates and accountable case handling.",theme:"work"},
+ "Event Applications":{serial:"B",icon:"▤",headline:"Application processing",description:"Receive, validate and review submitted event applications.",theme:"registry"},
+ "Event Registry":{serial:"C",icon:"▦",headline:"Official event register",description:"Search case references and maintain event records and audit history.",theme:"registry"},
+ "Reviews & Endorsements":{serial:"D",icon:"✧",headline:"Decisions with accountability",description:"Assessment records and delegated endorsement decisions are separate from payment.",theme:"governance"},
+ "Safety & Compliance":{serial:"E",icon:"✚",headline:"Safety oversight",description:"Coordinate event safety checks, risk concerns and compliance actions.",theme:"safety"},
+ "Inspections & Corrective Actions":{serial:"F",icon:"◈",headline:"Inspection control",description:"Record inspection findings, remedial tasks and follow-up actions.",theme:"safety"},
+ "Contractors & Vendors":{serial:"G",icon:"◇",headline:"Supplier coordination",description:"Manage contractor and vendor tasks linked to event cases.",theme:"people"},
+ "Personnel & Rosters":{serial:"H",icon:"◎",headline:"Personnel operations",description:"Assign event staffing tasks and monitor accountable personnel work.",theme:"people"},
+ "Logistics & Facilities":{serial:"I",icon:"▣",headline:"Resource and venue logistics",description:"Coordinate equipment, facilities and delivery checklists.",theme:"operations"},
+ "Access & Accreditation":{serial:"J",icon:"◉",headline:"Accreditation oversight",description:"Review event-related access requests, badges and assigned tasks.",theme:"operations"},
+ "Live Operations Centre":{serial:"K",icon:"◉",headline:"Live event operations",description:"Follow active event cases and on-the-day operational tasks.",theme:"live"},
+ "Incidents & Emergencies":{serial:"L",icon:"!",headline:"Incident coordination",description:"Record operational incidents and follow-up tasks; emergency calls remain external.",theme:"safety"},
+ "Letters & Memoranda":{serial:"M",icon:"✉",headline:"Official letters and memoranda",description:"Prepare case-linked correspondence subject to independent review.",theme:"documents"},
+ "Certificates & Verification":{serial:"N",icon:"◆",headline:"Verification and certification",description:"Manage records supporting formally delegated certificate workflows.",theme:"documents"},
+};
 export default function StaffConsole({actor,section,onChange}:{actor:EmsActor;section:string;onChange?:()=>void}){
  const [events,setEvents]=useState<Case[]>([]);
  const [tasks,setTasks]=useState<Task[]>([]);
@@ -55,6 +71,7 @@ export default function StaffConsole({actor,section,onChange}:{actor:EmsActor;se
  const chosen=details?.event?.id===selected?details:null;
  const category=sectionCategory[section]||"";
  const visibleTasks=useMemo(()=>tasks.filter(t=>!category||t.category===category),[tasks,category]);
+ const identity=sectionIdentity[section];
  const matched=events.filter(e=>(e.reference+" "+e.name+" "+e.organiser_name+" "+e.venue_name+" "+e.status).toLowerCase().includes(search.toLowerCase()));
  const upcoming=events.filter(e=>e.end_date>=new Date().toISOString().slice(0,10));
  const openTasks=tasks.filter(t=>t.status!=="completed");
@@ -111,6 +128,14 @@ export default function StaffConsole({actor,section,onChange}:{actor:EmsActor;se
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="WCDA-EMS-event-registry.csv";a.click();URL.revokeObjectURL(url);
  }
  return <div className={styles.console} aria-label="WCDA employee case management">
+  {identity&&<section className={styles.moduleHero} data-theme={identity.theme}>
+    <div className={styles.moduleEmblem}>{identity.icon}</div><div>
+      <small>MYWCDA / {identity.serial} / {section.toUpperCase()}</small>
+      <h2>{identity.headline}</h2>
+      <p>{identity.description}</p>
+    </div>
+    <aside><b>{visibleTasks.length}</b><span>{category?"Module tasks":"Linked tasks"}</span></aside>
+  </section>}
   {message&&<div className={styles.message} role="status">{message}<button type="button" onClick={()=>setMessage("")} aria-label="Dismiss message">×</button></div>}
   <div className={styles.top}>
    <div><span className={styles.eyebrow}>CONNECTED EMPLOYEE WORKSPACE</span><h2>{section==="Dashboard"?"Work & Case Control":section}</h2><p>{actor.role==="intake"?"Personal intake access: your own event cases and work. Formal approval requires a delegated role.":"Track the event lifecycle, assign work, record assessments and retain an audit trail."}</p></div>
