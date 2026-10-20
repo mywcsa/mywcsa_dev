@@ -12,6 +12,7 @@ import OrganiserApplication from "./organiser-application";
 import DocumentsCentre from "./documents-centre";
 import CorrespondenceCentre from "./correspondence-centre";
 import InsightViews, {type Area as InsightArea} from "./insight-views";
+import OrganiserOperations from "./organiser-operations";
 
 type NavGroup = { name: string; items: string[] };
 const internal: NavGroup[] = [
@@ -122,7 +123,9 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
         {actor.mode!=="staff"&&tab==="Payments & Invoices"&&<FinanceDesk actor={actor} events={events}/>}
         {actor.mode!=="staff"&&tab==="Documents & Compliance"&&<DocumentsCentre actor={actor} events={events}/>}
         {actor.mode!=="staff"&&tab==="Messages & Support"&&<CorrespondenceCentre actor={actor} events={events}/>}
-        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&tab!=="Payments & Invoices"&&tab!=="Documents & Compliance"&&tab!=="Messages & Support"&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
+        {actor.mode!=="staff"&&(tab==="Event Operations"||tab==="Letters & Certificates")&&<OrganiserOperations
+          section={tab} events={events} onDocuments={()=>setTab("Documents & Compliance")} onMessages={()=>setTab("Messages & Support")}/>}
+        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&tab!=="Payments & Invoices"&&tab!=="Documents & Compliance"&&tab!=="Messages & Support"&&tab!=="Event Operations"&&tab!=="Letters & Certificates"&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
           <a href="mailto:finances@wcsports.co.za">Finance · finances@wcsports.co.za</a>
           <a href="mailto:WCDA.Certificates@wcsports.co.za">Certificates · WCDA.Certificates@wcsports.co.za</a>
           <a href="mailto:WCDAEms@govapps.wcsports.co.za">System · WCDAEms@govapps.wcsports.co.za</a>
