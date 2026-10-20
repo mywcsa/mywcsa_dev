@@ -138,12 +138,12 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
    },
    memorandum:{
     title:"INTERNAL EVENTS ASSESSMENT MEMORANDUM",
-    opening:"To: [Responsible directorate / official]\\nFrom: [Preparing official and unit]\\nSubject: Case assessment and required action",
+    opening:"To: [Responsible directorate / official]\nFrom: [Preparing official and unit]\nSubject: Case assessment and required action",
     notes:"Purpose, verified findings, recommendation, required actions and responsible official: [Complete from case record]."
    },
    other:{
     title:"DRAFT EVENT CASE CORRESPONDENCE",
-    opening:"To: [Recipient]\\nPurpose: [Describe required response or notification]",
+    opening:"To: [Recipient]\nPurpose: [Describe required response or notification]",
     notes:"State only verified event information and requested actions. This draft has not been approved for official dispatch."
    },
   };
@@ -170,7 +170,7 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
    "Issue date: [Not issued]",
    "",
    "DRAFT — NOT ISSUED. Not a permit, signed approval or issued certificate."
-  ].join("\\n"));
+  ].join("\n"));
   setNotice("The "+nice(kind)+" template is ready to edit. Review all bracketed fields before saving.");
  }
  function exportDraft(d:Draft){
@@ -215,7 +215,7 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
  }
  async function copyDraft(d:Draft){
   try{
-   await navigator.clipboard.writeText("DRAFT — NOT ISSUED\\n"+reference+"\\n"+d.title+"\\n\\n"+d.body+"\\n\\nNOT A PERMIT, SIGNED ENDORSEMENT OR ISSUED CERTIFICATE.");
+   await navigator.clipboard.writeText("DRAFT — NOT ISSUED\n"+reference+"\n"+d.title+"\n\n"+d.body+"\n\nNOT A PERMIT, SIGNED ENDORSEMENT OR ISSUED CERTIFICATE.");
    setNotice("Draft text copied with its non-issued notice.");
   }catch{setNotice("Copy was blocked by your browser. Use the PDF download or select the preview text.");}
  }
