@@ -23,6 +23,7 @@ export default function DocumentWorkbench({actor,events,section,onCapture}:{
  const [eventId,setEventId]=useState("");
  const [available,setAvailable]=useState<string[]>([]);
  const [loadingCounts,setLoadingCounts]=useState(false);
+ const [revision,setRevision]=useState(0);
  const event=useMemo(()=>events.find(x=>x.id===eventId),[events,eventId]);
  const canDraft=draftingRoles.includes(actor.role||"");
  useEffect(()=>{
@@ -39,7 +40,7 @@ export default function DocumentWorkbench({actor,events,section,onCapture}:{
    if(!cancelled)setAvailable((json.documents||[]).filter(d=>d.event_id===eventId).map(d=>d.document_type));
   }).catch(()=>{if(!cancelled)setAvailable([])}).finally(()=>{if(!cancelled)setLoadingCounts(false)});
   return()=>{cancelled=true};
- },[eventId,view]);
+ },[eventId,view,revision]);
  return <section className={styles.shell} aria-label="WCDA document centre">
   <header className={styles.hero}>
     <div><span className={styles.kicker}>MYWCDA EVENTS / CONTROLLED RECORDS</span>
@@ -78,7 +79,7 @@ export default function DocumentWorkbench({actor,events,section,onCapture}:{
           <em>{available.includes(g.key)?"On file":"Not yet on file"}</em>
         </div>)}</div>
       </section>
-      <DocumentsCentre key={eventId} actor={actor} events={events} initialEventId={eventId}/>
+      <DocumentsCentre key={eventId} actor={actor} events={events} initialEventId={eventId} onUploaded={()=>setRevision(v=>v+1)}/>
     </div>}
     {view==="drafts"&&(canDraft&&event?<div className={styles.draftArea}>
       <div className={styles.draftExplainer}><strong>Document Draft Studio</strong><p>Create a WCDA-branded, case-specific draft, save it in the EMS register and export a watermarked PDF. Drafts do <b>not</b> issue approvals, signatures, certificates or permits.</p></div>
