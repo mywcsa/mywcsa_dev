@@ -20,6 +20,9 @@ export type EmsEvent = {
   name: string;
   category: string;
   venue_name: string;
+  venue_address?: string;
+  captured_by_email?: string|null;
+  capture_channel?: string;
   start_date: string;
   end_date: string;
   status: string;
