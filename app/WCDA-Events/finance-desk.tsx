@@ -21,11 +21,23 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
  const[message,setMessage]=useState("");
  const[eventId,setEventId]=useState("");
  const[pilotEventId,setPilotEventId]=useState("");
+ const[diagnostics,setDiagnostics]=useState<{mode:"test"|"live"|null;configured:boolean;providerReachable:boolean;pilotEnabled:boolean;r1Ready:boolean;message:string}|null>(null);
+ const[checking,setChecking]=useState(false);
  const[amount,setAmount]=useState("");
  const[description,setDescription]=useState("");
  const[reason,setReason]=useState("");
  const[activeInvoice,setActiveInvoice]=useState("");
  const unbilled=useMemo(()=>events.filter(e=>!records.some(i=>i.event_id===e.id)),[events,records]);
+ async function checkPaystack(){
+   setChecking(true);setError("");
+   try{
+    const r=await fetch("/api/wcda-events/payments/health",{cache:"no-store"});
+    const d=await r.json() as {error?:string;mode:"test"|"live"|null;configured:boolean;providerReachable:boolean;pilotEnabled:boolean;r1Ready:boolean;message:string};
+    if(!r.ok)throw Error(d.error||"Gateway check unavailable.");
+    setDiagnostics(d);
+   }catch(e){setError(e instanceof Error?e.message:"Gateway check unavailable.");}
+   finally{setChecking(false);}
+ }
  const byEvent=(id:string)=>events.find(e=>e.id===id);
  const pilotEligible=unbilled.filter(e=>e.captured_by_email?.toLowerCase()===actor.email.toLowerCase()
    &&e.capture_channel!=="organiser_portal");
@@ -115,6 +127,14 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
     <p>Capture an office application under this account, then create exactly one R1 test invoice for it.
       A <strong>different manager</strong> must approve the invoice before your Paystack checkout becomes available.
       Use your own permitted payment method. This test does not approve an event, issue a permit or set a public fee.</p>
+    <div className={styles.checks}>
+      <button type="button" onClick={()=>void checkPaystack()} disabled={checking}>
+        {checking?"Checking securely…":"Check live Paystack connection ↗"}
+      </button>
+      {diagnostics&&<div role="status"><strong>{diagnostics.r1Ready?"Gateway connection verified":"Gateway needs attention"}</strong>
+       <span>Mode: {diagnostics.mode?.toUpperCase()||"Not configured"} · Provider: {diagnostics.providerReachable?"Connected":"Unconfirmed"} · R1 pilot: {diagnostics.pilotEnabled?"Enabled":"Not enabled"}</span>
+       <small>{diagnostics.message}</small></div>}
+    </div>
     <div className={styles.pilotActions}>
       <label>Choose your captured event
         <select aria-label="Choose your office test event" value={pilotEventId} onChange={e=>setPilotEventId(e.target.value)}>
