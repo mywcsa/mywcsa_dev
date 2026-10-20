@@ -66,6 +66,21 @@ export async function POST(request:Request){
    const description=typeof body.description==="string"?body.description.trim():"";
    if(typeof amountCents!=="number"||!Number.isSafeInteger(amountCents)||amountCents<100||amountCents>100000000
       ||description.length<8||description.length>500)throw new EmsError(400,"Enter a valid charge and a description of at least 8 characters.");
+   // A R1 invoice created from Christiaan's own office capture is always the
+   // restricted internal connectivity pilot, even if the generic fee form was used.
+   // The database independently verifies the actor, event and exact R1 amount.
+   const ownOfficeCapture=actor.mode==="staff"&&actor.role==="super_admin"
+     &&actor.email==="ebranch@wcsports.co.za"&&amountCents===100
+     &&events.some(e=>e.id===body.eventId&&e.captured_by_email?.toLowerCase()===actor.email
+       &&e.capture_channel!=="organiser_portal");
+   if(ownOfficeCapture){
+    const {emsDatabase}=await import("@/lib/ems/server");
+    const pilot=await emsDatabase<EmsInvoice>("rpc/wcda_ems_prepare_r1_pilot",{
+      method:"POST",
+      body:JSON.stringify({p_actor_id:actor.id,p_actor_email:actor.email,p_event_id:body.eventId})
+    });
+    return Response.json({invoice:pilot},{status:201,headers});
+   }
    const result=await paymentAction("prepare",actor,null,body.eventId,{amountCents,description});
    return Response.json({invoice:result}, {status:201,headers});
   }
