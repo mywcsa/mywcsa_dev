@@ -5,13 +5,15 @@ import styles from "./documents-centre.module.css";
 type Doc={id:string;event_id:string;document_type:string;file_name:string;mime_type:string;file_size:number;uploaded_by_email:string;created_at:string};
 type Archive={id:string;event_id:string;document_id:string;state:"processing"|"archived"|"uncertain";archive_name:string|null;file_sha256:string|null;archived_at:string|null;};
 const kinds=[["application","Application and registration"],["safety","Safety and security"],["medical","Medical and emergency planning"],["venue","Venue and landowner documents"],["insurance","Insurance and liability"],["programme","Event programme"],["compliance","Compliance and permits"],["other","Other supporting evidence"]];
-export default function DocumentsCentre({actor,events}:{actor:EmsActor;events:EmsEvent[]}){
+export default function DocumentsCentre({actor,events,initialEventId,onUploaded}:{actor:EmsActor;events:EmsEvent[];initialEventId?:string;onUploaded?:()=>void}){
  const canArchive=actor.mode==="staff"&&["manager","super_admin","executive","compliance","certificates","registrar"].includes(actor.role||"");
  const[archives,setArchives]=useState<Archive[]>([]);
  const[archiveEnabled,setArchiveEnabled]=useState(false);
  const[archiving,setArchiving]=useState("");
  const[docs,setDocs]=useState<Doc[]>([]);
- const[eventId,setEventId]=useState("");
+ const[eventId,setEventId]=useState(initialEventId||"");
+ const[search,setSearch]=useState("");
+ const[onlyKind,setOnlyKind]=useState("all");
  const[kind,setKind]=useState("application");
  const[file,setFile]=useState<File|null>(null);
  const[loading,setLoading]=useState(true);
@@ -51,26 +53,30 @@ export default function DocumentsCentre({actor,events}:{actor:EmsActor;events:Em
  }
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(busy||!file||!eventId)return;
-  if(file.size>10485760){setError("The file cannot exceed 10 MB.");return;}
+  if(file.size>10485760||file.size===0){setError("Choose a non-empty file not exceeding 10 MB.");return;}
+  if(!/\.(pdf|png|jpe?g)$/i.test(file.name)){setError("Only PDF, PNG and JPEG evidence files are supported.");return;}
   setBusy(true);setError("");setMessage("");
   try{
    const body=new FormData();body.append("file",file);body.append("eventId",eventId);body.append("documentType",kind);
    const r=await fetch("/api/wcda-events/documents",{method:"POST",body});
    const x=await r.json() as {document?:Doc;error?:string};
    if(!r.ok||!x.document)throw new Error(x.error||"Upload could not be completed.");
-   setMessage("Supporting evidence uploaded securely and linked to the event record.");
+   setMessage("Evidence saved to the private event register. You can preview or download it below.");
    setFile(null);
    const input=document.querySelector<HTMLInputElement>("#wcdaDocumentFile");
    if(input)input.value="";
    await refresh();
+   onUploaded?.();
   }catch(e){setError(e instanceof Error?e.message:"Document upload failed.");}
   finally{setBusy(false);}
  }
- const visible=eventId?docs.filter(d=>d.event_id===eventId):docs;
+ const visible=docs.filter(d=>(!eventId||d.event_id===eventId)
+   &&(onlyKind==="all"||d.document_type===onlyKind)
+   &&(d.file_name+" "+(kinds.find(k=>k[0]===d.document_type)?.[1]||"")).toLowerCase().includes(search.toLowerCase()));
  const eventFor=(id:string)=>events.find(e=>e.id===id);
  return <section className={styles.root}>
   <header className={styles.heading}><div><span className={styles.overline}>MYWCDA EVENTS · DOCUMENT CONTROL</span><h2>{actor.mode==="staff"?"Official case documents":"Documents & compliance"}</h2><p>Attach supporting evidence to an authorised event case. Files are stored privately and are not publicly accessible.</p></div><button type="button" onClick={()=>void refresh()} disabled={busy||loading}>↻ Refresh</button></header>
-  {canArchive&&!archiveEnabled&&<p className={styles.help}><strong>SharePoint official archive awaiting activation:</strong> uploads remain safely stored in the private EMS evidence register until the approved WCDA Microsoft site and Graph permission are configured.</p>}
+  {canArchive&&!archiveEnabled&&<p className={styles.help}><strong>Secure evidence storage is active.</strong> The separate SharePoint archive has not yet been approved for application access. You can still upload, preview, download and classify case evidence here.</p>}
   {error&&<p role="alert" className={styles.error}>{error}</p>}
   {message&&<p role="status" className={styles.success}>{message}</p>}
   <form className={styles.panel} onSubmit={submit}>
@@ -82,17 +88,29 @@ export default function DocumentsCentre({actor,events}:{actor:EmsActor;events:Em
     <label>Document classification *<select required value={kind} onChange={e=>setKind(e.target.value)}>{kinds.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label>
     <label className={styles.fileLabel}>Supporting file *<input id="wcdaDocumentFile" type="file" required accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" onChange={e=>setFile(e.target.files?.[0]||null)}/></label>
    </div>
-   <p className={styles.help}>Only upload documents you are authorised to share. Supporting documents are reviewed separately and do not automatically approve or certify an event.</p>
+   <p className={styles.help}>Select the correct event and classification. PDF, PNG and JPEG files are checked by their actual file contents. Evidence is private and does not automatically issue an endorsement or certificate.</p>
    <button type="submit" className={styles.upload} disabled={!file||!eventId||busy}>{busy?"Uploading securely…":"Upload to event record ↑"}</button>
   </form>
   <section className={styles.panel}>
-   <div className={styles.cardHead}><h3>Case document register</h3><span>{visible.length} document(s)</span></div>
+   <div className={styles.cardHead}><h3>Evidence library</h3><span>{visible.length} matching document(s)</span></div>
+   <div className={styles.filters}>
+    <label>Find a file <input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search filename or document category…"/></label>
+    <label>Category <select value={onlyKind} onChange={e=>setOnlyKind(e.target.value)}><option value="all">All document types</option>{kinds.map(([v,l])=><option value={v} key={v}>{l}</option>)}</select></label>
+    {(search||onlyKind!=="all")&&<button type="button" onClick={()=>{setSearch("");setOnlyKind("all")}}>Clear filters</button>}
+   </div>
    {loading?<p className={styles.help}>Loading authorised records…</p>:visible.length===0?<div className={styles.empty}>No documents found for this view. Select an event above or upload the first supporting file.</div>:
     <div className={styles.list}>{visible.map(d=><article key={d.id} className={styles.doc}>
      <span className={styles.icon}>{d.mime_type==="application/pdf"?"PDF":"IMG"}</span>
      <div className={styles.docInfo}><strong>{d.file_name}</strong><span>{eventFor(d.event_id)?.reference||"EMS record"} · {kinds.find(k=>k[0]===d.document_type)?.[1]||"Document"}</span><small>{new Intl.DateTimeFormat("en-ZA",{dateStyle:"medium"}).format(new Date(d.created_at))} · {(d.file_size/1024/1024).toFixed(2)} MB</small></div>
-     <a href={"/api/wcda-events/documents?documentId="+encodeURIComponent(d.id)}>Download ↓</a>
-     {canArchive&&(()=>{const archived=archives.find(a=>a.document_id===d.id);return archived?<span className={styles.archiveStatus}>{archived.state==="archived"?"Archived in SharePoint":archived.state==="uncertain"?"Archive needs reconciliation":"Archiving in progress"}</span>:<button className={styles.archiveButton} type="button" disabled={!archiveEnabled||Boolean(archiving)} onClick={()=>void archiveDocument(d)}>{archiving===d.id?"Archiving…":"Archive evidence ↗"}</button>})()}
+     <div className={styles.fileActions}>
+      <a href={"/api/wcda-events/documents?documentId="+encodeURIComponent(d.id)+"&preview=1"} target="_blank" rel="noopener noreferrer" aria-label={"Preview "+d.file_name}>Preview ↗</a>
+      <a href={"/api/wcda-events/documents?documentId="+encodeURIComponent(d.id)} aria-label={"Download "+d.file_name}>Download ↓</a>
+     </div>
+     {canArchive&&(()=>{const archived=archives.find(a=>a.document_id===d.id);
+       return archived?<span className={styles.archiveStatus}>{archived.state==="archived"?"Archived in SharePoint":archived.state==="uncertain"?"Archive needs reconciliation":"Archiving in progress"}</span>:
+        archiveEnabled?<button className={styles.archiveButton} type="button" disabled={Boolean(archiving)} onClick={()=>void archiveDocument(d)}>{archiving===d.id?"Archiving…":"Copy to SharePoint ↗"}</button>:
+        <span className={styles.archiveStatus} title="Retained in the private, access-controlled EMS evidence store">Private EMS record ✓</span>;
+     })()}
     </article>)}</div>}
   </section>
   <p className={styles.help}>Documents are retained as case evidence. Uploaded evidence does not replace official endorsement decisions, permit requirements or document verification.</p>

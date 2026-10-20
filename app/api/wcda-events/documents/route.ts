@@ -3,9 +3,9 @@ import {EmsError,emsDatabase,requireEmsActor,listEmsEvents} from "@/lib/ems/serv
 import {supabaseConfig} from "@/lib/ams/supabase";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
-const noStore={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"};
+const noStore={"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"};
 const bucket="wcda-ems-documents";
-const uuid=(s:unknown):s is string=>typeof s==="string"&&/^[a-f0-9-]{36}$/i.test(s);
+const uuid=(s:unknown):s is string=>typeof s==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 const kinds=["application","safety","medical","venue","insurance","programme","compliance","other"];
 type EventDocument={
  id:string;event_id:string;document_type:string;file_name:string;mime_type:string;
@@ -42,23 +42,31 @@ export async function GET(request:Request){
    if(documentId)throw new EmsError(404,"Document not available.");
    return Response.json({documents:[]},{headers:noStore});
   }
-  const scope="event_id=in.("+ids.filter(uuid).slice(0,100).join(",")+")";
   if(documentId){
    if(!uuid(documentId))throw new EmsError(400,"Invalid document reference.");
-   const docs=await emsDatabase<EventDocument[]>("wcda_ems_event_documents?select=*&id=eq."+encodeURIComponent(documentId)+"&"+scope+"&limit=1");
+   const docs=await emsDatabase<EventDocument[]>("wcda_ems_event_documents?select=*&id=eq."+encodeURIComponent(documentId)+"&limit=1");
    const doc=docs[0];
-   if(!doc)throw new EmsError(404,"This document is not accessible to your account.");
+   if(!doc||!ids.includes(doc.event_id))throw new EmsError(404,"This document is not accessible to your account.");
    const response=await storageRequest(doc.storage_path);
    if(!response.ok)throw new EmsError(503,"Unable to retrieve the authorised file.");
    const bytes=await response.arrayBuffer();
    const safeName=doc.file_name.replace(/[\r\n\\/"<>]/g,"_");
+   const preview=params.get("preview")==="1";
    return new Response(bytes,{status:200,headers:{
     ...noStore,"Content-Type":doc.mime_type,
-    "Content-Disposition":"attachment; filename*=UTF-8''"+encodeURIComponent(safeName),
-    "Content-Security-Policy":"default-src 'none'",
+    "Content-Disposition":(preview?"inline":"attachment")+"; filename*=UTF-8''"+encodeURIComponent(safeName),
+    "Content-Security-Policy":"default-src 'none'; sandbox",
    }});
   }
-  const documents=await emsDatabase<EventDocument[]>("wcda_ems_event_documents?select=id,event_id,document_type,file_name,mime_type,file_size,uploaded_by_email,created_at&"+scope+"&order=created_at.desc&limit=200");
+  // Support staff with more than 100 assigned events without exposing unrelated files.
+  const chunks:string[][]=[];
+  const validIds=ids.filter(uuid);
+  for(let offset=0;offset<validIds.length;offset+=70)chunks.push(validIds.slice(offset,offset+70));
+  const batches=await Promise.all(chunks.map(group=>emsDatabase<EventDocument[]>(
+   "wcda_ems_event_documents?select=id,event_id,document_type,file_name,mime_type,file_size,uploaded_by_email,created_at"+
+   "&event_id=in.("+group.join(",")+")&order=created_at.desc&limit=200"
+  )));
+  const documents=batches.flat().sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,400);
   return Response.json({documents},{headers:noStore});
  }catch(e){return failure(e);}
 }
@@ -82,9 +90,15 @@ export async function POST(request:Request){
    throw new EmsError(400,"Select a PDF, PNG or JPEG file smaller than 10 MB.");
   const bytes=new Uint8Array(await file.arrayBuffer());
   const detected=detectedMime(bytes);
-  if(!detected||file.type!==detected[0])throw new EmsError(400,"The file contents do not match a permitted PDF, PNG or JPEG.");
+  if(!detected||(!["",detected[0],"application/octet-stream"].includes(file.type)))
+    throw new EmsError(400,"The file contents do not match a permitted PDF, PNG or JPEG.");
   const safeName=file.name.replace(/[\r\n\\/"<>]/g,"_").trim().slice(0,160);
-  if(!safeName)throw new EmsError(400,"Invalid file name.");
+  if(!safeName||!/\.(pdf|png|jpe?g)$/i.test(safeName))
+    throw new EmsError(400,"Use a PDF, PNG or JPEG filename.");
+  if((detected[1]==="pdf"&&!/\.pdf$/i.test(safeName))
+    ||(detected[1]==="png"&&!/\.png$/i.test(safeName))
+    ||(detected[1]==="jpg"&&!/\.jpe?g$/i.test(safeName)))
+    throw new EmsError(400,"The filename extension does not match the uploaded file.");
   const path=eventId+"/"+randomUUID()+"."+detected[1];
   const stored=await storageRequest(path,{method:"POST",headers:{
    "Content-Type":detected[0],"x-upsert":"false",

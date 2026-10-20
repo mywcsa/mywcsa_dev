@@ -65,7 +65,7 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
  const [description,setDescription]=useState("");
  const [draftTitle,setDraftTitle]=useState("");
  const [draftBody,setDraftBody]=useState("");
- const [kind,setKind]=useState("endorsement_letter");
+ const [kind,setKind]=useState(section==="Certificates & Verification"?"certificate":"endorsement_letter");
  const [recommendation,setRecommendation]=useState("");
  const [decisionReasons,setDecisionReasons]=useState<Record<string,string>>({});
  const [openDraft,setOpenDraft]=useState<string|null>(null);
@@ -119,34 +119,59 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
    setDecisionReasons(state=>({...state,[id]:""}));
  }
  function makeTemplate(){
-  const heading=kind==="certificate"?"DRAFT CERTIFICATE OF ENDORSEMENT & APPROVAL":
-   kind==="memorandum"?"INTERNAL EVENTS MEMORANDUM":
-   kind==="endorsement_letter"?"DRAFT LETTER OF ENDORSEMENT AND APPROVAL":
-   "DRAFT OFFICIAL CORRESPONDENCE";
-  setDraftTitle(heading+" — "+event.name);
+  // Case-grounded templates are editable, explicitly drafts and never pre-authorised.
+  const profile:Record<string,{title:string;opening:string;notes:string}>={
+   endorsement_letter:{
+    title:"DRAFT LETTER OF EVENT ENDORSEMENT",
+    opening:"This letter records the event information supplied to the Western Cape Development Authority for assessment.",
+    notes:"Record verified assessment findings and all lawful conditions. Do not state that endorsement has been granted until the separately authorised signatory records the decision."
+   },
+   approval_letter:{
+    title:"DRAFT EVENT APPLICATION DECISION LETTER",
+    opening:"This draft is prepared for communication of a future recorded event assessment decision.",
+    notes:"Decision: [Not yet issued]. Insert only the decision and evidence confirmed in the official EMS case and applicable delegated approval process."
+   },
+   certificate:{
+    title:"DRAFT EVENT ENDORSEMENT CERTIFICATE",
+    opening:"CERTIFICATE NUMBER: [Not allocated]  |  STATUS: DRAFT — NOT ISSUED",
+    notes:"This certificate is only an internal draft. It has no certification, endorsement or legal effect unless separately approved and issued by an authorised official."
+   },
+   memorandum:{
+    title:"INTERNAL EVENTS ASSESSMENT MEMORANDUM",
+    opening:"To: [Responsible directorate / official]\nFrom: [Preparing official and unit]\nSubject: Case assessment and required action",
+    notes:"Purpose, verified findings, recommendation, required actions and responsible official: [Complete from case record]."
+   },
+   other:{
+    title:"DRAFT EVENT CASE CORRESPONDENCE",
+    opening:"To: [Recipient]\nPurpose: [Describe required response or notification]",
+    notes:"State only verified event information and requested actions. This draft has not been approved for official dispatch."
+   },
+  };
+  const template=profile[kind]||profile.other;
+  setDraftTitle(template.title+" — "+event.name);
   setDraftBody([
-   "WESTERN CAPE DEVELOPMENT AUTHORITY",
-   "EVENTS & SAFETY DEPARTMENT",
-   heading,
-   "Event reference: "+reference,
-   "Event: "+event.name,
+   template.opening,
+   "",
+   "EMS case reference: "+reference,
+   "Event name: "+event.name,
    "Organiser: "+event.organiser_name,
-   "Location: "+event.venue_name,
-   "Event dates: "+event.start_date+" to "+event.end_date,
+   "Recorded venue: "+event.venue_name,
+   "Proposed dates: "+event.start_date+" to "+event.end_date,
    "",
-   "TO WHOM IT MAY CONCERN",
+   "ASSESSMENT / EVENT CONTEXT",
+   "[Insert the relevant recorded facts, purpose of the document and case history.]",
    "",
-   "This document is prepared for internal assessment and verification of the event described above.",
-   "Any WCDA endorsement must be authorised through the recorded assessment and delegated signatory process. This draft does not indicate that the event has been approved.",
-   "Any eventual endorsement remains subject to applicable legislation, local municipal requirements, venue authorisation, health and safety conditions and permits or licences of the competent authorities.",
+   "VERIFICATION AND REQUIRED ACTION",
+   template.notes,
    "",
-   "Assessment findings / conditions: [Insert verified findings and applicable conditions]",
-   "",
-   "Authorised signatory: [Not yet verified]",
+   "Supporting documents reviewed: [List official evidence references; do not assume they are complete]",
+   "Prepared by: "+actor.name+" (internal draft)",
+   "Signatory: [Not assigned or verified]",
    "Issue date: [Not issued]",
    "",
-   "DRAFT — NOT ISSUED. This is not an event permit or official certificate."
+   "DRAFT — NOT ISSUED. Not a permit, signed approval or issued certificate."
   ].join("\n"));
+  setNotice("The "+nice(kind)+" template is ready to edit. Review all bracketed fields before saving.");
  }
  function exportDraft(d:Draft){
   const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
@@ -188,9 +213,11 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
   footer();
   pdf.save("WCDA-"+reference.replaceAll(" ","-").replaceAll("/","-")+"-DRAFT.pdf");
  }
- function copyDraft(d:Draft){
-  void navigator.clipboard.writeText("DRAFT — NOT ISSUED\n"+reference+"\n"+d.title+"\n\n"+d.body+"\n\nNOT A PERMIT, SIGNED ENDORSEMENT OR ISSUED CERTIFICATE.");
-  setNotice("Draft text copied with its non-issued notice.");
+ async function copyDraft(d:Draft){
+  try{
+   await navigator.clipboard.writeText("DRAFT — NOT ISSUED\n"+reference+"\n"+d.title+"\n\n"+d.body+"\n\nNOT A PERMIT, SIGNED ENDORSEMENT OR ISSUED CERTIFICATE.");
+   setNotice("Draft text copied with its non-issued notice.");
+  }catch{setNotice("Copy was blocked by your browser. Use the PDF download or select the preview text.");}
  }
  if(!module&&!documents&&!decisions)return null;
  return <section className={styles.desk} aria-label={section+" governance register"}>
@@ -229,11 +256,13 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
       {openDraft===d.id&&<div className={styles.draftPreview}><b>DRAFT — NOT ISSUED</b><p><strong>{d.title}</strong></p><pre>{d.body}</pre><p>This document has not been signed or issued and is not evidence of legal approval.</p><div className={styles.actions}><button type="button" className={styles.smallButton} onClick={()=>copyDraft(d)}>Copy draft text</button><button type="button" className={styles.smallButton} onClick={()=>exportDraft(d)}>Download watermarked PDF</button></div></div>}
      </article>)}{!data.drafts.length&&<p className={styles.empty}>No document drafts have been prepared for this event.</p>}</div>
      {canDraft&&<form className={styles.form} onSubmit={createDraft}>
-       <h4>Prepare internal draft</h4><button className={styles.smallButton} type="button" onClick={makeTemplate}>Use WCDA event template</button>
+       <h4>Prepare a document draft</h4>
+       <p className={styles.help}>Select a document type and choose <strong>Fill from event</strong>. The title, organiser, venue, reference and dates will be populated from the case, ready for you to review.</p>
        <label>Document type<select value={kind} onChange={e=>setKind(e.target.value)}>{formats.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+       <button className={styles.smallButton} type="button" onClick={makeTemplate}>Fill from event →</button>
        <label>Document title<input required minLength={3} maxLength={180} value={draftTitle} onChange={e=>setDraftTitle(e.target.value)}/></label>
        <label>Draft body<textarea required minLength={10} maxLength={10000} rows={6} value={draftBody} onChange={e=>setDraftBody(e.target.value)} placeholder="Enter verified facts and approved wording. Do not include a signature."/></label>
-       <button disabled={busy} type="submit">{busy?"Saving…":"Save draft — do not issue"}</button>
+       <button disabled={busy||!draftTitle.trim()||draftBody.trim().length<10} type="submit">{busy?"Saving draft…":"Save draft to event record"}</button>
       </form>}
     </>}
     {decisions&&<>

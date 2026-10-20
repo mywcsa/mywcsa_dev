@@ -10,6 +10,7 @@ import OfficeCapture from "./office-capture";
 import FinanceDesk from "./finance-desk";
 import OrganiserApplication from "./organiser-application";
 import DocumentsCentre from "./documents-centre";
+import DocumentWorkbench from "./document-workbench";
 import CorrespondenceCentre from "./correspondence-centre";
 import InsightViews, {type Area as InsightArea} from "./insight-views";
 import OrganiserOperations from "./organiser-operations";
@@ -25,6 +26,16 @@ const internal: NavGroup[] = [
   {name:"Intelligence & Control",items:["Reports & Intelligence","Administration & Audit"]},
 ];
 const external: NavGroup[] = [{name:"Organiser Workspace",items:["Dashboard","Event Applications","My Events","Documents & Compliance","Event Operations","Payments & Invoices","Letters & Certificates","Messages & Support"]}];
+const essentialStaff:NavGroup[]=[
+ {name:"Everyday tools",items:["Dashboard","Capture in Office","Event Applications","Finance & Payments","Documents & Records","My Work"]},
+ {name:"Communication",items:["Correspondence & Cases"]},
+];
+const essentialOrganiser:NavGroup[]=[{name:"Get started",items:["Dashboard","Event Applications","My Events","Documents & Compliance","Payments & Invoices","Messages & Support"]}];
+const documentSections=["Documents & Records","Letters & Memoranda","Certificates & Verification"];
+const sectionHint=(s:string)=>documentSections.includes(s)?"Draft letters, check case evidence and manage your documents from one place.":
+ /Finance|Payments/.test(s)?"Prepare, review or pay invoices linked to authorised events.":
+ s==="Capture in Office"?"Register a walk-in or paper application in guided steps.":
+ "Work with your authorised events and keep their records up to date.";
 const dateZA=(date:string)=>date?new Date(date+"T12:00:00").toLocaleDateString("en-ZA",{day:"2-digit",month:"short",year:"numeric"}):"—";
 const readable=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
 const iconFor=(s:string):WorkHubIconName=>
@@ -35,6 +46,8 @@ const isInsight=(value:string):value is InsightArea=>insightSections.includes(va
 
 export default function EmsWorkspace({actor}:{actor:EmsActor}) {
   const groups=actor.mode==="staff"?internal:external;
+  const [simpleMode,setSimpleMode]=useState(true);
+  const navGroups=simpleMode?(actor.mode==="staff"?essentialStaff:essentialOrganiser):groups;
   const [tab,setTab]=useState("Dashboard");
   const [collapsed,setCollapsed]=useState(false);
   const [pinned,setPinned]=useState(true);
@@ -80,25 +93,45 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
     <header className={styles.topbar}>
       <div className={styles.topBrand}><img src="/mywcsa-logo.png" alt="MyWCSA GovApps"/><span><strong>MyWCDA Events</strong><small>Events | Safety | Progress</small></span></div>
       <div className={styles.headerSearch}><WorkHubIcon name="search" size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} aria-label="Search EMS pages and events" placeholder="Search MyWCDA Events..."/>
-        {matches.length>0&&<div className={styles.searchResults}>{matches.map(x=><button type="button" key={x} onClick={()=>{setTab(x);setQuery("");setShowForm(false);}}><WorkHubIcon name={iconFor(x)} size={17}/>{x}</button>)}</div>}
+        {matches.length>0&&<div className={styles.searchResults}>{matches.map(x=><button type="button" key={x} onClick={()=>{setTab(x);setQuery("");setShowForm(false);setSimpleMode(false);}}><WorkHubIcon name={iconFor(x)} size={17}/>{x}</button>)}</div>}
       </div>
       <div className={styles.topActions}><Link href={actor.mode==="staff"?"/my-apps":"/"} className={styles.backLink}>My Apps <WorkHubIcon name="external" size={13}/></Link><span className={styles.avatar}>{actor.name.slice(0,1).toUpperCase()}</span><span className={styles.accountName}>{actor.name}<small>{actor.mode==="staff"?"Employee":"Organiser"}</small></span></div>
     </header>
     <div className={`${styles.appBody} ${collapsed?styles.layoutCollapsed:""}`}>
       <aside className={styles.sidebar} style={{position:pinned?"sticky":"relative",top:pinned?10:undefined}}>
         <div className={styles.navControls}><button className={styles.collapse} type="button" onClick={()=>setCollapsed(v=>!v)} aria-label={collapsed?"Expand navigation":"Collapse navigation"}><WorkHubIcon name="chevron" size={18}/></button>{!collapsed&&<button className={styles.pin} type="button" aria-pressed={pinned} onClick={()=>setPinned(v=>!v)}>{pinned?"Pinned":"Pin"}</button>}</div>
+        {!collapsed&&<button type="button" className={styles.modeToggle} aria-expanded={!simpleMode} onClick={()=>setSimpleMode(v=>!v)}>{simpleMode?"Show all tools ↓":"Simple menu ↑"}</button>}
         <nav aria-label="EMS sections">
-          {groups.map(group=><section key={group.name} className={styles.navGroup}>{!collapsed&&<span className={styles.navHeading}>{group.name}</span>}
+          {navGroups.map(group=><section key={group.name} className={styles.navGroup}>{!collapsed&&<span className={styles.navHeading}>{group.name}</span>}
           {group.items.map(item=><button className={`${styles.navItem} ${tab===item?styles.navActive:""}`} key={item} title={item} aria-current={tab===item?"page":undefined} type="button" onClick={()=>{setTab(item);setShowForm(false);}}>
           <span className={styles.navSymbol}><WorkHubIcon name={iconFor(item)} size={18}/></span>{!collapsed&&<><span>{item}</span><span className={styles.navChevron}><WorkHubIcon name="chevron" size={14}/></span></>}</button>)}</section>)}
         </nav>
         {!collapsed&&<div className={styles.sidebarBottom}><strong>WCDA</strong><small>Western Cape Development Authority</small><p>Events & Safety Department</p></div>}
       </aside>
       <main className={styles.main}>
-        {tab!=="Dashboard"&&<div className={styles.titleRow}><div><span className={styles.eyebrow}>MYWCDA EVENTS · OFFICIAL GOVAPPS WORKSPACE</span><h1>{tab}</h1><p>Event reference: EMS YY/NNNNN</p></div>{canCreate&&registryTabs.includes(tab)&&<button type="button" className={styles.primaryButton} onClick={()=>{if(actor.mode==="staff"){setTab("Capture in Office");setShowForm(false);}else setShowForm(v=>!v);}}>{actor.mode==="staff"?"Capture office application":showForm?"Close form":"New event +"}</button>}</div>}
+        {tab!=="Dashboard"&&<div className={styles.titleRow}><div><span className={styles.eyebrow}>MYWCDA EVENTS · OFFICIAL GOVAPPS WORKSPACE</span><h1>{tab}</h1><p>{sectionHint(tab)}</p></div>{canCreate&&registryTabs.includes(tab)&&<button type="button" className={styles.primaryButton} onClick={()=>{if(actor.mode==="staff"){setTab("Capture in Office");setShowForm(false);}else setShowForm(v=>!v);}}>{actor.mode==="staff"?"Capture office application":showForm?"Close form":"New event +"}</button>}</div>}
         {notice&&<div className={styles.notice} role="status">{notice}</div>}
         {tab==="Dashboard"&&<>
           <section className={styles.hero}><div className={styles.heroOverlay}><span className={styles.heroKicker}>WELCOME BACK</span><h1>{actor.name} <span aria-hidden="true">👋</span></h1><p>Your digital workspace for events, community safety and progress.</p>{canCreate&&<button type="button" className={styles.heroButton} onClick={()=>{if(actor.mode==="staff"){setTab("Capture in Office");setShowForm(false);}else setShowForm(true);}}>{actor.mode==="staff"?"Capture an office application":"New event application"} <WorkHubIcon name="arrow" size={16}/></button>}</div><div className={styles.heroQuote}>Events.<br/>Safety.<br/>Progress.</div></section>
+          <section className={styles.quickStart} aria-label="Quick actions">
+            <div className={styles.quickHeader}><div><span>GET THINGS DONE</span><h2>Your next step</h2></div><small>Choose a task to open the right workspace</small></div>
+            <div className={styles.quickCards}>
+            {(actor.mode==="staff"?[
+              {title:"Capture an event",info:"Walk-in, paper or assisted applications",target:"Capture in Office",marker:"01"},
+              {title:"Manage documents",info:"Evidence, official drafts and records",target:"Documents & Records",marker:"02"},
+              {title:"Invoices & payments",info:"Finance records and secure checkout",target:"Finance & Payments",marker:"03"},
+              {title:"Review event cases",info:"Track applications and assignments",target:"Event Applications",marker:"04"},
+            ]:[
+              {title:"Register an event",info:"Start or continue an application",target:"Event Applications",marker:"01"},
+              {title:"My documents",info:"Upload and review supporting files",target:"Documents & Compliance",marker:"02"},
+              {title:"Invoices & payments",info:"View invoices and check payment status",target:"Payments & Invoices",marker:"03"},
+              {title:"Contact the team",info:"Messages and case correspondence",target:"Messages & Support",marker:"04"},
+            ]).map(x=><button type="button" className={styles.quickCard} key={x.title}
+              onClick={()=>{setTab(x.target);setShowForm(false);if(actor.mode==="organiser"&&x.target==="Event Applications")setShowForm(true);}}>
+              <span>{x.marker}</span><strong>{x.title}</strong><small>{x.info}</small><b aria-hidden="true">→</b>
+            </button>)}
+            </div>
+          </section>
           <section className={styles.stats} aria-label="EMS event summary">{metrics.map((m,i)=><div key={m.label} className={styles.stat}><span className={styles.metricIcon} data-tone={i}><WorkHubIcon name={m.icon} size={22}/></span><div className={styles.statDetail}><strong>{m.label}</strong><b>{m.value}</b><small>{m.subtitle}</small></div><span className={styles.metricGo}><WorkHubIcon name="chevron" size={16}/></span></div>)}</section>
           <div className={styles.dashboardPanels}>
             <section className={styles.glassPanel}><div className={styles.panelHeader}><h2><WorkHubIcon name="activity" size={17}/> Recent Activity</h2><span className={styles.panelHint}>Private event updates</span></div><div className={styles.panelBody}>{isStaffViewer?"Your EMS role is pending authorisation. Event records are restricted until your department assigns a role.":events.length?"Event records are available in the registry. Review your assigned cases and upcoming sessions.":"Activity will appear once authorised event records have been created."}</div></section>
@@ -112,9 +145,9 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
         {actor.mode==="staff"&&isInsight(tab)&&<InsightViews section={tab} actor={actor} events={events}
           onCapture={()=>setTab("Capture in Office")} onFinance={()=>setTab("Finance & Payments")}/>}
         {actor.mode==="staff"&&tab==="Finance & Payments"&&<FinanceDesk actor={actor} events={events}/>}
-        {actor.mode==="staff"&&tab==="Documents & Records"&&<DocumentsCentre actor={actor} events={events}/>}
+        {actor.mode==="staff"&&documentSections.includes(tab)&&<DocumentWorkbench key={tab} actor={actor} events={events} section={tab as "Documents & Records"|"Letters & Memoranda"|"Certificates & Verification"} onCapture={()=>setTab("Capture in Office")}/>} 
         {actor.mode==="staff"&&tab==="Correspondence & Cases"&&<CorrespondenceCentre actor={actor} events={events}/>}
-        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&tab!=="Documents & Records"&&tab!=="Correspondence & Cases"&&!isInsight(tab)&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
+        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&!documentSections.includes(tab)&&tab!=="Correspondence & Cases"&&!isInsight(tab)&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
         {actor.mode!=="staff"&&registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
           <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>My Events</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
           {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
