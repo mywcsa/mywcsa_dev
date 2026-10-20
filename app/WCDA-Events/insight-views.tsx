@@ -3,7 +3,7 @@ import {useEffect,useMemo,useState} from "react";
 import type {EmsActor,EmsEvent} from "@/lib/ems/types";
 import styles from "./insight-views.module.css";
 
-type Area="Events Calendar & GIS"|"Venues & Locations"|"Organisers & Stakeholders"|"Programmes & Scheduling"|"Reports & Intelligence"|"Administration & Audit";
+export type Area="Events Calendar & GIS"|"Venues & Locations"|"Organisers & Stakeholders"|"Programmes & Scheduling"|"Reports & Intelligence"|"Administration & Audit";
 type Task={id:string;event_id:string;title:string;assigned_to_email:string;status:string;due_date:string|null};
 type Audit={id:number;action:string;actor_email:string;created_at:string;details:Record<string,unknown>};
 type Detail={activity:Audit[];error?:string};
