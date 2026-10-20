@@ -54,6 +54,7 @@ function config(mode = "test", flag = "false") {
   process.env.PAYSTACK_SECRET_KEY = mode === "live" ? "sk_live_ems_test_fixture" : "sk_test_ems_test_fixture";
   process.env.MEMBERSHIP_PUBLIC_ORIGIN = "https://govapps.wcsports.co.za";
   process.env.WCDA_EVENTS_LIVE_PAYMENTS_ENABLED = flag;
+  process.env.WCDA_EVENTS_CHECKOUT_ENABLED = "true";
 }
 function resetCalls() {
   calls.db.length = 0;
@@ -102,6 +103,17 @@ test("WCDA Events payment protection and provider settlement regression", async 
       assert.equal(checkoutConfig().mode, "live");
       process.env.MEMBERSHIP_PUBLIC_ORIGIN = "https://other.wcsports.co.za";
       assert.throws(() => checkoutConfig(), e => e.status === 503);
+    });
+
+    await t.test("global EMS checkout gate blocks both test and live modes", async () => {
+      for (const mode of ["test", "live"]) {
+        resetCalls(); config(mode, "true"); providerMock();
+        process.env.WCDA_EVENTS_CHECKOUT_ENABLED = "false";
+        assert.throws(() => checkoutConfig(), e => e.status === 503);
+        await assert.rejects(initializeEventCheckout(invoice), e => e.status === 503);
+        assert.equal(calls.provider.length, 0);
+        assert.equal(calls.db.length, 0);
+      }
     });
 
     await t.test("test mode can be used for controlled no-money testing", () => {
