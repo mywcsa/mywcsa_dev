@@ -39,7 +39,7 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
    finally{setChecking(false);}
  }
  const byEvent=(id:string)=>events.find(e=>e.id===id);
- const pilotEligible=events.filter(e=>!records.some(i=>i.event_id===e.id)&&e.captured_by_email?.toLowerCase()===actor.email.toLowerCase()
+ const pilotEligible=events.filter(e=>!records.some(i=>i.event_id===e.id&&i.is_pilot_test)&&e.captured_by_email?.toLowerCase()===actor.email.toLowerCase()
    &&e.capture_channel!=="organiser_portal");
 
  async function refresh(){
@@ -69,10 +69,10 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
    if(payload.action==="prepare_r1_pilot")setPilotEventId("");
    setReason("");setActiveInvoice("");
    await refresh();
-   setMessage(payload.action==="prepare_r1_pilot"
+   setMessage(payload.action==="prepare_r1_pilot"||(payload.action==="prepare"&&x.invoice?.is_pilot_test)
      ?"R1 internal pilot invoice created and ready for checkout. No additional manager approval is required."
      :payload.action==="prepare"
-       ?"Invoice prepared. An independent authorised manager must approve before payment."
+       ?"Official event invoice prepared. The normal finance controls apply."
        :payload.action==="approve"?"Invoice approved for payment. The linked payer may proceed.":"Invoice cancelled before checkout.");
   }catch(e){setError(e instanceof Error?e.message:"Unable to complete the action.");}
   finally{setBusy(false);}
