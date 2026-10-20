@@ -1,0 +1,32 @@
+name: Payment and EMS safety checks
+
+on:
+  push:
+    branches:
+      - implementation/wcda-ems-governance-20261016
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  payment-regression:
+    name: Membership and WCDA Events payment regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run payment security and database tests
+        run: npm run test:payments
+      - name: Validate TypeScript
+        run: npx tsc --noEmit
