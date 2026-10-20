@@ -1,6 +1,6 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const load = require("./load-typescript.cjs")();
+const load = require("./load-typescript.cjs");
 
 class TestEmsError extends Error {
   constructor(status, message) {
