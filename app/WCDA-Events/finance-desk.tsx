@@ -171,8 +171,14 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
      {i.status==="pending_approval"&&<p className={styles.hint}>{i.is_pilot_test?"The R1 internal test is being prepared; refresh to check eligibility.":"Official event charge: finance review pending before checkout."}</p>}
      {i.status==="approved_for_payment"&&(i.is_pilot_test?<p className={styles.hint}><strong>R1 internal test ready for checkout.</strong> Automatic eligibility verified; no manager approval needed.</p>:i.approved_by_email?<p className={styles.hint}>Approved by {isStaff?i.approved_by_email:"WCDA Finance"} on {shortDate(i.approved_at)}.</p>:null)}
      {i.status==="paid"&&receipt&&<div className={styles.receipt}><strong>✓ Paystack payment verified</strong><span>Confirmation: {receipt.receipt_reference}</span><button type="button" onClick={()=>void receiptPdf(i,receipt)}>Download confirmation PDF ↓</button></div>}
-     {((!isStaff&&!i.is_pilot_test)||(isPilotTester&&i.is_pilot_test&&i.amount_cents===100&&i.customer_email.toLowerCase()===actor.email.toLowerCase()))&&i.status==="approved_for_payment"&&<button className={styles.pay} type="button" disabled={busy} onClick={()=>void execute({action:"checkout",invoiceId:i.id})}>{busy?"Opening secure checkout…":"Pay "+rand(i.amount_cents)+" securely ↗"}</button>}
-     {(i.is_pilot_test&&isPilotTester||!isStaff)&&i.status==="checkout_pending"&&<p className={styles.hint}>Checkout is being prepared. Refresh after a short wait before retrying.</p>}
+     {((!isStaff&&!i.is_pilot_test)||(isPilotTester&&i.is_pilot_test&&i.amount_cents===100&&i.customer_email.toLowerCase()===actor.email.toLowerCase()))&&
+      (i.status==="approved_for_payment"||i.status==="checkout_pending")&&
+       <button className={styles.pay} type="button" disabled={busy}
+        onClick={()=>void execute({action:"checkout",invoiceId:i.id})}>
+        {busy?"Opening secure checkout…":i.status==="checkout_pending"?"Resume Paystack checkout ↗":"Pay "+rand(i.amount_cents)+" securely ↗"}
+       </button>}
+     {(i.is_pilot_test&&isPilotTester||!isStaff)&&i.status==="checkout_pending"&&
+      <p className={styles.hint}>If the previous checkout was interrupted, use Resume checkout. The server prevents duplicate requests while an initialization is in progress (up to two minutes).</p>}
      {canReview&&<div className={styles.review}>
       {activeInvoice===i.id?<><label>Approval or cancellation reason<textarea required rows={2} minLength={8} maxLength={500} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Record the documented basis for your decision"/></label><div className={styles.buttons}><button type="button" disabled={busy||reason.trim().length<8} onClick={()=>void execute({action:"approve",invoiceId:i.id,reason})}>Approve for payment</button><button type="button" className={styles.danger} disabled={busy||reason.trim().length<8} onClick={()=>void execute({action:"cancel",invoiceId:i.id,reason})}>Cancel invoice</button><button type="button" className={styles.ghost} onClick={()=>{setActiveInvoice("");setReason("")}}>Close</button></div></>:
        <button type="button" onClick={()=>{setActiveInvoice(i.id);setReason("")}}>Review invoice →</button>}
