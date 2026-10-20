@@ -106,7 +106,11 @@ export default function DocumentsCentre({actor,events,initialEventId,onUploaded}
       <a href={"/api/wcda-events/documents?documentId="+encodeURIComponent(d.id)+"&preview=1"} target="_blank" rel="noopener noreferrer" aria-label={"Preview "+d.file_name}>Preview ↗</a>
       <a href={"/api/wcda-events/documents?documentId="+encodeURIComponent(d.id)} aria-label={"Download "+d.file_name}>Download ↓</a>
      </div>
-     {canArchive&&(()=>{const archived=archives.find(a=>a.document_id===d.id);return archived?<span className={styles.archiveStatus}>{archived.state==="archived"?"Archived in SharePoint":archived.state==="uncertain"?"Archive needs reconciliation":"Archiving in progress"}</span>:<button className={styles.archiveButton} type="button" disabled={!archiveEnabled||Boolean(archiving)} onClick={()=>void archiveDocument(d)}>{archiving===d.id?"Archiving…":"Archive evidence ↗"}</button>})()}
+     {canArchive&&(()=>{const archived=archives.find(a=>a.document_id===d.id);
+       return archived?<span className={styles.archiveStatus}>{archived.state==="archived"?"Archived in SharePoint":archived.state==="uncertain"?"Archive needs reconciliation":"Archiving in progress"}</span>:
+        archiveEnabled?<button className={styles.archiveButton} type="button" disabled={Boolean(archiving)} onClick={()=>void archiveDocument(d)}>{archiving===d.id?"Archiving…":"Copy to SharePoint ↗"}</button>:
+        <span className={styles.archiveStatus} title="Retained in the private, access-controlled EMS evidence store">Private EMS record ✓</span>;
+     })()}
     </article>)}</div>}
   </section>
   <p className={styles.help}>Documents are retained as case evidence. Uploaded evidence does not replace official endorsement decisions, permit requirements or document verification.</p>
