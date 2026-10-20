@@ -13,3 +13,12 @@
 .archiveButton{background:#001484;color:#fff;font:600 10px Poppins,"Segoe UI",sans-serif;padding:10px 13px;border:0;border-radius:10px;cursor:pointer}
 .archiveButton:disabled{opacity:.48;cursor:not-allowed}
 .archiveStatus{font-size:10px;font-weight:650;color:#2d6681;padding:9px 11px;background:#e6f5f7;border-radius:9px}
+
+
+.filters{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 18px}
+.filters label{display:grid;gap:6px;flex:1 1 220px;font-size:10px;font-weight:700;color:#54718e}
+.filters input,.filters select{font:inherit;font-size:12px;background:#fff;padding:12px;border:1px solid #cbd9e9;border-radius:10px;width:100%;min-width:0}
+.filters>button{font:inherit;font-size:11px;font-weight:700;background:#f0f6ff;border:1px solid #d1dff2;border-radius:10px;padding:12px;color:#001484;cursor:pointer}
+.fileActions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fileActions a{padding:9px 11px;display:inline-flex;white-space:nowrap}
+@media(max-width:620px){.fileActions{width:100%;padding-left:56px}.fileActions a{margin-left:0}.filters{display:grid}.filters label{min-width:0}}
