@@ -105,6 +105,27 @@ test("WCDA Events payment protection and provider settlement regression", async 
       assert.throws(() => checkoutConfig(), e => e.status === 503);
     });
 
+    await t.test("R1 internal test requires an explicit pilot switch and cannot enable ordinary invoices", async () => {
+      const pilot={ ...invoice, is_pilot_test: true, amount_cents: 100, customer_email: "ebranch@wcsports.co.za" };
+      resetCalls();config("live","false");providerMock();
+      process.env.WCDA_EVENTS_CHECKOUT_ENABLED="false";
+      process.env.WCDA_EVENTS_LIVE_PAYMENTS_ENABLED="false";
+      process.env.WCDA_EVENTS_R1_PILOT_ENABLED="false";
+      assert.throws(()=>checkoutConfig(pilot),e=>e.status===503);
+      process.env.WCDA_EVENTS_R1_PILOT_ENABLED="true";
+      assert.equal(checkoutConfig(pilot).mode,"live");
+      assert.throws(()=>checkoutConfig(invoice),e=>e.status===503);
+      assert.throws(()=>checkoutConfig({...pilot,amount_cents:200}),e=>e.status===503);
+      assert.throws(()=>checkoutConfig({...pilot,customer_email:"organiser@example.org"}),e=>e.status===503);
+      const url=await initializeEventCheckout(pilot);
+      assert.equal(url,"https://checkout.paystack.com/test-id");
+      const providerData=JSON.parse(calls.provider[0].opts.body);
+      assert.equal(providerData.amount,100);
+      assert.equal(providerData.email,"ebranch@wcsports.co.za");
+      assert.equal(providerData.currency,"ZAR");
+      assert.equal(calls.provider.length,1);
+    });
+
     await t.test("global EMS checkout gate blocks both test and live modes", async () => {
       for (const mode of ["test", "live"]) {
         resetCalls(); config(mode, "true"); providerMock();
