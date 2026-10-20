@@ -72,6 +72,11 @@ async function gatewayRequest(path:string, key:string, method:"GET"|"POST",data?
  * transactions that were already initiated.
  */
 export function checkoutConfig(){
+ // Separate checkout release gate: blocks test *and* live checkout in production
+ // unless explicitly released. Verification/settlement of already-started payments
+ // must remain available even if checkout is disabled.
+ if(process.env.WCDA_EVENTS_CHECKOUT_ENABLED!=="true")
+  throw new EmsError(503,"MyWCDA Events payment checkout is not yet released. No charge has been made.");
  const cfg=gatewayConfig();
  if(cfg.mode==="live"){
   if(process.env.WCDA_EVENTS_LIVE_PAYMENTS_ENABLED!=="true")
