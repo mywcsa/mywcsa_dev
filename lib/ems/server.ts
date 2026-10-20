@@ -1,6 +1,7 @@
 import "server-only";
 import { auth } from "@/auth";
 import { supabaseConfig } from "@/lib/ams/supabase";
+import { authorisedStaffApps } from "@/lib/govapps/staff-app-access";
 import { externalAppApproved, externalSession } from "@/lib/external/access";
 
 export const EMS_ROOT = "/WCDA-Events" as const;
@@ -86,9 +87,17 @@ export async function getEmsActor(): Promise<EmsActor | null> {
   const email = str(user.email).toLowerCase();
   const id = str(user.id);
   if (!email || !id) return null;
-  if (user.authProvider === "microsoft-entra-id") {
-    // A Microsoft staff session alone NEVER grants EMS access.
-    // Require a current, active WCDA appointment; fail closed on lookup errors.
+  if (user.authProvider === "microsoft-entra-id" || user.authProvider === "staff-password") {
+    // Approved fallback staff logins must pass the same live launcher account checks:
+    // enabled password account, first-use rotation completed, global fallback enabled,
+    // and explicit WCDA app allocation. Neither login method grants an EMS role by itself.
+    if(user.authProvider === "staff-password") {
+      try {
+        const allowed=await authorisedStaffApps({email,authProvider:user.authProvider});
+        if(!allowed.has("wcda-events"))return null;
+      } catch {return null;}
+    }
+    // Both providers still require a current active WCDA appointment.
     try {
       const rows = await emsDatabase<Array<{role:string;active:boolean}>>(
         "wcda_ems_staff_access?select=role,active&email=eq." + encodeURIComponent(email) + "&active=eq.true&limit=1"
@@ -154,6 +163,7 @@ export type CreateEmsInput = {
   startDate: string;
   endDate: string;
   estimatedAttendance: number | null;
+  details: Record<string, string | boolean>;
 };
 
 export function validateEmsInput(raw: unknown): CreateEmsInput {
@@ -175,11 +185,35 @@ export function validateEmsInput(raw: unknown): CreateEmsInput {
     if (!Number.isSafeInteger(n) || n < 0 || n > 100000000) throw new EmsError(400,"Attendance must be a valid non-negative whole number.");
     estimatedAttendance = n;
   }
-  return {organiserName,name,category,venueName,venueAddress,startDate,endDate,estimatedAttendance};
+  const contactName=str(obj.contactName);
+  const contactPhone=str(obj.contactPhone);
+  const description=str(obj.description);
+  const details: Record<string,string|boolean>={
+    description,contactName,contactPhone,
+    audience:str(obj.audience),
+    ticketing:str(obj.ticketing)||"free",
+    foodVendors:obj.foodVendors===true,
+    alcoholPlanned:obj.alcoholPlanned===true,
+    roadClosures:obj.roadClosures===true,
+    medicalPlan:str(obj.medicalPlan),
+    safetyPlan:str(obj.safetyPlan),
+    accessibilityPlan:str(obj.accessibilityPlan),
+    trafficPlan:str(obj.trafficPlan),
+    additionalNotes:str(obj.additionalNotes),
+  };
+  if(contactName.length>150||contactPhone.length>30||
+     (contactPhone.length>0&&!/^[0-9+() .-]+$/.test(contactPhone))||
+     description.length>3000||str(obj.audience).length>300||
+     !["free","ticketed","invitation"].includes(details.ticketing as string)||
+     str(obj.medicalPlan).length>1200||str(obj.safetyPlan).length>2000||
+     str(obj.accessibilityPlan).length>1000||str(obj.trafficPlan).length>1200||
+     str(obj.additionalNotes).length>1000||JSON.stringify(details).length>7000)
+    throw new EmsError(400,"Review the contact and planning details. One or more fields are invalid or too long.");
+  return {organiserName,name,category,venueName,venueAddress,startDate,endDate,estimatedAttendance,details};
 }
 
 export async function createEmsEvent(actor: EmsActor, input: CreateEmsInput): Promise<{id:string;reference:string;status:string;created_at:string}> {
-  return emsDatabase("rpc/wcda_ems_create_event", {
+  return emsDatabase("rpc/wcda_ems_submit_detailed_event", {
     method: "POST",
     body: JSON.stringify({
       p_actor_id:actor.id,
@@ -192,6 +226,7 @@ export async function createEmsEvent(actor: EmsActor, input: CreateEmsInput): Pr
       p_start_date:input.startDate,
       p_end_date:input.endDate,
       p_estimated_attendance:input.estimatedAttendance,
+      p_details:input.details,
     }),
   });
 }

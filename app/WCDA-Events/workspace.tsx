@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { WorkHubIcon, type WorkHubIconName } from "@/app/workhub/WorkHubIcon";
 import type { EmsActor, EmsEvent } from "@/lib/ems/types";
 import styles from "./workspace.module.css";
 import StaffConsole from "./staff-console";
 import OfficeCapture from "./office-capture";
+import FinanceDesk from "./finance-desk";
+import OrganiserApplication from "./organiser-application";
+import DocumentsCentre from "./documents-centre";
+import CorrespondenceCentre from "./correspondence-centre";
 
 type NavGroup = { name: string; items: string[] };
 const internal: NavGroup[] = [
@@ -19,9 +23,6 @@ const internal: NavGroup[] = [
   {name:"Intelligence & Control",items:["Reports & Intelligence","Administration & Audit"]},
 ];
 const external: NavGroup[] = [{name:"Organiser Workspace",items:["Dashboard","Event Applications","My Events","Documents & Compliance","Event Operations","Payments & Invoices","Letters & Certificates","Messages & Support"]}];
-const categories=["Festival","Sport","Concert","Market","Conference","Cultural","Community","Religious","Exhibition","Other"];
-const emptyForm={organiserName:"",name:"",category:"Festival",venueName:"",venueAddress:"",startDate:"",endDate:"",estimatedAttendance:""};
-type EmsForm=typeof emptyForm;
 const dateZA=(date:string)=>date?new Date(date+"T12:00:00").toLocaleDateString("en-ZA",{day:"2-digit",month:"short",year:"numeric"}):"—";
 const readable=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
 const iconFor=(s:string):WorkHubIconName=>
@@ -37,10 +38,8 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
   const [loading,setLoading]=useState(false);
   const [notice,setNotice]=useState("");
   const [showForm,setShowForm]=useState(false);
-  const [saving,setSaving]=useState(false);
-  const [form,setForm]=useState<EmsForm>(emptyForm);
   const isStaffViewer=actor.mode==="staff" && actor.role==="viewer";
-  const canCreate=actor.mode==="organiser"||["registrar","manager","assessor","intake","compliance","operations","finance","certificates"].includes(actor.role||"");
+  const canCreate=actor.mode==="organiser"||["super_admin","registrar","manager","assessor","intake","compliance","operations","finance","certificates"].includes(actor.role||"");
   const registryTabs=["Dashboard","Event Applications","Event Registry","My Events"];
   const navigable=groups.flatMap(g=>g.items);
   const matches=query.trim()?navigable.filter(x=>x.toLowerCase().includes(query.toLowerCase())).slice(0,5):[];
@@ -64,18 +63,6 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
     finally{setLoading(false);}
   }
   useEffect(()=>{void refresh();},[]);
-  async function submit(e:FormEvent<HTMLFormElement>){
-    e.preventDefault();if(saving||!canCreate)return;
-    setSaving(true);setNotice("");
-    try{
-      const response=await fetch("/api/wcda-events/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)});
-      const data=await response.json() as {event?:{reference:string};error?:string};
-      if(!response.ok)throw new Error(data.error||"The application could not be submitted.");
-      setForm(emptyForm);setShowForm(false);setTab(actor.mode==="staff"?"Event Registry":"My Events");
-      await refresh();setNotice("Event registered as "+(data.event?.reference||"an official EMS event")+".");
-    }catch(error){setNotice(error instanceof Error?error.message:"The application could not be submitted.");}
-    finally{setSaving(false);}
-  }
   const upcoming=events.filter(e=>e.start_date>=new Date().toISOString().slice(0,10));
   const metrics=[
     {label:"Registered events",value:isStaffViewer?"—":loading?"—":String(events.length),icon:"calendar" as WorkHubIconName,subtitle:"Events in authorised records"},
@@ -114,26 +101,22 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
             <section className={styles.glassPanel}><div className={styles.panelHeader}><h2><WorkHubIcon name="megaphone" size={17}/> Announcements</h2><span className={styles.panelHint}>WCDA</span></div><div className={styles.panelBody}>Official departmental announcements will appear here when the messaging service is connected.</div></section>
           </div>
         </>}
-        {showForm&&canCreate&&actor.mode==="organiser"&&<section className={styles.formPanel} aria-label="Submit event application"><div className={styles.panelHeader}><h2>New event application</h2><span className={styles.panelHint}>Registry intake</span></div><p>Register an event for formal assessment. Submission does not constitute an endorsement or statutory permit.</p><form className={styles.eventForm} onSubmit={submit}>
-          <label>Organiser name<input required minLength={2} maxLength={200} value={form.organiserName} onChange={e=>setForm(v=>({...v,organiserName:e.target.value}))}/></label>
-          <label>Event name<input required minLength={3} maxLength={200} value={form.name} onChange={e=>setForm(v=>({...v,name:e.target.value}))}/></label>
-          <label>Event category<select value={form.category} onChange={e=>setForm(v=>({...v,category:e.target.value}))}>{categories.map(c=><option key={c}>{c}</option>)}</select></label>
-          <label>Venue name<input required minLength={2} maxLength={200} value={form.venueName} onChange={e=>setForm(v=>({...v,venueName:e.target.value}))}/></label>
-          <label className={styles.formWide}>Venue address<input maxLength={300} value={form.venueAddress} onChange={e=>setForm(v=>({...v,venueAddress:e.target.value}))}/></label>
-          <label>Start date<input type="date" required value={form.startDate} onChange={e=>setForm(v=>({...v,startDate:e.target.value}))}/></label>
-          <label>End date<input type="date" required min={form.startDate||undefined} value={form.endDate} onChange={e=>setForm(v=>({...v,endDate:e.target.value}))}/></label>
-          <label>Estimated attendance<input type="number" min={0} max={100000000} value={form.estimatedAttendance} onChange={e=>setForm(v=>({...v,estimatedAttendance:e.target.value}))}/></label>
-          <div className={styles.formWide}><button type="submit" className={styles.primaryButton} disabled={saving}>{saving?"Submitting…":"Submit application"}</button></div>
-        </form></section>}
+        {showForm&&canCreate&&actor.mode==="organiser"&&<OrganiserApplication actor={actor} onCancel={()=>setShowForm(false)} onCreated={(reference)=>{setShowForm(false);setTab("My Events");void refresh().then(()=>setNotice("Event registered as "+reference+". Your application has been sent for assessment."));}}/>}
         {actor.mode==="staff"&&tab==="Capture in Office"&&canCreate&&<OfficeCapture actor={actor} events={events} onCaptured={()=>void refresh()}/>}
         {actor.mode==="staff"&&tab==="Capture in Office"&&!canCreate&&<p className={styles.notice}>Your staff role does not have intake capture permission.</p>}
-        {actor.mode==="staff"&&tab!=="Capture in Office"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
+        {actor.mode==="staff"&&tab==="Finance & Payments"&&<FinanceDesk actor={actor} events={events}/>}
+        {actor.mode==="staff"&&tab==="Documents & Records"&&<DocumentsCentre actor={actor} events={events}/>}
+        {actor.mode==="staff"&&tab==="Correspondence & Cases"&&<CorrespondenceCentre actor={actor} events={events}/>}
+        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&tab!=="Documents & Records"&&tab!=="Correspondence & Cases"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
         {actor.mode!=="staff"&&registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
           <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>My Events</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
           {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
           <p className={styles.empty}>{isStaffViewer?"No records are displayed until your WCDA EMS role is approved.":notice?"The event service needs configuration before records can be shown.":"No matching event records have been registered."}</p>}
         </section>}
-        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
+        {actor.mode!=="staff"&&tab==="Payments & Invoices"&&<FinanceDesk actor={actor} events={events}/>}
+        {actor.mode!=="staff"&&tab==="Documents & Compliance"&&<DocumentsCentre actor={actor} events={events}/>}
+        {actor.mode!=="staff"&&tab==="Messages & Support"&&<CorrespondenceCentre actor={actor} events={events}/>}
+        {actor.mode!=="staff"&&!registryTabs.includes(tab)&&tab!=="Payments & Invoices"&&tab!=="Documents & Compliance"&&tab!=="Messages & Support"&&<section className={styles.glassPanel+" "+styles.modulePanel}><div className={styles.panelHeader}><h2><WorkHubIcon name={iconFor(tab)} size={18}/>{tab}</h2><span className={styles.planned}>Configuration pending</span></div><p>This module is part of the WCDA EMS approved architecture. Records and actions will be enabled following secure integration and role approval. No sample approvals, certificates, invoices or incidents are presented as live data.</p>{/Finance|Payment|Certificate|Correspondence|Support/.test(tab)&&<div className={styles.mailGrid}>
           <a href="mailto:finances@wcsports.co.za">Finance · finances@wcsports.co.za</a>
           <a href="mailto:WCDA.Certificates@wcsports.co.za">Certificates · WCDA.Certificates@wcsports.co.za</a>
           <a href="mailto:WCDAEms@govapps.wcsports.co.za">System · WCDAEms@govapps.wcsports.co.za</a>

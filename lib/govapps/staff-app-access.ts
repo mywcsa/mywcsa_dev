@@ -83,8 +83,9 @@ export async function authorisedStaffApps(user: {email?:string|null;authProvider
   ]);
   if (command.length) allowed.add("control");
   if (registry.length) allowed.add("ams");
-  // WCDA currently uses Entra-only event actors. Do not advertise a fallback-incompatible app.
-  if (user?.authProvider==="microsoft-entra-id" && wcda.length) allowed.add("wcda-events");
+  // Both Entra and approved staff-password sessions require an active EMS appointment.
+  // Fallback password sessions have already passed live enablement and rotation checks above.
+  if (wcda.length) allowed.add("wcda-events");
   // PERSAL stays Entra-bound even for users with a separate password login.
   if (user?.authProvider === "microsoft-entra-id" && persal) allowed.add("persal");
   for (const entry of special) {

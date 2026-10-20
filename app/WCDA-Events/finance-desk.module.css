@@ -1,0 +1,46 @@
+.root{display:grid;gap:16px;color:#263959;font-family:Poppins,"Segoe UI",sans-serif}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.heading h2{font-size:23px;letter-spacing:-.8px;margin:5px 0}
+.heading p{font-size:12px;color:#607898;max-width:700px;line-height:1.7}
+.overline{font-size:10px;letter-spacing:2px;color:#001484;font-weight:750}
+.heading button,.formFoot button,.review button,.pay,.receipt button{border:0;border-radius:12px;padding:12px 17px;font:600 12px Poppins,"Segoe UI",sans-serif;cursor:pointer;background:#001484;color:#fff}
+.heading button{background:#ecf2ff;color:#001484;border:1px solid #d4e0fa}
+.card{border:1px solid rgba(194,213,239,.85);border-radius:18px;background:rgba(255,255,255,.78);box-shadow:0 5px 23px #5276b412;backdrop-filter:blur(18px);padding:21px}
+.cardTitle{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px}
+.cardTitle h3{font-size:15px;color:#122a55;margin:0}.cardTitle span{font-size:10px;color:#69809d}
+.muted,.hint,.footNote{font-size:11px;color:#607995;line-height:1.7}
+.formGrid{display:grid;grid-template-columns:1.5fr 1fr;gap:13px;margin-top:15px}
+.formGrid label,.review label{display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:650;color:#2c4e75}
+.formGrid input,.formGrid select,.review textarea{width:100%;border:1px solid #cfdeee;border-radius:10px;padding:11px 12px;background:#fff;color:#193357;font:400 12px Poppins,"Segoe UI",sans-serif;outline:0}
+.formGrid input:focus,.formGrid select:focus,.review textarea:focus{border-color:#4069c6;box-shadow:0 0 0 3px #4069c620}
+.wide{grid-column:1/-1}
+.formFoot{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:18px;flex-wrap:wrap}
+.formFoot small{max-width:460px;color:#6c7d94;font-size:10px;line-height:1.6}
+.alert{padding:13px 17px;border:1px solid #e7bcbf;color:#9a2436;background:#fff0f1;border-radius:12px;font-size:12px}
+.success{padding:13px 17px;border:1px solid #c5e6d8;color:#1d7155;background:#edfdf6;border-radius:12px;font-size:12px}
+.list{display:grid;gap:12px}
+.invoice{border:1px solid #e0e9f4;padding:16px;border-radius:13px;background:rgba(247,250,255,.83)}
+.invoiceTop{display:flex;align-items:start;justify-content:space-between;gap:15px}
+.invoiceTop small{color:#3168b0;letter-spacing:.7px;font-weight:750;font-size:10px}
+.invoiceTop h4{margin:5px 0;font-size:14px;color:#1f3659}
+.invoiceTop p{font-size:11px;color:#617892;line-height:1.65;margin:0}
+.amount{font-size:19px;font-weight:700;white-space:nowrap;color:#001484}
+.details{margin-top:12px;border-top:1px solid #e1eaf5;padding-top:12px;display:flex;align-items:center;flex-wrap:wrap;gap:7px 18px;color:#70809a;font-size:10px}
+.status{display:inline-flex;padding:6px 11px;background:#edf2fa;border-radius:20px;font-weight:750;color:#576e8b}
+.status[data-status="paid"]{background:#def8ea;color:#146648}
+.status[data-status="approved_for_payment"]{background:#e7edff;color:#001484}
+.status[data-status="cancelled"]{background:#f8e9ed;color:#a03348}
+.status[data-status="pending_approval"]{background:#fff4df;color:#9c650e}
+.pay{margin-top:15px;background:linear-gradient(100deg,#001484,#265cda);font-size:12px}
+.receipt{display:flex;align-items:center;gap:10px 17px;flex-wrap:wrap;margin-top:13px;background:#e8f9f0;border:1px solid #b8e0ce;color:#196f52;padding:12px 13px;border-radius:12px;font-size:11px}
+.receipt button{background:#fff;border:1px solid #a7dcc2;color:#1d7755;padding:9px 12px;font-size:10px}
+.review{margin-top:15px}
+.review button{background:#194eb5}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.review .danger{background:#a9404a}
+.review .ghost{background:#e4ecf8;color:#214b82}
+.empty{padding:26px 8px;color:#425c7b;font-size:12px}
+.empty p{max-width:590px;font-size:11px;color:#6b809c;line-height:1.75}
+.footNote a{color:#001484;text-decoration:underline}
+.root button:disabled{opacity:.52;cursor:not-allowed}
+@media(max-width:640px){.formGrid{grid-template-columns:1fr}.wide{grid-column:auto}.invoiceTop{flex-direction:column}.amount{font-size:17px}.card{padding:15px}}

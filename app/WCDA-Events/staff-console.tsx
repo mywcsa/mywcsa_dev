@@ -3,6 +3,7 @@ import {useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
 import type {EmsActor,EmsEvent} from "@/lib/ems/types";
 import {WorkHubIcon} from "@/app/workhub/WorkHubIcon";
 import styles from "./staff-console.module.css";
+import GovernanceDesk from "./governance-desk";
 
 type Case=EmsEvent&{assigned_to_email?:string|null;priority?:string;risk_level?:string;review_due?:string|null};
 type Task={id:string;event_id:string;title:string;details:string;category:string;assigned_to_email:string;created_by_email:string;status:string;priority:string;due_date:string|null;created_at:string};
@@ -20,7 +21,7 @@ const sectionCategory:Record<string,string>={
 const categories=[["general","General"],["application","Applications"],["review","Assessments"],["safety","Safety & Inspections"],["vendor","Contractors & Vendors"],["personnel","Personnel"],["logistics","Logistics"],["accreditation","Access & Accreditation"],["operations","Operations"],["incident","Incidents"],["certificate","Documents & Certification"],["finance","Finance"],["correspondence","Correspondence"]];
 const readable=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
 const date=(d?:string|null)=>d?new Date(d.length===10?d+"T12:00:00":d).toLocaleDateString("en-ZA",{day:"2-digit",month:"short",year:"numeric"}):"—";
-const canReview=(role?:string)=>["executive","registrar","manager","assessor","compliance"].includes(role||"");
+const canReview=(role?:string)=>["super_admin","executive","registrar","manager","assessor","compliance"].includes(role||"");
 const isEditable=(role?:string)=>role!=="auditor"&&role!=="viewer";
 const isWorkView=(s:string)=>s==="My Work"||s==="Dashboard";
 const isRegistryView=(s:string)=>["Event Applications","Event Registry","Reviews & Endorsements","Safety & Compliance","Inspections & Corrective Actions"].includes(s);
@@ -157,6 +158,7 @@ export default function StaffConsole({actor,section,onChange}:{actor:EmsActor;se
     </>:<p className={styles.empty}>Select or create an event to manage its assigned work, review notes and status.</p>}
    </section>
   </div>}
+  {event&&<GovernanceDesk key={event.id+"-"+section} actor={actor} eventId={event.id} event={event} reference={event.reference} section={section} onChange={onChange}/>}
   {category&&<p className={styles.disclaimer}>This section currently tracks real {categories.find(c=>c[0]===category)?.[1].toLowerCase()} work items and related event cases. Specialist {section.toLowerCase()} features, formal financial records and external authorisations are not represented as live until implemented and verified.</p>}
  </div>;
 }

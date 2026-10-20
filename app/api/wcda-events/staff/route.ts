@@ -50,7 +50,7 @@ export async function POST(request:Request){
   if(!uuid.test(id)||!allowed.includes(action))throw new EmsError(400,"Invalid event or action.");
   const events=await listEmsEvents(actor);
   if(!events.some(e=>e.id===id))throw new EmsError(403,"You cannot update this event.");
-  if((action==="set_case"||action==="add_check"||action==="check_status") && !["executive","registrar","manager","assessor","compliance"].includes(actor.role||""))
+  if((action==="set_case"||action==="add_check"||action==="check_status") && !["super_admin","executive","registrar","manager","assessor","compliance"].includes(actor.role||""))
    throw new EmsError(403,"An authorised WCDA review role is required.");
   const payload=data.payload && typeof data.payload==="object" && !Array.isArray(data.payload)?data.payload:{};
   const record=await emsDatabase<Record<string,unknown>>("rpc/wcda_ems_staff_action",{
