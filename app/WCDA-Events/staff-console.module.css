@@ -8,3 +8,18 @@
 .line{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid #d7e4ef}.line span{color:#697f9a}.lineButton{flex-direction:row;justify-content:space-between}.lineButton span{color:#6584a0}.statsLine{display:flex;flex-wrap:wrap;gap:12px;margin:13px 0}.statsLine span{background:#e9f3ff;padding:9px;border-radius:10px}.disclaimer{padding:12px;color:#607b94;font-size:10px;line-height:1.6}.message{padding:12px 16px;margin:8px 0;border:1px solid #b9dbee;background:#effaff;color:#1a5d80;border-radius:12px;display:flex;justify-content:space-between;gap:12px}.message button{background:transparent;border:0;color:#2c698b;cursor:pointer;font-size:18px}
 @media(max-width:1080px){.columns{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.caseList{max-height:280px}}
 @media(max-width:560px){.metrics{gap:7px}.metrics>div{padding:11px}.metrics strong{font-size:19px}.panel{padding:12px}.row{flex-wrap:wrap}.row select{width:100%}.double{grid-template-columns:1fr}.lineButton,.line{flex-direction:column;gap:6px}}
+
+
+/* Distinct operational department identity cards. No fabricated module figures. */
+.moduleHero{--base:#001484;--glow:#5a75f0;background:linear-gradient(115deg,var(--base),var(--glow));border-radius:22px;padding:22px 26px;display:flex;align-items:center;gap:20px;color:#fff;margin:12px 0 20px;position:relative;overflow:hidden;box-shadow:0 18px 32px #173a651c}
+.moduleHero[data-theme="registry"]{--base:#104682;--glow:#439ccc}
+.moduleHero[data-theme="work"]{--base:#1e3b62;--glow:#6583a7}
+.moduleHero[data-theme="governance"]{--base:#38235f;--glow:#8c66be}
+.moduleHero[data-theme="safety"]{--base:#832c42;--glow:#d97468}
+.moduleHero[data-theme="people"]{--base:#176769;--glow:#60b1a5}
+.moduleHero[data-theme="operations"]{--base:#634a1e;--glow:#b79a5b}
+.moduleHero[data-theme="live"]{--base:#112a34;--glow:#147a99}
+.moduleHero[data-theme="documents"]{--base:#735434;--glow:#bea274}
+.moduleEmblem{display:grid;place-items:center;width:76px;height:76px;border:1px solid #ffffff66;border-radius:18px;background:#ffffff21;font-size:40px;flex:none}
+.moduleHero>div:nth-child(2){flex:1;min-width:0}.moduleHero small{display:block;letter-spacing:.16em;font-size:9px;color:#e7f4ff;font-weight:800}.moduleHero h2{font-size:clamp(20px,3vw,28px);margin:8px 0 6px;color:#fff;letter-spacing:-.65px}.moduleHero p{font-size:11px;color:#e3efff;line-height:1.7;margin:0;max-width:580px}.moduleHero aside{text-align:center;flex:none;background:#ffffff24;border:1px solid #ffffff3f;border-radius:16px;padding:13px 19px}.moduleHero aside b{display:block;font-size:29px}.moduleHero aside span{font-size:10px;color:#e0eafd}
+@media(max-width:640px){.moduleHero{flex-wrap:wrap;padding:18px}.moduleEmblem{width:56px;height:56px;font-size:30px}.moduleHero aside{width:100%}}
