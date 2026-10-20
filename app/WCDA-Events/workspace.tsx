@@ -11,6 +11,7 @@ import FinanceDesk from "./finance-desk";
 import OrganiserApplication from "./organiser-application";
 import DocumentsCentre from "./documents-centre";
 import CorrespondenceCentre from "./correspondence-centre";
+import InsightViews, {type Area as InsightArea} from "./insight-views";
 
 type NavGroup = { name: string; items: string[] };
 const internal: NavGroup[] = [
@@ -27,6 +28,9 @@ const dateZA=(date:string)=>date?new Date(date+"T12:00:00").toLocaleDateString("
 const readable=(s:string)=>s.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
 const iconFor=(s:string):WorkHubIconName=>
  s==="Dashboard"?"house":/Calendar|Scheduling/.test(s)?"calendar":/Certificate|Compliance|Inspection/.test(s)?"check":/Finance|Payment|Invoice/.test(s)?"briefcase":/Work|People|Personnel|Organiser|Contractor|Vendor/.test(s)?"users":/Correspondence|Messages|Support/.test(s)?"mail":/Document|Letter|Record/.test(s)?"file":/Application|Event/.test(s)?"clipboard":/Report|Live|Incident/.test(s)?"activity":"id";
+
+const insightSections:InsightArea[]=["Events Calendar & GIS","Venues & Locations","Organisers & Stakeholders","Programmes & Scheduling","Reports & Intelligence","Administration & Audit"];
+const isInsight=(value:string):value is InsightArea=>insightSections.includes(value as InsightArea);
 
 export default function EmsWorkspace({actor}:{actor:EmsActor}) {
   const groups=actor.mode==="staff"?internal:external;
@@ -102,12 +106,14 @@ export default function EmsWorkspace({actor}:{actor:EmsActor}) {
           </div>
         </>}
         {showForm&&canCreate&&actor.mode==="organiser"&&<OrganiserApplication actor={actor} onCancel={()=>setShowForm(false)} onCreated={(reference)=>{setShowForm(false);setTab("My Events");void refresh().then(()=>setNotice("Event registered as "+reference+". Your application has been sent for assessment."));}}/>}
-        {actor.mode==="staff"&&tab==="Capture in Office"&&canCreate&&<OfficeCapture actor={actor} events={events} onCaptured={()=>void refresh()}/>}
+        {actor.mode==="staff"&&tab==="Capture in Office"&&canCreate&&<OfficeCapture actor={actor} events={events} onCaptured={()=>void refresh()} onFinance={()=>setTab("Finance & Payments")}/>}
         {actor.mode==="staff"&&tab==="Capture in Office"&&!canCreate&&<p className={styles.notice}>Your staff role does not have intake capture permission.</p>}
+        {actor.mode==="staff"&&isInsight(tab)&&<InsightViews section={tab} actor={actor} events={events}
+          onCapture={()=>setTab("Capture in Office")} onFinance={()=>setTab("Finance & Payments")}/>}
         {actor.mode==="staff"&&tab==="Finance & Payments"&&<FinanceDesk actor={actor} events={events}/>}
         {actor.mode==="staff"&&tab==="Documents & Records"&&<DocumentsCentre actor={actor} events={events}/>}
         {actor.mode==="staff"&&tab==="Correspondence & Cases"&&<CorrespondenceCentre actor={actor} events={events}/>}
-        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&tab!=="Documents & Records"&&tab!=="Correspondence & Cases"&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
+        {actor.mode==="staff"&&tab!=="Capture in Office"&&tab!=="Finance & Payments"&&tab!=="Documents & Records"&&tab!=="Correspondence & Cases"&&!isInsight(tab)&&<StaffConsole key={tab} actor={actor} section={tab} onChange={()=>void refresh()}/>}
         {actor.mode!=="staff"&&registryTabs.includes(tab)&&<section className={styles.glassPanel+" "+styles.registryPanel}>
           <div className={styles.panelHeader}><h2><WorkHubIcon name="clipboard" size={18}/>My Events</h2><button className={styles.secondaryButton} type="button" onClick={()=>void refresh()}>Refresh</button></div>
           {loading?<p className={styles.empty}>Loading event records…</p>:found.length?<div className={styles.tableWrap}><table><thead><tr><th>Reference</th><th>Event</th><th>Organiser</th><th>Venue</th><th>Dates</th><th>Status</th></tr></thead><tbody>{found.map(e=><tr key={e.id}><td className={styles.reference}>{e.reference}</td><td>{e.name}</td><td>{e.organiser_name}</td><td>{e.venue_name}</td><td>{dateZA(e.start_date)} — {dateZA(e.end_date)}</td><td>{readable(e.status)}</td></tr>)}</tbody></table></div>:
