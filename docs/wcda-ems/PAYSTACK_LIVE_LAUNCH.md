@@ -1,5 +1,18 @@
 # MyWCDA Events — Paystack live activation
 
+## R1 internal office payment pilot — automatic readiness (20 October 2026)
+
+The user requested **no second-person approval for the R1 internal Paystack connectivity test**. This applies only to Christiaan's own office-captured application and a single invoice of exactly **R1.00**.
+
+- `wcda_ems_prepare_r1_pilot` now returns an invoice already in `approved_for_payment` once its **individual staff identity, active EMS Super Admin appointment, own office event, unique pilot invoice and R1 amount** are verified.
+- There is **no manager approval or simulated approver**. `approved_by_email` and `approved_by_id` stay null. The machine eligibility rule is recorded in `approval_reason`, `approved_at` and the audit trail.
+- The existing R1 invoice originally created through the ordinary fee form was narrowly reclassified as the same internal connectivity pilot, only after matching the trusted Christiaan login, office capture, exact R1 amount and pending/no-checkout state. No other fees or invoices are reclassified.
+- Both the dedicated **Create R1 pilot invoice** button and the ordinary **R1.00** invoice form now route to this same restricted database function, so the old waiting-for-manager message cannot recur for that tester's own R1 office test.
+- A pending Paystack checkout can be retried after the database's initialization-lease period; this does not authorise duplicate settlement.
+- Existing official tariffs, invoice approvals and general public checkout remain unchanged. The two general checkout gates are still **false**. Only `WCDA_EVENTS_R1_PILOT_ENABLED` is enabled.
+- Executable HTTP API regression checks and an actual Supabase rollback-only transaction were run. **Neither proves successful card settlement.** The authenticated user must run the final R1 Paystack payment and confirm the provider webhook and stored receipt.
+
+
 Release checklist, 19 October 2026. This document does **not** authorise taking real money.
 
 ## Verified status
