@@ -27,7 +27,7 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
  const[description,setDescription]=useState("");
  const[reason,setReason]=useState("");
  const[activeInvoice,setActiveInvoice]=useState("");
- const unbilled=useMemo(()=>events.filter(e=>!records.some(i=>i.event_id===e.id)),[events,records]);
+ const unbilled=useMemo(()=>events.filter(e=>!records.some(i=>i.event_id===e.id&&!i.is_pilot_test)),[events,records]);
  async function checkPaystack(){
    setChecking(true);setError("");
    try{
@@ -39,7 +39,7 @@ export default function FinanceDesk({actor,events}:{actor:EmsActor;events:EmsEve
    finally{setChecking(false);}
  }
  const byEvent=(id:string)=>events.find(e=>e.id===id);
- const pilotEligible=unbilled.filter(e=>e.captured_by_email?.toLowerCase()===actor.email.toLowerCase()
+ const pilotEligible=events.filter(e=>!records.some(i=>i.event_id===e.id)&&e.captured_by_email?.toLowerCase()===actor.email.toLowerCase()
    &&e.capture_channel!=="organiser_portal");
 
  async function refresh(){
