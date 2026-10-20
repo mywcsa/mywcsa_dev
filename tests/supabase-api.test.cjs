@@ -125,7 +125,7 @@ test("Supabase adapter and staff API authorization", async (t) => {
         assert.equal(body.p_token_hash, db.tokenHash(result.paymentCode));
         assert(!calls[0].options.body.includes(result.paymentCode));
         assert.equal(calls[0].options.headers.apikey, "sb_secret_fixture");
-        assert.equal(calls[0].options.headers.Authorization, undefined);
+        assert.equal(calls[0].options.headers.Authorization, "Bearer sb_secret_fixture");
       },
     );
     await t.test(
