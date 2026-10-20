@@ -28,24 +28,24 @@ Recommended minimum pair *subject to formal approval*: Felicia Marais (`finance`
 ## Technology administration
 
 - **Christiaan De Villiers** — `ebranch@wcsports.co.za`: `super_admin`, **active** in the live EMS staff register. The user explicitly authorised the role on 19 October 2026. Directory display name matches Christiaan; however directory first-name/surname fields read Selina/Ngalo. A tenant administrator should confirm account control and correct stale directory profile fields. This is an EMS application-level role, **not** a tenant Global Administrator role.
-- **Zaylin-Zyle Morris** — `zaylin@wcsports.co.za`: Microsoft directory confirmed. **Not yet appointed to an EMS role**, pending the user's indication whether this person should also be Super Admin or have a restricted operations role.
+- **Zaylin-Zyle Morris** — `zaylin@wcsports.co.za`: Microsoft directory identity confirmed. **`super_admin` ACTIVE in the EMS staff register**, explicitly user-authorised. Account is a separate individual from Christiaan, with no shared login or tenant-wide administrative entitlement.
 - The new EMS `super_admin` role has its own database role constraint and is recognised by six governed RPCs and the application's feature-branch authorization rules. Independent financial approval, specific endorsement signing authority and disabled real-money checkout remain enforced.
 - The official `finances@wcsports.co.za` mailbox is **not** a personal login or an independent human approver.
 
 ## Onboarding prerequisites — not yet complete
 
-1. Review the four active, user-authorised EMS appointments and establish responsibility for approval records. Selena Morgan retains her existing account still labelled Leibrandt; confirm Christiaan's account control due to outdated/conflicting underlying directory fields.
+1. Review the five active, user-authorised EMS appointments and establish responsibility for approval records. Selena Morgan retains her existing account still labelled Leibrandt; confirm Christiaan's account control due to outdated/conflicting underlying directory fields.
 2. Identify the approved, documented **event fee schedule** and payment fee/refund policy; do not charge arbitrary application fees.
-3. Verify the four active EMS appointment rows and user-authorisation audit strings. `authorisedStaffApps()` derives the launcher permission directly from these appointments. Obtain Zaylin's specific role before adding his account.
+3. Verify the five active EMS appointment rows and user-authorisation audit strings. `authorisedStaffApps()` derives the launcher permission directly from these appointments. Zaylin is appointed to `super_admin` using his individual Microsoft Entra account.
 4. Confirm the user signs into MyWCSA GovApps via the associated Microsoft Entra account and their role appears in the Events finance dashboard.
 5. Test prepare/approve denial for the same actor, a different verified approver, organiser-only checkout, Paystack signed webhook and idempotent settlement.
 6. Resolve GitHub draft PR #28 conflicts, verify production payment mode and Paystack webhook, and obtain formal go-live approval before setting `WCDA_EVENTS_LIVE_PAYMENTS_ENABLED=true`.
 
 ## Verified current state
 
-- Supabase `wcda_ems_staff_access`: **four active appointments** after user-authorised role provisioning on 19 October 2026: Felicia, Shedrick, Selena and Christiaan.
+- Supabase `wcda_ems_staff_access`: **five active appointments** after user-authorised role provisioning: Felicia, Shedrick, Selena, Christiaan and Zaylin.
 - Supabase `govapps_staff_app_grants`: **no active `wcda-events` grants** observed on 19 October 2026. The WCDA staff launcher instead derives permissions directly from active WCDA appointments.
-- The four roles were provisioned as instructed; no sign-in tests have been executed on the officials' behalf.
+- All five roles were provisioned as instructed; no sign-in tests have been executed on the officials' behalf.
 - `WCDA_EVENTS_LIVE_PAYMENTS_ENABLED` remains **false** in Vercel production.
 
 ## Identity clarification resolved
