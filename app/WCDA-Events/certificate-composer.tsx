@@ -32,7 +32,7 @@ function initials(name:string){
 function initialRows(event:EmsEvent):Row[]{
  const from=dateParts(event.start_date),to=dateParts(event.end_date);
  if(!from||!to||to.getTime()<from.getTime())return [{key:0,date:event.start_date||"",venue:event.venue_name,start:"",end:""}];
- const n=Math.min(5,Math.floor((to.getTime()-from.getTime())/86400000)+1);
+ const n=Math.min(31,Math.floor((to.getTime()-from.getTime())/86400000)+1);
  return Array.from({length:n},(_,i)=>({key:i,date:isoDate(new Date(from.getTime()+i*86400000)),venue:event.venue_name,start:"",end:""}));
 }
 function formatClock(value:string){
@@ -62,6 +62,10 @@ export default function CertificateComposer({actor,event,onSaved}:{actor:EmsActo
   setRows(old=>old.map(r=>r.key===key?{...r,[field]:value}:r));
  }
  function validate(){
+  if(rows.length>5){
+   setError("The A4 master cannot fit more than five date rows without a continuation page. The event days remain visible in the editor; exporting an incomplete schedule is not permitted.");
+   return false;
+  }
   if(!rows.length||rows.some(r=>!dateParts(r.date)||!r.venue.trim()||!r.start||!r.end)){
    setError("Complete every certificate date, venue and start/end time before saving the draft.");return false;
   }
@@ -127,7 +131,7 @@ export default function CertificateComposer({actor,event,onSaved}:{actor:EmsActo
     <p>Certificate: <strong>{abbreviation}</strong> · Finance: <strong>{esc}</strong>. Both always use the same six digits. A draft reference is not a reserved or verified official number.</p>
     <label>Proposed issue date<input type="date" value={issue} onChange={e=>setIssue(e.target.value)}/></label>
     <p>This date appears in UPPERCASE twice. It remains <strong>NOT ISSUED</strong> on drafts saved to the system.</p>
-    <h4>4. Stamp placement</h4><label>Horizontal position<input type="range" min={-90} max={30} value={stampX} onChange={e=>setStampX(Number(e.target.value))}/></label><label>Vertical position<input type="range" min={-70} max={20} value={stampY} onChange={e=>setStampY(Number(e.target.value))}/></label>
+    <h4>4. Stamp placement</h4><label>Horizontal position<input type="range" min={-90} max={30} value={stampX} onChange={e=>setStampX(Number(e.target.value))}/></label><label>Vertical position<input type="range" min={-30} max={20} value={stampY} onChange={e=>setStampY(Number(e.target.value))}/></label>
     <button type="button" className={styles.reset} onClick={()=>{setStampX(0);setStampY(0)}}>Reset stamp position</button>
    </div>
    <div className={styles.paperWrap}>
