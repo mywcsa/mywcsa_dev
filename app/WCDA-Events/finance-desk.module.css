@@ -61,3 +61,11 @@
 .pilotActions button:disabled{opacity:.5;cursor:not-allowed}
 .pilot small{color:#bdd5fa}
 .pilotLabel{display:inline-flex;background:#edefff;color:#001484;border:1px solid #b8c6ff;padding:5px 9px;border-radius:50px;font-size:10px;font-weight:750;letter-spacing:.06em}
+
+
+.checks{display:flex;flex-wrap:wrap;align-items:center;gap:13px;background:#ffffff11;border:1px solid #ffffff30;padding:12px;border-radius:13px}
+.checks>button{background:#def3ff;color:#001484;border:0;border-radius:10px;padding:10px 13px;font:inherit;font-size:11px;cursor:pointer;font-weight:750}
+.checks>button:disabled{opacity:.65}
+.checks>div{display:grid;gap:3px;max-width:500px}
+.checks>div strong{font-size:12px}
+.checks>div span,.checks>div small{font-size:10px;color:#d7e8ff;line-height:1.5}
