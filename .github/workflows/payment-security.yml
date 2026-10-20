@@ -28,5 +28,7 @@ jobs:
         run: npm ci
       - name: Run payment security and database tests
         run: npm run test:payments
+      - name: Run document engine privacy and upload tests
+        run: npm run test:docs
       - name: Validate TypeScript
         run: npx tsc --noEmit
