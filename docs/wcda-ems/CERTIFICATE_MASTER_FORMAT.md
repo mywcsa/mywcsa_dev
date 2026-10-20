@@ -1,0 +1,26 @@
+# MyWCDA Events — Certificate of Endorsement & Approval master format
+Source: user-supplied **Boland_Festival_2026_Endorsement_Approval_Certificate(2).docx**, inspected 20 October 2026. The DOCX is the visual authority where a web preview differs. **Never treat a prepared draft as an issued endorsement.**
+
+## Mandatory layout and unchanged typography
+1. Preserve the triple blue/cyan/green framed A4 certificate, WCDA header and artwork from the Word reference.
+2. Certificate title: **Certificate** / **OF ENDORSEMENT & APPROVAL**. Event name is large, centred and drawn from the case (sample `BOLAND FESTIVAL 2026`). Below, **ORGANISER:** plus the official organiser (sample `PAARL MUSLIM JAMAA`). The original sample contains `BOLAND FESITVAL` typo; the correct actual case name takes precedence for generated certificates.
+3. **Date & location / Time & duration** is a genuine two-column table with separate rows for **every recorded event day**. Preserve each actual location, start and end time. The uploaded example has three dates (2, 3 and 4 October 2026 at Daljosaphat Stadium, Paarl). Its source combines `16:00 PM` and similar mixed notations. Editors must supply verified HH:MM 24-hour values; do not invent or silently reinterpret times. A case record containing a date range but no times cannot auto-complete this table.
+4. **OFFICIAL ENDORSEMENT** immediately below the schedule; reference the full **event name** and **organiser name** within the text and include an explicit acknowledgement of event preparation, vendor management, operational arrangements and compliance documentation. Follow with italic conditions mentioning applicable legislation, municipal/venue requirements, safety, permits, licences and competent-authority approvals.
+5. Separate three-column reference strip: **CERTIFICATE REFERENCE** / **FINANCE REFERENCE** / **ISSUE DATE**. The illustrative source is `PMJ327109` / `ESC327109` / `29 SEPTEMBER 2026`. `PMJ` is the organiser abbreviation; `ESC` means **Events Safety Compliance**. Both reference values **share the same six-digit suffix**. The suffix is generated and stored by the authoritative certificate register on authorised issuance, must be collision-checked and cannot be inferred from an EMS event ID. A draft uses `######` (not a real number).
+6. **ISSUE DATE** is uppercase `DAY MONTH YEAR` (e.g., `29 SEPTEMBER 2026`). The **DATE:** under the issuer must use the **same single issue-date field** and **bold** formatting, not separately typed or a different day.
+7. Keep the exact issuer typography/label from original: **`S Morgan`** uses **Lucida Handwriting, 20 pt, regular**; **`MRS S MORGAN`** in Century Gothic, bold; **`REGISTRAR: EVENTS & SAFETY`** in Century Gothic 10 pt bold. Do not replace with a different current logged-in staff member or adjust the signature font/size merely for styling.
+8. Preserve stamp in the **lower-right area**, containing the WCDA identification and organisational details from the uploaded reference. Allow controlled movement/placement without covering issuer/date, reference strip, footer or certificate content. Stamp graphics/artwork are sourced from the original DOCX until independently approved updates are provided.
+9. The verification footer is **verbatim** (including `AN`, not `A`):  
+   `AN DIGITAL CERTIFICATE ISSUED BY THE MYWCDA EVENTS – VERIFICATION: mail-wcda@wcsports.co.za`  
+   Keep it on the **same certificate page**; the source DOCX mistakenly overflows the footer onto an otherwise empty page 2.
+10. Exact source fonts: **Century Gothic** for most headings/body, **Copperplate Gothic Light** for main Certificate heading, **Courier New** for certificate subtitle and verification footer, and **Lucida Handwriting** for `S Morgan`. Use fallbacks only for on-screen previews where original fonts are unavailable.
+
+## Controlled document workflow
+- **Draft:** event data can prefill name, organiser, venues and dates; start/end times must be verified manually. Preview/print is watermarked **DRAFT — NOT ISSUED**. Drafts cannot fake a certificate reference, signature, official issue date or licence.
+- **Authorised issuance (separate future implementation):** verify delegated signatory authority, applicable checklist/endorsement decision, allocate a unique six-digit suffix atomically, and record issue date in South African local date. Both displayed dates reuse that same field. Only then remove draft watermark and publish a verifiable signed certificate.
+- **Reference format:** for Paarl Muslim Jamaa `PMJ######`, finance `ESC######`. Do not conflate the ESC finance reference with the existing EMS application reference or Paystack transaction reference.
+- **No payment shortcut:** settled invoice does not itself approve or issue a certificate.
+- **UI deployment:** Certificate & Verification now uses the dedicated Boland-format composer instead of the generic jsPDF prose draft layout; official archival/issuance remains gated independently.
+
+## Source formatting quality control
+The actual sample times (including combinations such as `09:00 AM - 00:00 PM`) are **source text, not verified event hours**. Do not silently correct or use them as factual event schedule without confirmation. The sample footer text, original issuer styling and stamp region must **not** be edited to paraphrases.

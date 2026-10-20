@@ -4,6 +4,7 @@ import {useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
 import type {EmsActor,EmsEvent} from "@/lib/ems/types";
 import {jsPDF} from "jspdf";
 import styles from "./governance-desk.module.css";
+import CertificateComposer from "./certificate-composer";
 
 type Work={id:string;module:string;title:string;description:string;status:string;created_by_email:string;created_at:string};
 type Draft={id:string;kind:string;title:string;body:string;status:"draft";created_by_email:string;created_at:string};
@@ -249,13 +250,15 @@ export default function GovernanceDesk({actor,eventId,reference,section,event,on
      </form>}
     </>}
     {documents&&<>
+     {section==="Certificates & Verification"&&canDraft&&
+      <CertificateComposer key={event.id} actor={actor} event={event} onSaved={()=>void reload()}/>}
      <p className={styles.warning}>All documents in this section are internal drafts. No letter, permit or certificate is signed, sent or issued automatically. An authorised official must complete the relevant approval and document-control procedures.</p>
      <div className={styles.records}>{data.drafts.map(d=><article key={d.id} className={styles.record}>
       <div><strong>{d.title}</strong><small>{nice(d.kind)} · {d.created_by_email} · {formatDate(d.created_at)}</small><span className={styles.status}>DRAFT · NOT ISSUED</span></div>
       <button className={styles.smallButton} type="button" onClick={()=>setOpenDraft(openDraft===d.id?null:d.id)}>{openDraft===d.id?"Hide":"Preview"}</button>
-      {openDraft===d.id&&<div className={styles.draftPreview}><b>DRAFT — NOT ISSUED</b><p><strong>{d.title}</strong></p><pre>{d.body}</pre><p>This document has not been signed or issued and is not evidence of legal approval.</p><div className={styles.actions}><button type="button" className={styles.smallButton} onClick={()=>copyDraft(d)}>Copy draft text</button><button type="button" className={styles.smallButton} onClick={()=>exportDraft(d)}>Download watermarked PDF</button></div></div>}
+      {openDraft===d.id&&<div className={styles.draftPreview}><b>DRAFT — NOT ISSUED</b><p><strong>{d.title}</strong></p><pre>{d.body}</pre><p>This document has not been signed or issued and is not evidence of legal approval.</p><div className={styles.actions}><button type="button" className={styles.smallButton} onClick={()=>copyDraft(d)}>Copy draft text</button>{d.kind!=="certificate"?<button type="button" className={styles.smallButton} onClick={()=>exportDraft(d)}>Download watermarked PDF</button>:<span className={styles.warning}>Use the Certificate template designer above for the correct table, issuer, stamp and footer layout when saving to PDF.</span>}</div></div>}
      </article>)}{!data.drafts.length&&<p className={styles.empty}>No document drafts have been prepared for this event.</p>}</div>
-     {canDraft&&<form className={styles.form} onSubmit={createDraft}>
+     {canDraft&&section!=="Certificates & Verification"&&<form className={styles.form} onSubmit={createDraft}>
        <h4>Prepare a document draft</h4>
        <p className={styles.help}>Select a document type and choose <strong>Fill from event</strong>. The title, organiser, venue, reference and dates will be populated from the case, ready for you to review.</p>
        <label>Document type<select value={kind} onChange={e=>setKind(e.target.value)}>{formats.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
