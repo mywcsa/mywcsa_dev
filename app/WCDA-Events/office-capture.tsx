@@ -59,7 +59,7 @@ export default function OfficeCapture({actor,events,onCaptured,onFinance}:{actor
     <p className={styles.warning}>This is an administrative capture confirmation, not an endorsement, licence, certificate or approval.</p>
     {actor.email.toLowerCase()==="ebranch@wcsports.co.za"&&<div className={styles.nextAction}>
        <strong>Next: your R1 payment connectivity test</strong>
-       <p>Go to Finance & Payments to prepare one R1 internal pilot invoice. A different manager must approve it before you can open Paystack checkout.</p>
+       <p>Go to Finance & Payments to create the R1 internal pilot invoice. It becomes payment-ready automatically—no second person's approval is needed. Use the Paystack checkout button once the invoice appears.</p>
        <button type="button" onClick={onFinance}>Open Finance & R1 test →</button>
     </div>}
     <div className={styles.actions}><button type="button" onClick={()=>{setCreated(null);setForm(initial());setStage(1);setError("");}}>Capture another event</button><button className={styles.outline} type="button" onClick={()=>{void navigator.clipboard.writeText(created.reference);}}>Copy reference</button></div>
