@@ -5,7 +5,7 @@ import styles from "./documents-centre.module.css";
 type Doc={id:string;event_id:string;document_type:string;file_name:string;mime_type:string;file_size:number;uploaded_by_email:string;created_at:string};
 type Archive={id:string;event_id:string;document_id:string;state:"processing"|"archived"|"uncertain";archive_name:string|null;file_sha256:string|null;archived_at:string|null;};
 const kinds=[["application","Application and registration"],["safety","Safety and security"],["medical","Medical and emergency planning"],["venue","Venue and landowner documents"],["insurance","Insurance and liability"],["programme","Event programme"],["compliance","Compliance and permits"],["other","Other supporting evidence"]];
-export default function DocumentsCentre({actor,events,initialEventId}:{actor:EmsActor;events:EmsEvent[];initialEventId?:string}){
+export default function DocumentsCentre({actor,events,initialEventId,onUploaded}:{actor:EmsActor;events:EmsEvent[];initialEventId?:string;onUploaded?:()=>void}){
  const canArchive=actor.mode==="staff"&&["manager","super_admin","executive","compliance","certificates","registrar"].includes(actor.role||"");
  const[archives,setArchives]=useState<Archive[]>([]);
  const[archiveEnabled,setArchiveEnabled]=useState(false);
@@ -66,6 +66,7 @@ export default function DocumentsCentre({actor,events,initialEventId}:{actor:Ems
    const input=document.querySelector<HTMLInputElement>("#wcdaDocumentFile");
    if(input)input.value="";
    await refresh();
+   onUploaded?.();
   }catch(e){setError(e instanceof Error?e.message:"Document upload failed.");}
   finally{setBusy(false);}
  }
