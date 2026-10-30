@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "../cams.module.css";
+import styles from "../dashboard.module.css";
 
 type Session={authenticated:boolean;user?:{id:string;email:string};profile?:{display_name:string;job_title:string|null;roles:{role_key:string;display_name:string}[]}};
 const paths:Record<string,string>={
