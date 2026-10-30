@@ -98,6 +98,7 @@ export default function LauncherDashboard({ name, email, apps, signOutControl }:
       </div>
       <div className={styles.headerSearch}><Glyph name="search" size={20}/><input ref={searchRef} aria-label="Search applications" type="search" placeholder="Search apps and services..." value={query} onChange={e => setQuery(e.target.value)}/><kbd>/</kbd></div>
       <div className={styles.headerActions}>
+        <Link href="/webos" className={styles.supportLink}><Glyph name="sparkles" size={19}/><span>WCSA WebOS</span></Link>
         <a href="mailto:ServiceDesk@wcsports.co.za" className={styles.supportLink}><Glyph name="help" size={19}/><span>Help & Support</span></a>
         <button type="button" className={styles.profileButton} aria-expanded={profileOpen} onClick={() => setProfileOpen(value => !value)}>
           <span className={styles.avatar}>{initials}</span><span className={styles.identity}><strong>{name}</strong><small>Staff workspace</small></span><span className={styles.profileChevron}>⌄</span>
