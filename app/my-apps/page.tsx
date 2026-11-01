@@ -15,6 +15,7 @@ const fallbackApps: LauncherItem[] = [
   { slug: "persal", title: "MyWCSA PERSAL", description: "Restricted personnel administration and employee records.", href: "/persal", category: "People", icon: "shield", status: "restricted", featured: false, sort_order: 7 },
   { slug: "control", title: "MyWCSA Command Centre", description: "ServiceDesk, e-Innovation, BiT and ICT control, allocation and account request management. Authorised staff only.", href: "/control", category: "Administration", icon: "shield", status: "available", featured: false, sort_order: 9 },
   { slug: "msuite", title: "MyWCSA MSuite", description: "Open Microsoft 365 apps and productivity services.", href: "https://m365.cloud.microsoft/apps", category: "Services", icon: "layers", status: "available", featured: false, sort_order: 8 },
+  { slug: "cams", title: "MyWCSA CAMS", description: "Centralised administration for WCSA organisations, staff, schools, learners, players, documents and assets. Staff authorisation required.", href: "/cams", category: "Administration", icon: "shield", status: "preview", featured: true, sort_order: 10 },
 ];
 
 /** The catalog is public metadata read server-side only; permissions are NEVER inferred from a tile. */

@@ -18,10 +18,10 @@ import { getPersalOfficial } from "@/lib/persal/server";
  * but it is not advertised on the internal staff launcher without a grant.
  */
 export type StaffAppSlug =
-  | "workhub" | "msuite" | "control" | "persal" | "ams"
+  | "workhub" | "msuite" | "control" | "persal" | "ams" | "cams"
   | "wcda-events" | "applications" | "csd" | "membership";
 
-const staffBaseline: StaffAppSlug[] = ["workhub", "msuite"];
+const staffBaseline: StaffAppSlug[] = ["workhub", "msuite", "cams"];
 
 export function isMicrosoftStaff(user: { email?: string | null; authProvider?: string } | undefined): boolean {
   return (user?.authProvider === "microsoft-entra-id" || user?.authProvider === "staff-password") &&
