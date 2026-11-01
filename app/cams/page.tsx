@@ -1,2 +1,5 @@
-import { redirect } from "next/navigation";
-export default function CamsEntryPage(){ redirect("/login/staff?returnTo=%2Fcams"); }
+import { auth } from "@/auth";
+export default async function CamsEntryPage() {
+ const session = await auth();
+ return <main>{session?.user?.email || "Please sign in"}</main>;
+}
