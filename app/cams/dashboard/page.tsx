@@ -1,4 +1,5 @@
 "use client";
+import { signOut as signOutGovApps } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../dashboard.module.css";
@@ -30,7 +31,7 @@ const groups=[
 export default function CamsDashboardPage(){
  const router=useRouter();const [session,setSession]=useState<Session|null>(null);const [loading,setLoading]=useState(true);const [now,setNow]=useState(new Date());const [search,setSearch]=useState("");const [notice,setNotice]=useState("Phase 1 foundation: institutional registers and workflows will appear as each module is approved and activated.");
  useEffect(()=>{const timer=window.setInterval(()=>setNow(new Date()),30000);fetch("/api/cams/auth/session",{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("Unauthorised");return r.json()}).then(d=>{if(!d.authenticated)throw new Error("Unauthorised");setSession(d)}).catch(()=>router.replace("/cams")).finally(()=>setLoading(false));return()=>window.clearInterval(timer)},[router]);
- async function signOut(){await fetch("/api/cams/auth/logout",{method:"POST"});router.replace("/cams")}
+ async function signOut(){await signOutGovApps({callbackUrl:"/login/staff"})}
  if(loading||!session?.authenticated)return <main className={styles.dashboardLoading}><div className={styles.loadingMark}>W</div><span>Verifying your CAMS session…</span></main>;
  const name=session.profile?.display_name||"Authorised staff member";const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase()||"WS";
  const date=new Intl.DateTimeFormat("en-ZA",{timeZone:"Africa/Johannesburg",weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(now);
