@@ -9,6 +9,7 @@ type Props = {
   action: (formData: FormData) => Promise<void>;
   returnTo: string;
   signInUrl: string;
+  wcda?: boolean;
 };
 
 function SubmitButton() {
@@ -25,6 +26,7 @@ export default function ExternalUserRegistrationForm({
   action,
   returnTo,
   signInUrl,
+  wcda = false,
 }: Props) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -43,6 +45,7 @@ export default function ExternalUserRegistrationForm({
       }}
     >
       <input type="hidden" name="returnTo" value={returnTo} />
+      {wcda && <input type="hidden" name="wcda" value="1" />}
 
       <div className={styles.group}>
         <label className={shared.label} htmlFor="external-register-email">

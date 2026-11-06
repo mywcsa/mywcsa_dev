@@ -12,7 +12,7 @@ function graphSettings():GraphSettings {
   throw new EmsError(503,"The approved Microsoft Graph application has not been fully configured.");
  return {tenant,clientId,clientSecret};
 }
-export const mailConfigured=()=>process.env.WCDA_GRAPH_SEND_ENABLED==="true";
+export const mailConfigured=()=>process.env.GOVAPPS_MAIL_ENABLED==="true" && Boolean(value("GOVAPPS_MAIL_CLIENT_SECRET"));
 // Archive access must be reviewed independently of the Graph deployment flag.
 export const archiveConfigured=()=>process.env.WCDA_GRAPH_ARCHIVE_ENABLED==="true"&&process.env.WCDA_SHAREPOINT_ACCESS_REVIEWED==="true";
 
@@ -41,9 +41,12 @@ async function token(c:GraphSettings):Promise<string>{
 }
 function graphError(r:Response){return new EmsError(r.status===403?403:502,"The Microsoft Graph request was not accepted (HTTP "+r.status+"). Verify the mailbox, site permission and service configuration.");}
 function mailbox(){
- const from=value("GOVAPPS_MAIL_FROM").toLowerCase();
- if(!/^[^@\s]+@(?:[a-z0-9-]+\.)*wcsports\.co\.za$/.test(from))
-   throw new EmsError(503,"Configure a verified WCSA sender mailbox for WCDA correspondence.");
+ // WCDA correspondence must use its own approved shared mailbox. Do not fall
+ // back to the tenant-wide sender: that could route WCDA mail through another
+ // platform's identity or a personal mailbox.
+ const from=value("WCDA_GRAPH_MAIL_FROM").toLowerCase();
+ if(from!=="wcda.events@govapps.wcsports.co.za")
+   throw new EmsError(503,"Configure WCDA_GRAPH_MAIL_FROM with the approved WCDA.Events shared mailbox.");
  return from;
 }
 export async function sendCaseMail(args:{recipient:string;subject:string;body:string}):Promise<void>{

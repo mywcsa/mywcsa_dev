@@ -1,4 +1,5 @@
 import { createEmsEvent, EmsError, listEmsEvents, requireEmsActor, validateEmsInput } from "@/lib/ems/server";
+import { mailConfigured, sendCaseMail } from "@/lib/ems/microsoft";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,6 +46,35 @@ export async function POST(request: Request) {
         throw new EmsError(400,"Complete the organiser, event, safety and declaration sections before submitting.");
     }
     const record = await createEmsEvent(actor,input);
-    return Response.json({event:record}, {status:201,headers:noStore});
+    let emailNotification: "accepted" | "disabled" | "not_sent" = "disabled";
+    if (mailConfigured()) {
+      try {
+        await sendCaseMail({
+          recipient: actor.email,
+          subject: "WCDA Events application received · " + record.reference,
+          body: [
+            "Dear " + actor.name + ",",
+            "",
+            "Your event application has been received by the Western Cape Development Authority Events & Safety Department.",
+            "",
+            "Application reference: " + record.reference,
+            "Event: " + input.name,
+            "Event dates: " + input.startDate + " to " + input.endDate,
+            "Current status: Submitted for intake review",
+            "",
+            "You can sign in to MyWCDA Events to follow the application, upload supporting documents and respond to requests for information.",
+            "",
+            "Please note: submission is not approval, endorsement or a municipal permit. Relevant vetting and external permissions remain subject to the applicable authorities.",
+            "",
+            "WCDA Events · Events & Safety Department",
+            "ServiceDesk@wcsports.co.za",
+          ].join("\n"),
+        });
+        emailNotification = "accepted";
+      } catch {
+        emailNotification = "not_sent";
+      }
+    }
+    return Response.json({event:record,emailNotification}, {status:201,headers:noStore});
   } catch(error) { return failure(error); }
 }

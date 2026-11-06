@@ -138,6 +138,7 @@ export default async function WCDAEventsPage() {
         </Link>
       </div>
       <div className={styles.accessBottom}>
+        <p className={styles.noticeHelp}>New organiser? <Link href="/WCDA-Events/register">Create an organiser account and apply for access</Link>.</p>
         <div className={styles.securityNote}>
           <ShieldIcon/>
           <p>Your access is managed through MyWCSA GovApps. Features and records are available according to your authorised role.</p>

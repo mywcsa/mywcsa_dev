@@ -17,6 +17,9 @@ export type EmsEvent = {
   start_date: string;
   end_date: string;
   status: string;
+  decision_reason?: string|null;
+  decision_by_email?: string|null;
+  decision_at?: string|null;
   capture_channel?: string;
   date_received?: string|null;
   captured_by_email?: string|null;

@@ -22,7 +22,7 @@ const makeInitial=(actor:EmsActor):FormData=>({
  safetyPlan:"",medicalPlan:"",accessibilityPlan:"",trafficPlan:"",additionalNotes:"",
  confirmed:false,acknowledged:false,
 });
-export default function OrganiserApplication({actor,onCreated,onCancel}:{actor:EmsActor;onCreated:(reference:string)=>void;onCancel:()=>void}){
+export default function OrganiserApplication({actor,onCreated,onCancel}:{actor:EmsActor;onCreated:(reference:string,emailNotification?:"accepted"|"disabled"|"not_sent")=>void;onCancel:()=>void}){
  const[form,setForm]=useState<FormData>(()=>makeInitial(actor));
  const[step,setStep]=useState(0);
  const[busy,setBusy]=useState(false);
@@ -51,9 +51,9 @@ export default function OrganiserApplication({actor,onCreated,onCancel}:{actor:E
    const r=await fetch("/api/wcda-events/events",{
     method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(fields),
    });
-   const data=await r.json() as {event?:{reference:string};error?:string};
+   const data=await r.json() as {event?:{reference:string};emailNotification?:"accepted"|"disabled"|"not_sent";error?:string};
    if(!r.ok||!data.event?.reference)throw new Error(data.error||"The event application could not be submitted.");
-   onCreated(data.event.reference);
+   onCreated(data.event.reference,data.emailNotification);
   }catch(e){setError(e instanceof Error?e.message:"Unable to submit the event application.");}
   finally{setBusy(false);}
  }

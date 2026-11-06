@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: "Sign in to MyWCSA GovApps as a learner, athlete, participant, volunteer or other individual user.",
 };
 
-type Query = { returnTo?: string; mode?: string; error?: string; created?: string };
+type Query = { returnTo?: string; mode?: string; error?: string; created?: string; wcda?: string; request?: string };
 function safeDestination(value?: string) {
   return value && /^\/external(?:\/[^\\\r\n?#]*)?(?:\?[^\\\r\n#]*)?$/.test(value) ? value : "/external";
 }
@@ -138,7 +138,7 @@ export default async function ExternalUserLoginPage({
               )}
               {q.created === "1" && (
                 <div className={shared.success} role="status">
-                  Your account was created. You can now sign in.
+                  {q.wcda === "1" ? "Your account was created and your MyWCDA Events access request has been submitted. Sign in to track the approval." : q.request === "manual" ? "Your account was created. Sign in, open My Apps and submit the MyWCDA Events access request." : "Your account was created. You can now sign in."}
                 </div>
               )}
               {q.error && (

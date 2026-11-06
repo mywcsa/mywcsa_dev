@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Register a personal account for MyWCSA GovApps.",
 };
 
-type Query = { returnTo?: string; error?: string };
+type Query = { returnTo?: string; error?: string; wcda?: string };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function safeDestination(value?: string) {
@@ -54,7 +54,8 @@ export default async function ExternalUserRegisterPage({
   async function registerExternalUser(form: FormData): Promise<void> {
     "use server";
     const target = safeDestination(String(form.get("returnTo") || ""));
-    const registerPath = "/login/external-user/register?returnTo=" + encodeURIComponent(target);
+    const requestWcda = form.get("wcda") === "1";
+    const registerPath = "/login/external-user/register?returnTo=" + encodeURIComponent(target) + (requestWcda ? "&wcda=1" : "");
     const loginPath = "/login/external-user?returnTo=" + encodeURIComponent(target);
     const email = String(form.get("email") || "").trim().toLowerCase();
     const username = String(form.get("username") || "").trim();
@@ -110,6 +111,24 @@ export default async function ExternalUserRegisterPage({
       redirect(registerPath + "&error=unavailable");
     }
 
+    if (requestWcda) {
+      let accessRequested = false;
+      try {
+        const config = supabaseConfig();
+        const accessResponse = await fetch(config.origin + "/rest/v1/rpc/govapps_external_request_app", {
+          method: "POST",
+          headers: { apikey: config.secret, Authorization: "Bearer " + config.secret, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            p_account_id: accountId,
+            p_app: "wcda-events",
+            p_reason: "I am registering as an event organiser or authorised representative and request access to MyWCDA Events to submit and manage event applications.",
+          }),
+          cache: "no-store", redirect: "error", signal: AbortSignal.timeout(12000),
+        });
+        accessRequested = accessResponse.ok;
+      } catch { accessRequested = false; }
+      redirect(loginPath + "&created=1" + (accessRequested ? "&wcda=1" : "&request=manual"));
+    }
     redirect(loginPath + "&created=1");
   }
 
@@ -141,7 +160,7 @@ export default async function ExternalUserRegisterPage({
                 <p className={shared.identityEyebrow}>MyWCSA GovApps</p>
                 <h1>External User<br />Registration</h1>
                 <p className={shared.identityDescription}>
-                  Create your personal GovApps account to access authorised services.
+                  {query.wcda === "1" ? "Create your organiser account and automatically request access to MyWCDA Events." : "Create your personal GovApps account to access authorised services."}
                 </p>
 
                 <div className={external.noteBox}>
@@ -194,6 +213,7 @@ export default async function ExternalUserRegisterPage({
                 action={registerExternalUser}
                 returnTo={destination}
                 signInUrl={signInUrl}
+                wcda={query.wcda === "1"}
               />
 
               <p className={external.noticeSmall}>
